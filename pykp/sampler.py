@@ -13,7 +13,6 @@ class Sampler():
 		self, 
 		num_items: int, 
 		normalised_capacity: float,
-		weight_range: Tuple[float, float],
 		density_range: Tuple[float, float],
 		solution_value_range: Tuple[int, int],
 	):
@@ -24,7 +23,6 @@ class Sampler():
 			num_items (int): The number of items to sample.
 			normalised_capacity (float): The normalised capacity of the knapsack 
 			(sum of weights / capacity constraint).
-			weight_range (Tuple[float, float]): The range of item weights to sample from.
 			density_range (Tuple[float, float]): The range of item value densities 
 			to sample from.
 			solution_value_range (Tuple[int, int]): The range of solution values 
@@ -32,7 +30,6 @@ class Sampler():
 		"""
 		self.num_items = num_items
 		self.normalised_capacity = normalised_capacity
-		self.weight_range = weight_range
 		self.density_range = density_range
 		self.solution_value_range = solution_value_range
 
@@ -46,8 +43,8 @@ class Sampler():
 			Knapsack: The sampled knapsack instance.
 		"""
 		weights = np.random.uniform(
-			low = self.weight_range[0], 
-			high = self.weight_range[1],
+			low = 100, 
+			high = 1000,
 			size = self.num_items,
 		)
 		densities = np.random.uniform(
@@ -64,10 +61,14 @@ class Sampler():
 			capacity = int(self.normalised_capacity * sum_weights),
 			solve_only_optimal_node = True,
 		)
+		kp.solve()
 		solution_value = np.random.uniform(self.solution_value_range[0], self.solution_value_range[1])
 		scale_factor =  solution_value / kp.optimal_nodes[0].value
 		scaled_items = np.array([
-			Item(np.max([int(item.value * scale_factor), 1]), np.max([int(item.weight * scale_factor), 1]))
+			Item(
+				np.max([int(item.value * scale_factor), 1]), 
+				np.max([int(item.weight * scale_factor), 1])
+			)
 			for item in items
 		])
 		scaled_items = np.array(
@@ -77,4 +78,5 @@ class Sampler():
 			items = scaled_items,
 			capacity = int(kp.capacity * scale_factor),
 		)
+		scaled_kp.solve()
 		return scaled_kp
