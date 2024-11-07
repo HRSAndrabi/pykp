@@ -1,14 +1,13 @@
 from setuptools import find_packages, setup
 
-with open("./README.md", "r") as f:
+with open("README.md", "r") as f:
     long_description = f.read()
 
 setup(
     name="pykp",
-    version="0.0.10",
+    version="0.0.20",
     description="Tooling for sampling and solving instances of the 0-1 Knapsack Problem",
-    package_dir={"": "pykp"},
-    packages=find_packages(where="pykp"),
+    packages=find_packages(exclude=["docs", "tests*"]),
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/HRSAndrabi/pykp",
