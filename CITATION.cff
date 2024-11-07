@@ -4,7 +4,8 @@ title: "PyKP: A Python Package for the 0-1 Knapsack Problem"
 authors:
   - family-names: "Hassan"
     given-names: "Andrabi"
-date-released: "2024-11-07"
+    orcid: https://orcid.org/0000-0003-3929-5195
+date-released: 2024-11-07
 version: "1.0.0"
 doi: "10.5281/zenodo.14048522"
 url: "https://github.com/HRSAndrabi/pykp"
