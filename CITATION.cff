@@ -6,7 +6,7 @@ authors:
     given-names: "Andrabi"
 date-released: "2024-11-07"
 version: "1.0.0"
-doi: "placeholder"
+doi: "10.5281/zenodo.14048522"
 url: "https://github.com/HRSAndrabi/pykp"
 keywords:
   - knapsack problem
