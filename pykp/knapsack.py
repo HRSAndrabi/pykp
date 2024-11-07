@@ -37,6 +37,9 @@ class Knapsack:
     * empty() -> np.ndarray:
         Empties the knapsack by setting all items to be excluded.
 
+	* solve():
+		Finds the opitmal node(s) of the knapsack.
+
     * solve_terminal_nodes():
 		Finds the terminal nodes of the knapsack.
 	
