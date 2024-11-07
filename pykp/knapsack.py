@@ -84,12 +84,12 @@ class Knapsack:
 		
 		if len(items) == 0:
 			raise ValueError("`items` must have length greater than 0.")
-		if not isinstance(items, np.ndarray):
-			raise ValueError("`items` must be of type `np.ndarray`.")
 		if not np.all([isinstance(item, Item) for item in items]):
 			raise ValueError("All elements in `items` must be of type `Item`.")
 		if capacity < 0:
 			raise ValueError("`capacity` must be non-negative.")
+		if not isinstance(items, np.ndarray):
+			items = np.array(items)
 		
 		self.items = items
 		self.capacity = capacity
