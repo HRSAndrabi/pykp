@@ -1,5 +1,4 @@
 import numpy as np
-from tabulate import tabulate
 from .item import Item
 
 class Arrangement():
