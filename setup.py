@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setup(
     name="pykp",
-    version="0.0.23",
+    version="0.0.24",
     description="Tooling for sampling and solving instances of the 0-1 Knapsack Problem",
     packages=find_packages(exclude=["docs", "tests*"]),
     long_description=long_description,
