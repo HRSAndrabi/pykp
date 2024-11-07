@@ -22,7 +22,6 @@ setup(
     ],
     install_requires=[
         "anytree>=2.12.1", 
-        "tqdm>=4.66.6", 
         "pandas>=2.2.3",
         "matplotlib==3.9.2",
 		"numpy==2.1.3",

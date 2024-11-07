@@ -59,7 +59,6 @@ class Sampler():
 		kp = Knapsack(
 			items = items,
 			capacity = int(self.normalised_capacity * sum_weights),
-			solve_only_optimal_node = True,
 		)
 		kp.solve()
 		solution_value = np.random.uniform(self.solution_value_range[0], self.solution_value_range[1])

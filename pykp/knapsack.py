@@ -6,7 +6,6 @@ import operator
 import itertools
 import pandas as pd
 import matplotlib.pyplot as plt
-from tqdm import tqdm
 from anytree import Node, PreOrderIter
 
 
@@ -110,7 +109,7 @@ class Knapsack:
 		self, 
 		solve_terminal_nodes: bool = False, 
 		solve_feasible_nodes: bool = False,
-		solve_second_best = True
+		solve_second_best: bool = True
 	):
 		"""
 		Solves the knapsack problem and returns optimal arrangements.
@@ -353,7 +352,7 @@ class Knapsack:
 				)
 			
 
-	def solve_branch_and_bound(self, solve_second_best: bool = True):
+	def solve_branch_and_bound(self, solve_second_best: bool):
 		"""
 		Solves the optimal and second-best terminal nodes using best-first branch-and-bound.
 		"""
@@ -699,8 +698,8 @@ class Knapsack:
 		header = ", ".join([
 			f"C = {self.capacity}",
 			f"nC = {round(self.capacity / np.sum([item.weight for item in self.items]), 2)}",
-			f"nFC = {len(self.terminal_nodes)}",
-			f"nS = {len(self.optimal_nodes)}",
+			f"nTerminal = {len(self.terminal_nodes)}",
+			f"nOptimal = {len(self.optimal_nodes)}",
 			f"Δ = {self.optimal_nodes[0].value - best_inferior_solution.value}",
 			f"Δ% = {(self.optimal_nodes[0].value - best_inferior_solution.value) / self.optimal_nodes[0].value:.3}"
 		])
