@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this package, please cite it as follows:"
+title: "PyKP: A Python Package for the 0-1 Knapsack Problem"
+authors:
+  - family-names: "Hassan"
+    given-names: "Andrabi"
+date-released: "2024-11-07"
+version: "1.0.0"
+doi: "placeholder"
+url: "https://github.com/HRSAndrabi/pykp"
+keywords:
+  - knapsack problem
+  - optimization
+  - sampling
+  - Python
+license: "MIT"
