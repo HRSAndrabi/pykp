@@ -3,11 +3,6 @@ from .knapsack import Knapsack
 from .item import Item
 from typing import Tuple
 
-class Arrangement():
-	def __init__(self, value):
-		self.value = value
-
-
 class Sampler():
 	def __init__(
 		self, 
