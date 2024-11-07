@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setup(
     name="pykp",
-    version="0.0.22",
+    version="0.0.23",
     description="Tooling for sampling and solving instances of the 0-1 Knapsack Problem",
     packages=find_packages(exclude=["docs", "tests*"]),
     long_description=long_description,
@@ -15,9 +15,14 @@ setup(
     author_email="hrs.andrabi@gmail.com",
     license="MIT",
     classifiers=[
+        "Intended Audience :: Science/Research",
+        "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3.12",
         "Operating System :: OS Independent",
+        "Topic :: Scientific/Engineering",
+        "Topic :: Scientific/Engineering :: Mathematics",
+        "Topic :: Software Development :: Libraries :: Python Modules",
     ],
     install_requires=[
         "anytree>=2.12.1", 
