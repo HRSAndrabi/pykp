@@ -1,6 +1,6 @@
-# PyKP: A Python Package for Knapsack Problem Solving
+# PyKP
 
-PyKP is a free and open-source library for sampling and solving instances of the knapsack problem. It provides tools to define knapsack instances, solve them efficiently, and analyse computational complexity metrics. You can also use `pykp` to sample knapsack problem instances based on specified distributions.
+PyKP is a free and open-source library for sampling and solving instances of the knapsack problem. It provides tools to define knapsack instances, solve them eficiently, and analyse computational complexity metrics. You can also use `pykp` to randomly sample knapsack problem instances based on specified distributions.
 
 ## Features
 
