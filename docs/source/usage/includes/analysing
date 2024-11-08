@@ -1,0 +1,12 @@
+Analysing knapsacks
+----------------------
+
+PyKP provides methods to analyse knapsack instances.
+
+* ``Summary()``: Generate a ``DataFrame`` summary of the knapsack state and solutions.
+
+.. code-block:: python
+
+   # Get a summary of the knapsack solution
+   summary_df = knapsack.summary()
+   print(summary_df)
