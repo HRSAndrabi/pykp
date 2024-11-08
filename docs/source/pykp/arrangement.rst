@@ -1,4 +1,4 @@
-Arrangemnet
+Arrangement
 ===================
 
 .. automodule:: pykp.arrangement

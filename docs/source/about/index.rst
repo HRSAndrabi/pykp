@@ -5,11 +5,11 @@ About
 
 	Miscellaneous information about PyKP (py·kay·pee).
 
-I created this package as part of a research project involving the knapsack problem.
-Throught this project, I learned a lot about the knapsack problem, and the pitfalls of writing code to solve combinatorial optimisation problems.
-I hope this package will help others avoid the same mistakes, and be useful in their own learning and research.
+I created this package as part of a research project, in attempt to better understand the 0-1 Knapsack Problem.
+While writing the package, I learned a lot about efficient optimisation.
+I hope this package will help others learn from my mistakes, and be useful in their own learning and research.
 
-You can learn about me and my other projects my `personal website`_.
+You can learn about me and my other projects by visiting my `personal website`_.
 
 Versioning 
 ----------
