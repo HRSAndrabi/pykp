@@ -1,9 +1,10 @@
 from dataclasses import asdict
 from sphinxawesome_theme import ThemeOptions
 from sphinxawesome_theme.postprocess import Icons
+import sys, os
 
 
-# sys.path.insert(0, os.path.abspath(".."))
+sys.path.insert(0, os.path.abspath(".."))
 
 project = "PyKP"
 copyright = "2024, Hassan Andrabi"
