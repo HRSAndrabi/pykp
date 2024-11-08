@@ -1,3 +1,21 @@
+"""
+This module provides an interface for sampling knapsack instances.
+
+Example:
+	Randomly sample a large number of knapsack instances using the Sampler class::
+
+		import numpy as np
+		samples = []
+		for _ in tqdm(range(10_000)):
+		   sampler = Sampler(
+			num_items = 10,
+			normalised_capacity = 0.5,
+			density_range = (0.1, 1.2),
+			solution_value_range = (1_300, 1_700),
+		   )
+		   samples.append(Sampler.sample(sampler))
+"""
+
 import numpy as np
 from .knapsack import Knapsack
 from .item import Item

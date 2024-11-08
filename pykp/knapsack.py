@@ -1,3 +1,24 @@
+"""
+This module provides an interface for defining instances of the 0-1 Knapsack Problem.
+
+Example:
+	To define a Knapsack instance, initialise the `Knapsack` class with `Items` and a capacity constraint::
+    
+		from pykp import Knapsack
+		from pykp import Item
+
+		items = [
+		   Item(value=10, weight=5), 
+		   Item(value=15, weight=10), 
+		   Item(value=7, weight=3)
+		]
+		capacity = 15
+		knapsack = Knapsack(items=items, capacity=capacity)
+		knapsack.solve()
+		print(knapsack.optimal_nodes)
+    
+"""
+
 import json
 import numpy as np
 from .item import Item

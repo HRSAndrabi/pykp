@@ -1,3 +1,22 @@
+"""
+This module provides an interface for defining arrangements of items.
+
+Example:
+    Define an arangement of items for the knapsack problem::
+
+		from pykp import Arrangement, Item
+
+		items = [
+		   Item(value=10, weight=5),
+		   Item(value=20, weight=10),
+		   Item(value=30, weight=15),
+		]
+		state = [0, 1, 1]
+		arrangement = Arrangement(items=items, state=state)
+		print(arrangement)
+    
+"""
+
 import numpy as np
 from .item import Item
 
