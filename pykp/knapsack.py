@@ -14,55 +14,15 @@ class Knapsack:
     Represents a knapsack problem solver.
 
     Attributes:
-    * items (np.ndarray[Item]): An array of items available for the knapsack problem.
-    * capacity (int): The maximum weight capacity of the knapsack.
-    * state (np.ndarray): Binary array indicating the inclusion/exclusion of items in the knapsack.
-    * value (float): The total value of items currently in the knapsack.
-    * weight (float): The total weight of items currently in the knapsack.
-    * is_feasible (bool): Indicates if the knapsack is within its weight capacity.
-    * is_at_capacity (bool): Indicates if the knapsack is at full capacity.
-	* terminal_nodes (np.ndarray[Arrangement]): An array of all possible arrangements of items that are under the weight constraint, and at full capacity
-	* optimal_nodes (np.ndarray[Arrangement]): An array of optimal solutions to the knapsack problem.
-
-    Methods:
-    * add(item: Item) -> np.ndarray:
-        Adds the specified item to the knapsack and returns current state.
-
-    * remove(item: Item) -> np.ndarray:
-        Removes the specified item from the knapsack.
-
-    * set_state(state: np.ndarray) -> np.ndarray:
-        Sets the knapsack state using the provided binary array.
-
-    * empty() -> np.ndarray:
-        Empties the knapsack by setting all items to be excluded.
-
-	* solve():
-		Finds the opitmal node(s) of the knapsack.
-
-    * solve_terminal_nodes():
-		Finds the terminal nodes of the knapsack.
-	
-	* solve_feasible_nodes():
-		Finds the feasible nodes of the knapsack.
-	
-	* solve_branch_and_bound():
-		Solves the optimal and second-best terminal nodes using best-first branch-and-bound.
-
-    * calculate_sahni_k(arrangement: Arrangement) -> int:
-        Calculates the Sahni-k value for a given arrangement.
-
-	* plot_terminal_nodes_histogram():
-		Plots a histogram of terminal node values.
-
-	* write_to_json():
-		Writes the knapsack configuration to a .json file.
-
-	* load_from_json():
-		Loads a knapsack configuration from a provided .json file.
-
-    * summary() -> pd.DataFrame:
-        Generates a summary DataFrame containing information about the knapsack state and solutions.
+    	items (np.ndarray[Item]): An array of items available for the knapsack problem.
+    	capacity (int): The maximum weight capacity of the knapsack.
+    	state (np.ndarray): Binary array indicating the inclusion/exclusion of items in the knapsack.
+    	value (float): The total value of items currently in the knapsack.
+    	weight (float): The total weight of items currently in the knapsack.
+    	is_feasible (bool): Indicates if the knapsack is within its weight capacity.
+    	is_at_capacity (bool): Indicates if the knapsack is at full capacity.
+		terminal_nodes (np.ndarray[Arrangement]): An array of all possible arrangements of items that are under the weight constraint, and at full capacity
+		optimal_nodes (np.ndarray[Arrangement]): An array of optimal solutions to the knapsack problem.
     """
 	def __init__(
 		self, 

@@ -6,10 +6,10 @@ class Arrangement():
     Represents an arrangement of items for the knapsack problem.
 
     Attributes:
-    *    items (np.ndarray[Item]): An array of items for the knapsack problem.
-    *    state (np.ndarray[int]): Binary array indicating the inclusion/exclusion of items in the arrangement.
-    *    value (int): The total value of items in the arrangement.
-    *    weight (int): The total weight of items in the arrangement.
+    	items (np.ndarray[Item]): An array of items for the knapsack problem.
+    	state (np.ndarray[int]): Binary array indicating the inclusion/exclusion of items in the arrangement.
+    	value (int): The total value of items in the arrangement.
+    	weight (int): The total weight of items in the arrangement.
     """
 	def __init__(
 		self,
