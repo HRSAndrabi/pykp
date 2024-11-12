@@ -93,7 +93,7 @@ class Knapsack:
 		self, 
 		solve_terminal_nodes: bool = False, 
 		solve_feasible_nodes: bool = False,
-		solve_second_best: bool = True
+		solve_second_best: bool = False
 	):
 		"""
 		Solves the knapsack problem and returns optimal arrangements.
@@ -677,16 +677,27 @@ class Knapsack:
         Returns:
         	pd.DataFrame: Summary DataFrame.
         """
-		best_inferior_solution = self.terminal_nodes[len(self.optimal_nodes)]
-
-		header = ", ".join([
+		n_terminal = 2**len(self.items)
+		n_optimal = len(self.optimal_nodes)
+		
+		header = [
 			f"C = {self.capacity}",
 			f"nC = {round(self.capacity / np.sum([item.weight for item in self.items]), 2)}",
-			f"nTerminal = {len(self.terminal_nodes)}",
-			f"nOptimal = {len(self.optimal_nodes)}",
-			f"Δ = {self.optimal_nodes[0].value - best_inferior_solution.value}",
-			f"Δ% = {(self.optimal_nodes[0].value - best_inferior_solution.value) / self.optimal_nodes[0].value:.3}"
-		])
+			f"nTerminal = {n_terminal}",
+			f"nOptimal = {n_optimal}",
+		]
+
+		if len(self.terminal_nodes) > len(self.optimal_nodes):
+			best_inferior_solution = self.terminal_nodes[len(self.optimal_nodes)]
+			delta = self.optimal_nodes[0].value - best_inferior_solution.value
+			delta_pct = delta / self.optimal_nodes[0].value
+			header.append(f"Δ = {delta}")
+			header.append(f"Δ% = {delta_pct:.3}")
+		else: 
+			best_inferior_solution = None
+
+		header = ", ".join(header)
+
 		columns = pd.MultiIndex.from_arrays([
 			[header] * len(self.items),
 			[i+1 for i, item in enumerate(self.items)]
@@ -701,7 +712,6 @@ class Knapsack:
 			np.where(arrangement.state == 1, "IN", "OUT") 
 			for arrangement in self.optimal_nodes
 		])
-		rows.append(np.where(best_inferior_solution.state == 1, "IN", "OUT") )
 
 		index = ["v", "w", "density"]
 		index.extend([
@@ -712,11 +722,13 @@ class Knapsack:
 			])
 			for arrangement in self.optimal_nodes
 		])
-		index.append(", ".join([
-			f"best inferior (v = {best_inferior_solution.value}",
-			f"w = {best_inferior_solution.weight}",
-			f"k = {self.calculate_sahni_k(best_inferior_solution)})",
-		]))
+		if best_inferior_solution is not None:
+			index.append(", ".join([
+				f"best inferior (v = {best_inferior_solution.value}",
+				f"w = {best_inferior_solution.weight}",
+				f"k = {self.calculate_sahni_k(best_inferior_solution)})",
+			]))
+			rows.append(np.where(best_inferior_solution.state == 1, "IN", "OUT") )
 
 		return pd.DataFrame(rows, columns=columns, index=index, dtype="object")
 
