@@ -1,6 +1,55 @@
 # CHANGELOG
 
 
+## v1.1.0 (2024-11-13)
+
+### Bug Fixes
+
+* fix(knapsack): check relevant nodes are solved before plotting.
+
+Previous implementation would try to produce plots even if the relevant nodes had not been populated. This fix populates the nodes (if they don't already exist) and then produces the plot. ([`5f16162`](https://github.com/HRSAndrabi/pykp/commit/5f161622a1b34d7bd54966ac667f819bf69a41ef))
+
+* fix(knapsack): reset node attributes when solving all nodes.
+
+Fixes an issue where nodes were being duplicated when calling self.solve_all_nodes() multiple times in a row, or after self.solve(). ([`bfc7777`](https://github.com/HRSAndrabi/pykp/commit/bfc7777d974563e38db9c17ec7121400a8864ee6))
+
+* fix(knapsack): removes scienceplots styling. ([`4851769`](https://github.com/HRSAndrabi/pykp/commit/485176904f14c47edba864eb5b3c84e92e7d0d07))
+
+### Build System
+
+* build: delete unused workflow. ([`1e085ed`](https://github.com/HRSAndrabi/pykp/commit/1e085ed6de92b40135580b4ff260d236e6b139fa))
+
+### Chores
+
+* chore(knapsack): deletes unused variables. ([`9331641`](https://github.com/HRSAndrabi/pykp/commit/933164191b65f9300d3d5e354394aefcb4209d51))
+
+### Features
+
+* feat(knapsack): adds method for plotting network of knapsack instance. ([`7b4b7ea`](https://github.com/HRSAndrabi/pykp/commit/7b4b7eab6ebdbd2f48ac9efd98748df5bc924549))
+
+### Performance Improvements
+
+* perf(knapsack): move terminal/feasible node computation to solve_all_nodes().
+
+Moved terminal and feasible node computation to `solve_all_nodes()`. Better for performance, as both methods applied brute-force and this now only happens once. Added deprecation warnings for `solve_terminal_nodes()` and `solve_feasible_nodes()`. ([`b590ef3`](https://github.com/HRSAndrabi/pykp/commit/b590ef3beb4b9034b93d91b5ab42ef82d13a44ab))
+
+### Testing
+
+* test(sampler): add tolerance for range checks.
+
+Samples sometimes violated solution value/density ranges due to whole number rounding, causing tests to fail. This commit adds a tolerance parameter. Tests now ensure that the solution value/density is within the specified range + tolerance. ([`eb9b0ec`](https://github.com/HRSAndrabi/pykp/commit/eb9b0ec677e642d12ba2fede005fe975a92f17d4))
+
+* test(knapsack): fix typo. ([`d89cf42`](https://github.com/HRSAndrabi/pykp/commit/d89cf422db70a6e3aa5c175625e7391359590e65))
+
+* test(knapsack): remove np.array from initialisation. ([`7e2af96`](https://github.com/HRSAndrabi/pykp/commit/7e2af96a39dd7a6da16bc1f74f39f22e5e14640b))
+
+* test(knapsack): check value of sahni-k in test. ([`b40fe8d`](https://github.com/HRSAndrabi/pykp/commit/b40fe8d7d2cd89aec3e46259a75457f98802575f))
+
+* test(knapsack): fixed typo. ([`4b8e6c9`](https://github.com/HRSAndrabi/pykp/commit/4b8e6c963674fd6f8b6b72fe6173d6c59f54089d))
+
+* test: added docstrings. ([`5f28e89`](https://github.com/HRSAndrabi/pykp/commit/5f28e897b7679d410ea1cca2fc7323e5db9e6915))
+
+
 ## v1.0.1 (2024-11-12)
 
 ### Bug Fixes
