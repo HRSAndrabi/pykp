@@ -478,6 +478,11 @@ class Knapsack:
 		Returns:
 			np.ndarray: All nodes in the knapsack problem.
         """
+		self.nodes = np.array([])
+		self.feasible_nodes = np.array([])
+		self.terminal_nodes = np.array([])
+		self.optimal_nodes = np.array([])
+
 		for i in range(1, len(self.items) + 1):
 			subsets = list(itertools.combinations(self.items, i))
 			for subset in subsets:
