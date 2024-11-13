@@ -9,12 +9,12 @@ class TestKnapsack(unittest.TestCase):
         """
         Initialise some items for testing
         """
-        self.items = np.array([
+        self.items = [
             Item(value=10, weight=5),
             Item(value=15, weight=10),
             Item(value=7, weight=3),
             Item(value=12, weight=7),
-        ])
+        ]
         self.capacity = 23
         self.knapsack = Knapsack(items=self.items, capacity=self.capacity)
 
