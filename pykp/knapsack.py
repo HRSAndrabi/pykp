@@ -608,28 +608,32 @@ class Knapsack:
 					return subset_size
 
 
-	def plot_terminal_nodes_histogram(self):
+	def plot_terminal_nodes_histogram(self) -> tuple[plt.Figure, plt.Axes]:
 		"""
 		Plots a histogram of values for possible at-capacity arrangements.
-		"""
-		with plt.style.context(["nature"]):
-			fig, axes = plt.subplots(
-				figsize=(8, 3), 
-				dpi=300, 
-				nrows=1, 
-				ncols=1,
-				constrained_layout=True
-			)
 
-			axes.hist(
-				[arrangement.value for arrangement in self.terminal_nodes],
-				bins=100,
-				color="#FF2C00",
-				alpha=0.7,
-			)
-			axes.set_ylabel("Number of solutions")
-			axes.set_xlabel("Solution value")
-			plt.show()
+		Returns:
+			tuple[plt.Figure, plt.Axes]: Figure and Axes objects.
+		"""
+		fig, axes = plt.subplots(
+			figsize=(8, 3), 
+			dpi=300, 
+			nrows=1, 
+			ncols=1,
+			constrained_layout=True
+		)
+
+		axes.hist(
+			[arrangement.value for arrangement in self.terminal_nodes],
+			bins=100,
+			color="#FF2C00",
+			alpha=0.7,
+		)
+		axes.set_ylabel("Number of solutions")
+		axes.set_xlabel("Solution value")
+		plt.show()
+
+		return fig, axes
 
 	def __get_node_color(self, arrangement):
 		# Optimal node
