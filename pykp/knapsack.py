@@ -669,16 +669,12 @@ class Knapsack:
 
 		kp_network = kp_network = nx.DiGraph()
 
-		for i, arrangement in enumerate(self.nodes):
+		for arrangement in self.nodes:
 			neighbours = [
 				alt_arrangement for alt_arrangement in self.nodes
 				if np.sum(np.abs(np.subtract(alt_arrangement.state, arrangement.state))) == 1
 			]
 			
-			is_optimal = False
-			if arrangement.value == self.optimal_nodes[0].value:
-				is_optimal = True
-				
 			kp_network.add_node(
 				arrangement,
 			)
