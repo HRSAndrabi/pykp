@@ -85,11 +85,13 @@ class TestKnapsack(unittest.TestCase):
 
     def test_calculate_sahni_k(self):
         """
-        Test Sahni-k calculation (add more detailed tests as needed)
+        Test Sahni-k calculation
         """
-        arrangement = Arrangement(self.items, np.array([1, 1, 0, 1]))
-        sahni_k = self.knapsack.calculate_sahni_k(arrangement)
+        self.knapsack.solve()
+        optimal = self.knapsack.optimal_nodes[0]
+        sahni_k = self.knapsack.calculate_sahni_k(optimal)
         self.assertIsInstance(sahni_k, int)
+        self.assertEqual(sahni_k, 3)
 
     def test_load_from_json(self):
         """
