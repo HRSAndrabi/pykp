@@ -635,6 +635,7 @@ class Knapsack:
 
 		return fig, axes
 
+
 	def __get_node_color(self, arrangement):
 		# Optimal node
 		if arrangement.value == self.optimal_nodes[0].value:
@@ -660,8 +661,6 @@ class Knapsack:
 		kp_network = kp_network = nx.DiGraph()
 
 		for i, arrangement in enumerate(self.nodes):
-			mask = np.zeros_like(self.nodes)
-			alt_arrangements = np.delete(self.nodes, i)
 			neighbours = [
 				alt_arrangement for alt_arrangement in self.nodes
 				if np.sum(np.abs(np.subtract(alt_arrangement.state, arrangement.state))) == 1
