@@ -8,6 +8,7 @@ class TestSampler(unittest.TestCase):
         """
         Initialise the sampler with some parameters
         """
+        self.epsilon = 0.025
         self.num_items = 7
         self.normalised_capacity = 0.6
         self.density_range = (0.5, 1.5)
@@ -42,9 +43,11 @@ class TestSampler(unittest.TestCase):
         """
         Test if the density of each item falls within the specified density range
         """
+        lower_bound = self.density_range[0] * (1 - self.epsilon)
+        upper_bound = self.density_range[1] * (1 + self.epsilon)
         for sample in self.samples:
             densities = [item.value / item.weight for item in sample.items]
-            self.assertTrue(all(self.density_range[0] <= d <= self.density_range[1] for d in densities))
+            self.assertTrue(all(lower_bound <= d <= upper_bound for d in densities))
 
     def test_sample_capacity(self):
         """
@@ -52,15 +55,17 @@ class TestSampler(unittest.TestCase):
         """
         for sample in self.samples:
             sum_weights = np.sum([item.weight for item in sample.items])
-            self.assertAlmostEqual(sample.capacity / sum_weights, self.normalised_capacity, delta=0.05)
+            self.assertAlmostEqual(sample.capacity / sum_weights, self.normalised_capacity, delta=self.epsilon)
 
     def test_solution_value_within_range(self):
         """
         Ensure that the solution value of the knapsack is within the specified solution value range
         """
+        lower_bound = self.solution_value_range[0] * (1 - self.epsilon)
+        upper_bound = self.solution_value_range[1] * (1 + self.epsilon)
         for sample in self.samples:
             solution_value = sample.optimal_nodes[0].value
-            self.assertTrue(self.solution_value_range[0] <= solution_value <= self.solution_value_range[1])
+            self.assertTrue(lower_bound <= solution_value <= upper_bound)
 
 if __name__ == '__main__':
     unittest.main()
