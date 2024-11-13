@@ -620,6 +620,9 @@ class Knapsack:
 		Returns:
 			tuple[plt.Figure, plt.Axes]: Figure and Axes objects.
 		"""
+		if not self.nodes.size == 2 ** len(self.items):
+			self.solve_all_nodes()
+			
 		fig, axes = plt.subplots(
 			figsize=(8, 3), 
 			dpi=300, 
@@ -661,7 +664,8 @@ class Knapsack:
 		Returns:
 			tuple[plt.Figure, plt.Axes]: Figure and Axes objects.
 		"""
-		self.solve_all_nodes()
+		if not self.nodes.size == 2 ** len(self.items):
+			self.solve_all_nodes()
 
 		kp_network = kp_network = nx.DiGraph()
 
