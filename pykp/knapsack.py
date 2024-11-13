@@ -28,6 +28,7 @@ import itertools
 import pandas as pd
 import matplotlib.pyplot as plt
 from anytree import Node, PreOrderIter
+import networkx as nx
 from warnings import warn
 
 class Knapsack:
@@ -629,6 +630,71 @@ class Knapsack:
 			axes.set_ylabel("Number of solutions")
 			axes.set_xlabel("Solution value")
 			plt.show()
+
+	def __get_node_color(self, arrangement):
+		# Optimal node
+		if arrangement.value == self.optimal_nodes[0].value:
+			return "#57ff29"
+		
+		# Feasible nodes
+		if arrangement.weight < self.capacity:
+			return "#003CAB"
+			
+		# Infeasible nodes
+		return "#FF2C00"
+		
+
+	def plot_network(self) -> tuple[plt.Figure, plt.Axes]:
+		"""
+		Plots a network of knapsack nodes.
+
+		Returns:
+			tuple[plt.Figure, plt.Axes]: Figure and Axes objects.
+		"""
+		self.solve_all_nodes()
+
+		kp_network = kp_network = nx.DiGraph()
+
+		for i, arrangement in enumerate(self.nodes):
+			mask = np.zeros_like(self.nodes)
+			alt_arrangements = np.delete(self.nodes, i)
+			neighbours = [
+				alt_arrangement for alt_arrangement in self.nodes
+				if np.sum(np.abs(np.subtract(alt_arrangement.state, arrangement.state))) == 1
+			]
+			
+			is_optimal = False
+			if arrangement.value == self.optimal_nodes[0].value:
+				is_optimal = True
+				
+			kp_network.add_node(
+				arrangement,
+			)
+			kp_network.add_edges_from([
+				(arrangement, alt_arrangement) 
+				for alt_arrangement in neighbours
+			])
+
+		fig, axes = plt.subplots(
+			figsize = (4 * len(self.items)/10, 4 * len(self.items)/10), 
+			dpi = 1000, 
+			nrows = 1, 
+			ncols = 1,
+			constrained_layout = True
+		)
+
+		node_colors = [self.__get_node_color(arrangement) for arrangement in kp_network.nodes]
+		nx.draw_spring(
+			kp_network, 
+			ax = axes, 
+			node_color = node_colors, 
+			node_size = 2,
+			width = 0.05, 
+			arrowsize = 0.01,
+			with_labels = False
+		)
+		plt.show()
+		return fig, axes
 
 
 	def write_to_json(self, path: str): 
