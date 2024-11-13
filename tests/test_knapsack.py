@@ -6,7 +6,9 @@ from pykp import Item, Knapsack, Arrangement
 
 class TestKnapsack(unittest.TestCase):
     def setUp(self):
-        # Initialise some items for testing
+        """
+        Initialise some items for testing
+        """
         self.items = np.array([
             Item(value=10, weight=5),
             Item(value=15, weight=10),
@@ -17,7 +19,9 @@ class TestKnapsack(unittest.TestCase):
         self.knapsack = Knapsack(items=self.items, capacity=self.capacity)
 
     def test_initialization(self):
-        # Test if knapsack initialises correctly
+        """
+        Test if knapsack initialises correctly
+        """
         self.assertEqual(self.knapsack.capacity, 23)
         self.assertTrue(np.array_equal(self.knapsack.state, np.zeros(len(self.items))))
         self.assertEqual(self.knapsack.value, 0)
@@ -25,7 +29,9 @@ class TestKnapsack(unittest.TestCase):
         self.assertTrue(self.knapsack.is_feasible)
 
     def test_invalid_initialization(self):
-        # Test if invalid initialisations raise appropriate errors
+        """
+        Test if invalid initialisations raise appropriate errors
+        """
         with self.assertRaises(ValueError):
             Knapsack(items=np.array([]), capacity=10)
 
@@ -36,7 +42,9 @@ class TestKnapsack(unittest.TestCase):
             Knapsack(items=np.array([1, 2, 3]), capacity=-5)
 
     def test_add_item(self):
-        # Add an item and check if state, value, and weight are updated
+        """
+        Add an item and check if state, value, and weight are updated
+        """
         self.knapsack.empty()
         self.knapsack.add(self.knapsack.items[0])
         self.assertEqual(self.knapsack.value, 10)
@@ -45,7 +53,9 @@ class TestKnapsack(unittest.TestCase):
         self.assertTrue(np.array_equal(self.knapsack.state, [1, 0, 0, 0]))
 
     def test_remove_item(self):
-        # Remove an item and check if state, value, and weight are updated
+        """
+        Remove an item and check if state, value, and weight are updated
+        """
         self.knapsack.empty()
         self.knapsack.add(self.items[0])
         self.knapsack.remove(self.items[0])
@@ -54,7 +64,9 @@ class TestKnapsack(unittest.TestCase):
         self.assertTrue(np.array_equal(self.knapsack.state, [0, 0, 0, 0]))
 
     def test_set_state(self):
-        # Set a custom state and verify the updates
+        """
+        Set a custom state and verify the updates
+        """
         self.knapsack.set_state(np.array([1, 1, 0, 0]))
         self.assertEqual(self.knapsack.value, 25)
         self.assertEqual(self.knapsack.weight, 15)
@@ -62,7 +74,9 @@ class TestKnapsack(unittest.TestCase):
         self.assertTrue(np.array_equal(self.knapsack.state, [1, 1, 0, 0]))
 
     def test_empty_knapsack(self):
-        # Empty the knapsack and check the state
+        """
+        Empty the knapsack and check the state
+        """
         self.knapsack.add(self.items[0])
         self.knapsack.empty()
         self.assertEqual(self.knapsack.value, 0)
@@ -70,13 +84,17 @@ class TestKnapsack(unittest.TestCase):
         self.assertTrue(np.array_equal(self.knapsack.state, [0, 0, 0, 0]))
 
     def test_calculate_sahni_k(self):
-        # Test Sahni-k calculation (add more detailed tests as needed)
+        """
+        Test Sahni-k calculation (add more detailed tests as needed)
+        """
         arrangement = Arrangement(self.items, np.array([1, 1, 0, 1]))
         sahni_k = self.knapsack.calculate_sahni_k(arrangement)
         self.assertIsInstance(sahni_k, int)
 
     def test_load_from_json(self):
-        # Test loading from a JSON file (assumes you have a sample file)
+        """
+        Test loading from a JSON file (assumes you have a sample file)
+        """
         self.knapsack.write_to_json("./tests/scratch/test_knapsack.json")
         new_knapsack = Knapsack(
             items=self.items,
