@@ -18,7 +18,7 @@ class TestKnapsack(unittest.TestCase):
         self.capacity = 23
         self.knapsack = Knapsack(items=self.items, capacity=self.capacity)
 
-    def test_initialization(self):
+    def test_initialisation(self):
         """
         Test if knapsack initialises correctly
         """
