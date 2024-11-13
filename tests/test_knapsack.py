@@ -28,7 +28,7 @@ class TestKnapsack(unittest.TestCase):
         self.assertEqual(self.knapsack.weight, 0)
         self.assertTrue(self.knapsack.is_feasible)
 
-    def test_invalid_initialization(self):
+    def test_invalid_initialisation(self):
         """
         Test if invalid initialisations raise appropriate errors
         """
