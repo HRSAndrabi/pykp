@@ -28,7 +28,7 @@ import itertools
 import pandas as pd
 import matplotlib.pyplot as plt
 from anytree import Node, PreOrderIter
-
+from warnings import warn
 
 class Knapsack:
 	"""
@@ -93,24 +93,31 @@ class Knapsack:
 		self, 
 		solve_terminal_nodes: bool = False, 
 		solve_feasible_nodes: bool = False,
+		solve_all_nodes: bool = False,
 		solve_second_best: bool = False
 	):
 		"""
 		Solves the knapsack problem and returns optimal arrangements.
 
 		Parameters:
-			solve_terminal_nodes (bool, optional): Whether to find all terminal nodes. Default is False.
-			solve_feasible_nodes (bool, optional): Whether to find all feasible nodes. Default is False.
-			solve_second_bnest (bool, optional): Whether to find the second best node. Default is False.
+			solve_terminal_nodes (bool, optional): Whether to find all terminal nodes. Default is False. This argument will be deprecated in future versions.
+			solve_feasible_nodes (bool, optional): Whether to find all feasible nodes. Default is False. This argument will be deprecated in future versions.
+			solve_all_nodes (bool, optional): Whether to find all nodes in the knapsack, including terminal nodes, and feasible nodes. Note, this method applies brute-force and may be infeasible for large instances. Default is False.
+			solve_second_best (bool, optional): Whether to find the second best node. Default is False.
 
 		Returns:
 			np.ndarray: Optimal arrangements for the knapsack problem.
 		"""
+		# Remove in 2.0.0
 		if solve_terminal_nodes:
 			self.solve_terminal_nodes()
 
+		# Remove in 2.0.0
 		if solve_feasible_nodes:
 			self.solve_feasible_nodes()
+
+		if solve_all_nodes:
+			self.solve_all_nodes()
 		
 		self.solve_branch_and_bound(solve_second_best = solve_second_best)
 	
@@ -436,16 +443,58 @@ class Knapsack:
 
 	def solve_terminal_nodes(self):
 		"""
-        Solves the knapsack problem and returns optimal arrangements.
+        Solves the knapsack problem and returns optimal arrangements. This method will be deprecated in future versions. Use `solve` with `solve_feasible_nodes=True` instead.
 
         Returns:
         	np.ndarray: Optimal arrangements for the knapsack problem.
         """
-		self.optimal_nodes = np.array([])
-		self.terminal_nodes = np.array([])
+		warn("This method will be deprecated in future versions. Use `solve` with `solve_terminal_nodes=True` instead.", DeprecationWarning)
+		self.solve_all_nodes()
+
+		return self.terminal_nodes
+	
+
+	def solve_feasible_nodes(self) -> np.ndarray:
+		"""
+        Solves the knapsack problem and returns optimal arrangements. This method will be deprecated in future versions. Use `solve` with `solve_feasible_nodes=True` instead.
+
+        Parameters:
+    		verbose (bool, optional): If True, prints the string representation of the knapsack summary. Default is True.
+
+        Returns:
+        	np.ndarray: Optimal arrangements for the knapsack problem.
+        """
+		warn("This method will be deprecated in future versions. Use `solve` with `solve_terminal_nodes=True` instead.", DeprecationWarning)
+		self.solve_all_nodes()
+
+		return self.feasible_nodes
+
+
+	def solve_all_nodes(self) -> np.ndarray:
+		"""
+        Computes all nodes in the knapsack problem. Populates attributes `nodes`, `feasible_nodes`, `terminal_nodes`, `optimal_nodes`.
+
+		Returns:
+			np.ndarray: All nodes in the knapsack problem.
+        """
 		for i in range(1, len(self.items) + 1):
 			subsets = list(itertools.combinations(self.items, i))
 			for subset in subsets:
+				self.nodes = np.append(
+					self.nodes, 
+					Arrangement(
+						items = self.items,
+						state = np.array([int(item in subset) for item in self.items])
+					)
+				)	
+				if self.__is_subset_feasible(subset):
+					self.feasible_nodes = np.append(
+						self.feasible_nodes, 
+						Arrangement(
+							items = self.items,
+							state = np.array([int(item in subset) for item in self.items])
+						)
+					)	
 				if self.__is_subset_terminal(subset):
 					self.terminal_nodes = np.append(
 						self.terminal_nodes, 
@@ -454,7 +503,24 @@ class Knapsack:
 							state = np.array([int(item in subset) for item in self.items])
 						)
 					)	
-
+		self.nodes = np.append(
+			self.nodes,
+			Arrangement(
+				items = self.items,
+				state = np.zeros(len(self.items), dtype = int)
+			)
+		)
+		self.feasible_nodes = np.append(
+			self.feasible_nodes,
+			Arrangement(
+				items = self.items,
+				state = np.zeros(len(self.items), dtype = int)
+			)
+		)
+		self.feasible_nodes = sorted(
+			self.feasible_nodes, 
+			key = operator.attrgetter("value"),
+		) 	
 		self.terminal_nodes = sorted(
 			self.terminal_nodes, 
 			key = operator.attrgetter("value"),
@@ -466,70 +532,7 @@ class Knapsack:
 			if arrangement.value == self.terminal_nodes[0].value
 		])
 		self.sahni_k = self.calculate_sahni_k(self.optimal_nodes[0])
-
-		return self.optimal_nodes
-	
-
-	def solve_feasible_nodes(self) -> np.ndarray:
-		"""
-        Solves the knapsack problem and returns optimal arrangements.
-
-        Parameters:
-    		verbose (bool, optional): If True, prints the string representation of the knapsack summary. Default is True.
-
-        Returns:
-        	np.ndarray: Optimal arrangements for the knapsack problem.
-        """
-		self.feasible_nodes = np.array([
-			Arrangement(
-				items = self.items,
-				state = np.zeros_like(self.items)
-			)
-		])
-		for i in range(1, len(self.items) + 1):
-			subsets = list(itertools.combinations(self.items, i))
-			for subset in subsets:
-				if self.__is_subset_feasible(subset):
-					self.feasible_nodes = np.append(
-						self.feasible_nodes, 
-						Arrangement(
-							items = self.items,
-							state = np.array([int(item in subset) for item in self.items])
-						)
-					)	
-
-		self.feasible_nodes = sorted(
-			self.feasible_nodes, 
-			key = operator.attrgetter("value"),
-		) 	
-		return self.feasible_nodes
-
-	def solve_all_nodes(self) -> np.ndarray:
-		"""
-        Populates an array with all nodes in the knapsack problem.
-        """
-		self.feasible_nodes = np.array([
-			Arrangement(
-				items = self.items,
-				state = np.zeros_like(self.items)
-			)
-		])
-		for i in range(1, len(self.items) + 1):
-			subsets = list(itertools.combinations(self.items, i))
-			for subset in subsets:
-				self.nodes = np.append(
-					self.nodes, 
-					Arrangement(
-						items = self.items,
-						state = np.array([int(item in subset) for item in self.items])
-					)
-				)	
-
-		self.feasible_nodes = sorted(
-			self.feasible_nodes, 
-			key = operator.attrgetter("value"),
-		) 	
-		return self.feasible_nodes
+		return self.nodes
 	
 	
 	def __is_subset_feasible(self, subset: list[Item]) -> bool:
