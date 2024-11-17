@@ -449,7 +449,11 @@ class Knapsack:
         Returns:
         	np.ndarray: Optimal arrangements for the knapsack problem.
         """
-		warn("This method will be deprecated in future versions. Use `solve` with `solve_terminal_nodes=True` instead.", DeprecationWarning)
+		warn(
+			message="Use `solve` with `solve_terminal_nodes=True` instead.", 
+			category=DeprecationWarning,
+			stacklevel=2
+		)
 		self.solve_all_nodes()
 
 		return self.terminal_nodes
@@ -465,7 +469,11 @@ class Knapsack:
         Returns:
         	np.ndarray: Optimal arrangements for the knapsack problem.
         """
-		warn("This method will be deprecated in future versions. Use `solve` with `solve_terminal_nodes=True` instead.", DeprecationWarning)
+		warn(
+			message="Use `solve` with `solve_terminal_nodes=True` instead.", 
+			category=DeprecationWarning,
+			stacklevel=2
+		)
 		self.solve_all_nodes()
 
 		return self.feasible_nodes
