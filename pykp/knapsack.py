@@ -769,7 +769,7 @@ class Knapsack:
 
 	def summary(self):
 		"""
-        Generates a summary DataFrame containing information about the knapsack state and solutions.
+        Generates a summary of the knapsack instance.
 
         Returns:
         	pd.DataFrame: Summary DataFrame.
