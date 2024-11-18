@@ -665,9 +665,19 @@ class Knapsack:
 		return "#FF2C00"
 		
 
-	def plot_network(self) -> tuple[plt.Figure, plt.Axes]:
+	def plot_network(
+		self, 
+		fig: plt.Figure = None, 
+		ax: plt.Axes = None,
+		show: bool = False,
+	) -> tuple[plt.Figure, plt.Axes]:
 		"""
 		Plots a network of knapsack nodes.
+
+		Paramaters:
+			fig (plt.Figure, optional): Figure object. Default is None.
+			ax (plt.Axes, optional): Axes object. Default is None.
+			show (bool, optional): Whether to display the plot. Default is False.
 
 		Returns:
 			tuple[plt.Figure, plt.Axes]: Figure and Axes objects.
@@ -691,26 +701,28 @@ class Knapsack:
 				for alt_arrangement in neighbours
 			])
 
-		fig, axes = plt.subplots(
-			figsize = (4 * len(self.items)/10, 4 * len(self.items)/10), 
-			dpi = 1000, 
-			nrows = 1, 
-			ncols = 1,
-			constrained_layout = True
-		)
+		if fig is None or ax is None:
+			fig, ax = plt.subplots(
+				figsize = (4 * len(self.items)/10, 4 * len(self.items)/10), 
+				dpi = 1000, 
+				nrows = 1, 
+				ncols = 1,
+				constrained_layout = True
+			)
 
 		node_colors = [self.__get_node_color(arrangement) for arrangement in kp_network.nodes]
 		nx.draw_spring(
 			kp_network, 
-			ax = axes, 
+			ax = ax, 
 			node_color = node_colors, 
 			node_size = 2,
 			width = 0.05, 
 			arrowsize = 0.01,
 			with_labels = False
 		)
-		plt.show()
-		return fig, axes
+		if show:
+			plt.show()
+		return fig, ax
 
 
 	def write_to_json(self, path: str): 
