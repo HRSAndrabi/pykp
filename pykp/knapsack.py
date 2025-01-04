@@ -24,7 +24,7 @@ from typing import Literal
 import numpy as np
 from .item import Item
 from .arrangement import Arrangement
-from .solvers.branch_and_bound import BranchAndBound
+from .solvers import BranchAndBound, Greedy
 import operator
 import itertools
 import pandas as pd
@@ -81,7 +81,11 @@ class Knapsack:
 		if not isinstance(items, np.ndarray):
 			items = np.array(items)
 		
-		self.items = items
+		self.items = np.array(sorted(
+			items, 
+			key = lambda item: item.value/item.weight, 
+			reverse = True
+		))
 		self.capacity = capacity
 		self.state = np.zeros_like(items)
 		self.value = 0
@@ -120,7 +124,7 @@ class Knapsack:
 				solver = BranchAndBound()
 
 			self.optimal_nodes = solver.solve(items = self.items, capacity = self.capacity)
-			self.sahni_k = min([self.calculate_sahni_k(arrangement) for arrangement in self.optimal_nodes])
+			# self.sahni_k = min([self.calculate_sahni_k(arrangement) for arrangement in self.optimal_nodes])
 			
 
 	def add(self, item: Item):
@@ -435,7 +439,6 @@ class Knapsack:
 			in nodes
 			if node[1] == nodes[0][1]
 		])
-		self.sahni_k = self.calculate_sahni_k(self.optimal_nodes[0])
 
 		if solve_second_best:
 			self.terminal_nodes = np.append(
@@ -550,7 +553,6 @@ class Knapsack:
 			in self.terminal_nodes
 			if arrangement.value == self.terminal_nodes[0].value
 		])
-		self.sahni_k = self.calculate_sahni_k(self.optimal_nodes[0])
 		return self.nodes
 	
 	
@@ -621,8 +623,9 @@ class Knapsack:
 					self.add(
 						out_items[densities.index(max(densities))]
 					)
-
-				if np.array_equal(arrangement.state, self.state):
+				# Check hamming distance between arrangement and current state
+				hamming_distance = sum(np.absolute(np.subtract(arrangement.state, self.state)))	
+				if hamming_distance == 0:
 					return subset_size
 
 
