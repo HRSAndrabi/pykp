@@ -3,3 +3,4 @@ PyKP is a package to provide tooling for sampling and solving instances of the 0
 """
 
 from .branch_and_bound import BranchAndBound
+from .greedy import Greedy
