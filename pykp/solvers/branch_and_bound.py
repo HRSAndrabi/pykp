@@ -221,4 +221,4 @@ class BranchAndBound():
 			state = np.array([int(item in node.included_items) for item in items])
 		) for node in optimal_nodes])
 
-		return list(set(result))
+		return np.array(list(set(result)))

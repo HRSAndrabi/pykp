@@ -127,7 +127,8 @@ class Knapsack:
 
 		if method == "mzn_gecode":
 			solver = MznGecode()
-			self.optimal_nodes = await solver.solve(items = self.items, capacity = self.capacity)
+			result = await solver.solve(items = self.items, capacity = self.capacity)
+			self.optimal_nodes = np.array([result])
 
 		return self.optimal_nodes
 

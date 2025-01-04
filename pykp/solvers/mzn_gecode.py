@@ -56,9 +56,9 @@ class MznGecode():
 
 		result = await instance.solve_async()
 
-		return np.array([Arrangement(
+		return Arrangement(
 			items = items,
 			state = np.array(result["x"])
-		)])
+		)
 
 		
