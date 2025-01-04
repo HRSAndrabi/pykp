@@ -24,7 +24,7 @@ from typing import Literal
 import numpy as np
 from .item import Item
 from .arrangement import Arrangement
-from .solvers import BranchAndBound, Greedy
+from .solvers import BranchAndBound, Greedy, MznGecode
 import operator
 import itertools
 import pandas as pd
@@ -34,7 +34,7 @@ import networkx as nx
 from warnings import warn
 
 
-SOLVERS = ["branch_and_bound"]
+SOLVERS = ["branch_and_bound", "mzn_gecode"]
 
 class Knapsack:
 	"""
@@ -99,16 +99,16 @@ class Knapsack:
 		self.optimal_nodes = np.array([])
 
 
-	def solve(
+	async def solve(
 		self, 
-		method: Literal["branch_and_bound"] = "branch_and_bound",
+		method: Literal["branch_and_bound", "mzn_gecode"] = "branch_and_bound",
 		solve_all_nodes: bool = False,
 	):
 		"""
 		Solves the knapsack problem and returns optimal arrangements.
 
 		Parameters:
-			method (Literal["branch_and_bound"], optional): The method to use to solve the knapsack problem. Default is "branch_and_bound".
+			method (Literal["branch_and_bound", "mzn_gecode], optional): The method to use to solve the knapsack problem. Default is "branch_and_bound".
 			solve_all_nodes (bool, optional): Whether to find all nodes in the knapsack, including terminal nodes, and feasible nodes. Note, this method applies brute-force and may be infeasible for large instances. Default is False.
 
 		Returns:
@@ -119,13 +119,18 @@ class Knapsack:
 
 		if solve_all_nodes:
 			self.solve_all_nodes()
-		else:
-			if method == "branch_and_bound":
-				solver = BranchAndBound()
-
+			return
+		
+		if method == "branch_and_bound":
+			solver = BranchAndBound()
 			self.optimal_nodes = solver.solve(items = self.items, capacity = self.capacity)
-			# self.sahni_k = min([self.calculate_sahni_k(arrangement) for arrangement in self.optimal_nodes])
-			
+
+		if method == "mzn_gecode":
+			solver = MznGecode()
+			self.optimal_nodes = await solver.solve(items = self.items, capacity = self.capacity)
+
+		return self.optimal_nodes
+
 
 	def add(self, item: Item):
 		"""
