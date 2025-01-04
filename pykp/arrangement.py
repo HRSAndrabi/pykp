@@ -69,7 +69,12 @@ class Arrangement():
         	float: The total weight of items in the knapsack.
         """
 		return sum([self.items[i].weight for i, inside in enumerate(self.state) if bool(inside)])
+	
+	def __hash__(self):
+		return hash(tuple(self.state))
 
+	def __eq__(self, other):
+		return np.array_equal(self.state, other.state)
 	
 	def __str__(self):
 		state = int("".join(self.state.astype(int).astype(str)), 2)

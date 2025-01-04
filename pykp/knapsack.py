@@ -20,9 +20,11 @@ Example:
 """
 
 import json
+from typing import Literal
 import numpy as np
 from .item import Item
 from .arrangement import Arrangement
+from .solvers.branch_and_bound import BranchAndBound
 import operator
 import itertools
 import pandas as pd
@@ -30,6 +32,9 @@ import matplotlib.pyplot as plt
 from anytree import Node, PreOrderIter
 import networkx as nx
 from warnings import warn
+
+
+SOLVERS = ["branch_and_bound"]
 
 class Knapsack:
 	"""
@@ -92,36 +97,31 @@ class Knapsack:
 
 	def solve(
 		self, 
-		solve_terminal_nodes: bool = False, 
-		solve_feasible_nodes: bool = False,
+		method: Literal["branch_and_bound"] = "branch_and_bound",
 		solve_all_nodes: bool = False,
-		solve_second_best: bool = False
 	):
 		"""
 		Solves the knapsack problem and returns optimal arrangements.
 
 		Parameters:
-			solve_terminal_nodes (bool, optional): Whether to find all terminal nodes. Default is False. This argument will be deprecated in future versions.
-			solve_feasible_nodes (bool, optional): Whether to find all feasible nodes. Default is False. This argument will be deprecated in future versions.
+			method (Literal["branch_and_bound"], optional): The method to use to solve the knapsack problem. Default is "branch_and_bound".
 			solve_all_nodes (bool, optional): Whether to find all nodes in the knapsack, including terminal nodes, and feasible nodes. Note, this method applies brute-force and may be infeasible for large instances. Default is False.
-			solve_second_best (bool, optional): Whether to find the second best node. Default is False.
 
 		Returns:
 			np.ndarray: Optimal arrangements for the knapsack problem.
 		"""
-		# Remove in 2.0.0
-		if solve_terminal_nodes:
-			self.solve_terminal_nodes()
-
-		# Remove in 2.0.0
-		if solve_feasible_nodes:
-			self.solve_feasible_nodes()
+		if method not in SOLVERS:
+			raise ValueError(f"`method` must be one of: {SOLVERS}.")
 
 		if solve_all_nodes:
 			self.solve_all_nodes()
-		
-		self.solve_branch_and_bound(solve_second_best = solve_second_best)
-	
+		else:
+			if method == "branch_and_bound":
+				solver = BranchAndBound()
+
+			self.optimal_nodes = solver.solve(items = self.items, capacity = self.capacity)
+			self.sahni_k = min([self.calculate_sahni_k(arrangement) for arrangement in self.optimal_nodes])
+			
 
 	def add(self, item: Item):
 		"""
@@ -348,6 +348,11 @@ class Knapsack:
 		"""
 		Solves the optimal and second-best terminal nodes using best-first branch-and-bound.
 		"""
+		warn(
+			message="Use `solve` with `method = 'branch_and_bound'` instead.", 
+			category=DeprecationWarning,
+			stacklevel=2
+		)
 		self.items = np.array(sorted(
 			self.items, 
 			key = lambda item: item.value/item.weight, 
