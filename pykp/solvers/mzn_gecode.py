@@ -10,7 +10,7 @@ from minizinc import Instance, Model, Solver
 
 class MznGecode():
 	"""
-	Represents an implementation of the minizinc and gecode solver for solving the knapsack problem.
+	Represents an implementation of the minizinc and gecode solver for solving the knapsack problem. This solver is not robust to multiple optimal solutions.
 	"""
 	
 	@staticmethod
@@ -18,7 +18,16 @@ class MznGecode():
 		items: np.ndarray[Item],
 		capacity: int
 	) -> Arrangement:
-		
+		"""
+		Solves the knapsack problem using the minizinc and gecode solver.
+
+		Args:
+			items (np.ndarray[Item]): Items that can be included in the knapsack.
+			capacity (int): Maximum weight capacity of the knapsack.
+
+		Returns:
+			Arrangement: The optimal arrangement of items in the knapsack.
+		"""
 		model = Model()
 		model.add_string(
 			"""

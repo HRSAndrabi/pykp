@@ -14,7 +14,7 @@ Example:
 		]
 		capacity = 15
 		knapsack = Knapsack(items=items, capacity=capacity)
-		knapsack.solve()
+		await knapsack.solve()
 		print(knapsack.optimal_nodes)
     
 """

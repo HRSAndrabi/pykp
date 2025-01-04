@@ -31,7 +31,7 @@ class Node():
 
 class BranchAndBound():
 	"""
-	Represents an implementation of the branch and bound algorithm for solving the knapsack problem.
+	Represents an implementation of the branch and bound algorithm for solving the knapsack problem. This solver is robust to multiple optimal solutions.
     """
 
 	@staticmethod
@@ -158,7 +158,7 @@ class BranchAndBound():
 		return True
 	
 
-	def solve(self, items: np.ndarray[Item], capacity: int) -> Arrangement:
+	def solve(self, items: np.ndarray[Item], capacity: int) -> np.ndarray[Arrangement]:
 		"""
 		Solves the knapsack problem using the branch-and-bound algorithm.
 
@@ -167,7 +167,7 @@ class BranchAndBound():
 			capacity (int): Maximum weight capacity of the knapsack.
 
 		Returns:
-			Arrangement: The optimal arrangement of items in the knapsack.
+			np.ndarray[Arrangement]: The optimal arrangements of items in the knapsack.
 		"""
 		items = np.array(sorted(
 			items, 

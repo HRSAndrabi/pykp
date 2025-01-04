@@ -16,7 +16,7 @@ class Greedy():
 	def solve(
 		items: np.ndarray[Item],
 		capacity: int
-	) -> np.ndarray[Item]:
+	) -> Arrangement:
 		"""
 		Solves the knapsack problem using the greedy algorithm.
 
@@ -25,7 +25,7 @@ class Greedy():
 			capacity (int): Maximum weight capacity of the knapsack.
 
 		Returns:
-			np.ndarray[Item]: Items included in the knapsack.
+			Arrangement: The greedy arrangement of items in the knapsack.
 		"""
 		state = np.zeros(len(items))
 		weight = 0
