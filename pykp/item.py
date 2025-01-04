@@ -16,7 +16,7 @@ Example:
 
 from dataclasses import dataclass, field
 
-@dataclass(order = True)
+@dataclass(frozen = True, eq = False)
 class Item:
 	"""
 	Represents an item for the knapsack problem.
@@ -25,9 +25,5 @@ class Item:
     	value (int): The value of the item.
     	weight (int): The weight of the item.
 	"""
-	density: float = field(init = False, compare = True)
 	value: int = field(compare = False)
 	weight: int = field(compare = False)
-	
-	def __post_init__(self):
-		self.density = self.value/self.weight
