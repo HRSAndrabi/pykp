@@ -22,7 +22,6 @@ Example:
 """
 
 import numpy as np
-from ..knapsack import Knapsack
 from ..arrangement import Arrangement
 import itertools
 
@@ -45,27 +44,33 @@ def sahni_k(
 	if arrangement.weight > capacity:
 		raise ValueError("The total weight of items included in the `Arrangement` exceeds the `capacity`.")
 	
-	instance = Knapsack(items = arrangement.items, capacity = capacity)
-
+	in_items = [arrangement.items[i] for i, element in enumerate(arrangement.state) if element == 1]
 	for subset_size in range(0, len(arrangement.state)+1):
-		in_indexes = [i for i, element in enumerate(arrangement.state) if element == 1]
-		for subset in itertools.combinations(in_indexes, subset_size):
-			initial_state = np.array([int(i in subset) for i in range(0, len(arrangement.state))])
-			instance.set_state(initial_state.copy())
-			
+		for subset in itertools.combinations(in_items, subset_size):
+			subset = list(subset)
+			weight = sum([item.weight for item in subset])
+
 			# Solve greedily
-			while not instance.is_at_capacity:
+			while True:
+				if len(subset) == len(arrangement.items):
+					break
+				
+				# Check instance at capacity
 				out_items = [
-					instance.items[i] 
-					for i, element 
-					in enumerate(instance.state) 
-					if element == 0 and instance.items[i].weight + instance.weight <= instance.capacity
+					item 
+					for item in arrangement.items 
+					if item not in subset
 				]
+				if min([
+						weight + item.weight 
+						for item in out_items
+					]) > capacity:
+					break
+
 				densities = [item.value/item.weight for item in out_items]
-				instance.add(
-					out_items[densities.index(max(densities))]
-				)
-			# Check hamming distance between arrangement and current state
-			hamming_distance = sum(np.absolute(np.subtract(arrangement.state, instance.state)))	
-			if hamming_distance == 0:
+				max_density_item = out_items[densities.index(max(densities))]
+				subset.append(max_density_item)
+				weight = sum([item.weight for item in subset])
+
+			if set(subset) == set(in_items):
 				return subset_size
