@@ -34,13 +34,13 @@ class MznGecode(SolverABC):
 			"""
 			int: n; % number of objects
 			set of int: OBJ = 1..n;
-			int: capacity;
-			array[OBJ] of int: profit;
-			array[OBJ] of int: size;
+			float: capacity;
+			array[OBJ] of float: profit;
+			array[OBJ] of float: size;
 
 			%var set of OBJ: x;
 			array[OBJ] of var 0..1: x;
-			var int: TotalProfit=sum(i in OBJ)(profit[i]*x[i]);
+			var float: TotalProfit=sum(i in OBJ)(profit[i]*x[i]);
 
 			constraint sum(i in OBJ)(size[i]*x[i]) <= capacity;
 
