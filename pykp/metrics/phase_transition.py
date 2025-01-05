@@ -6,6 +6,7 @@ import numpy as np
 from pykp.solvers import *
 from pykp.item import Item
 from tqdm import tqdm
+import pandas as pd
 
 
 SOLVERS = ["branch_and_bound", "mzn_gecode"]
@@ -109,11 +110,36 @@ def _simulate_cell_solvability(
 	return score / samples
 
 
+def _save(
+	phase_transition: np.ndarray, 
+	grid: np.ndarray,
+	path: str
+):
+	"""
+	Save the phase transition to a CSV file.
+
+	Args:
+		phase_transition (np.ndarray): The phase transition grid.
+		grid (np.ndarray): The grid of normalised capacities and profits.
+		path (str): The path to save the CSV file.
+	"""
+	df = pd.DataFrame(
+		{
+			"nc_lower": grid[0].flatten(),
+			"nc_upper": grid[0].flatten() + 1 / len(grid[0][0]),
+			"np_lower": grid[1].flatten(),
+			"np_upper": grid[1].flatten() + 1 / len(grid[1][0]),
+			"solvability": phase_transition.flatten(),
+		},
+	)
+	df.to_csv(path, index=False, float_format="%.6f")
+
 def phase_transition(
 	num_items: int, 
 	samples: int = 100,
 	solver: str = "branch_and_bound",
-	resolution: tuple[int, int] = (41, 41)
+	resolution: tuple[int, int] = (41, 41),
+	path: str = None
 ) -> tuple[np.ndarray, np.ndarray]:
 	"""
 
@@ -122,6 +148,7 @@ def phase_transition(
 		samples (int, optional): Number of knapsack samples to produce for each grid cell. Defaults to 100.
 		solver (str, optional): Solver to use. Defaults to "branch_and_bound".
 		resolution (tuple[int, int], optional): Resolution of the normalised capacity-normalised profit grid. The first number corresponds to the resolution of normalised capacity, and the second to the resolution of normalised profit. Defaults to (41, 41).
+		path (str, optional): Path to save the phase transition to. Defaults to None.
 
 	Returns:
 		tuple[np.ndarray, np.ndarray]: The grid of normalised capacities and profits, and the phase transition.
@@ -156,11 +183,16 @@ def phase_transition(
 	phase_transition = np.array(phase_transition).reshape(
 		(resolution[0], resolution[1])
 	)
+
+	if path:
+		_save(phase_transition, grid, path)
+
 	return grid, phase_transition
 
 if __name__ == "__main__":
 	phase_transition(
 		num_items = 10, 
 		samples = 1,
-		resolution = (20, 20)
+		resolution = (10, 10),
+		path = "phase_transition.csv"
 	)
