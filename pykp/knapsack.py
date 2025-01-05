@@ -25,6 +25,7 @@ import numpy as np
 from .item import Item
 from .arrangement import Arrangement
 from .solvers import BranchAndBound, Greedy, MznGecode
+from .metrics import sahni_k
 import operator
 import itertools
 import pandas as pd
@@ -596,43 +597,6 @@ class Knapsack:
 			if i.weight <= balance:
 				return False
 		return True
-		
-
-	def calculate_sahni_k(self, arrangement: Arrangement):
-		"""
-        Calculates the Sahni-k value for a given arrangement.
-
-        Parameters:
-        	arrangement (Arrangement): The arrangement for which to calculate Sahni-k.
-
-        Returns:
-        	int: Sahni-k value.
-        """
-		if not isinstance(arrangement, Arrangement):
-			raise ValueError("`arrangement` must be of type `Arrangement`.")
-
-		for subset_size in range(0, len(arrangement.state)+1):
-			in_indexes = [i for i, element in enumerate(arrangement.state) if element == 1]
-			for subset in itertools.combinations(in_indexes, subset_size):
-				initial_state = np.array([int(i in subset) for i in range(0, len(arrangement.state))])
-				self.set_state(initial_state.copy())
-				
-				# Solve greedily
-				while not self.is_at_capacity:
-					out_items = [
-						self.items[i] 
-						for i, element 
-						in enumerate(self.state) 
-						if element == 0 and self.items[i].weight + self.weight <= self.capacity
-					]
-					densities = [item.value/item.weight for item in out_items]
-					self.add(
-						out_items[densities.index(max(densities))]
-					)
-				# Check hamming distance between arrangement and current state
-				hamming_distance = sum(np.absolute(np.subtract(arrangement.state, self.state)))	
-				if hamming_distance == 0:
-					return subset_size
 
 
 	def plot_terminal_nodes_histogram(self) -> tuple[plt.Figure, plt.Axes]:
@@ -751,7 +715,7 @@ class Knapsack:
 
 		instance_spec = {
 			"capacity": self.capacity,
-			"sahni_k": self.calculate_sahni_k(self.optimal_nodes[0]),
+			"sahni_k": sahni_k(self.optimal_nodes[0], self.capacity),
 			"optimal_value": self.optimal_nodes[0].value,
 			"items": [
 				{
@@ -829,7 +793,7 @@ class Knapsack:
 			", ".join([
 				f"solution (v = {arrangement.value}",
 				f"w = {arrangement.weight}",
-				f"k = {self.calculate_sahni_k(arrangement)})",
+				f"k = {sahni_k(arrangement, self.capacity)})",
 			])
 			for arrangement in self.optimal_nodes
 		])
@@ -837,7 +801,7 @@ class Knapsack:
 			index.append(", ".join([
 				f"best inferior (v = {best_inferior_solution.value}",
 				f"w = {best_inferior_solution.weight}",
-				f"k = {self.calculate_sahni_k(best_inferior_solution)})",
+				f"k = {sahni_k(best_inferior_solution, self.capacity)})",
 			]))
 			rows.append(np.where(best_inferior_solution.state == 1, "IN", "OUT") )
 
