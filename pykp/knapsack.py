@@ -14,15 +14,17 @@ Example:
 		]
 		capacity = 15
 		knapsack = Knapsack(items=items, capacity=capacity)
-		knapsack.solve()
+		await knapsack.solve()
 		print(knapsack.optimal_nodes)
     
 """
 
 import json
+from typing import Literal
 import numpy as np
 from .item import Item
 from .arrangement import Arrangement
+from .solvers import BranchAndBound, Greedy, MznGecode
 import operator
 import itertools
 import pandas as pd
@@ -30,6 +32,9 @@ import matplotlib.pyplot as plt
 from anytree import Node, PreOrderIter
 import networkx as nx
 from warnings import warn
+
+
+SOLVERS = ["branch_and_bound", "mzn_gecode"]
 
 class Knapsack:
 	"""
@@ -76,7 +81,11 @@ class Knapsack:
 		if not isinstance(items, np.ndarray):
 			items = np.array(items)
 		
-		self.items = items
+		self.items = np.array(sorted(
+			items, 
+			key = lambda item: item.value/item.weight, 
+			reverse = True
+		))
 		self.capacity = capacity
 		self.state = np.zeros_like(items)
 		self.value = 0
@@ -90,38 +99,39 @@ class Knapsack:
 		self.optimal_nodes = np.array([])
 
 
-	def solve(
+	async def solve(
 		self, 
-		solve_terminal_nodes: bool = False, 
-		solve_feasible_nodes: bool = False,
+		method: Literal["branch_and_bound", "mzn_gecode"] = "branch_and_bound",
 		solve_all_nodes: bool = False,
-		solve_second_best: bool = False
 	):
 		"""
 		Solves the knapsack problem and returns optimal arrangements.
 
 		Parameters:
-			solve_terminal_nodes (bool, optional): Whether to find all terminal nodes. Default is False. This argument will be deprecated in future versions.
-			solve_feasible_nodes (bool, optional): Whether to find all feasible nodes. Default is False. This argument will be deprecated in future versions.
+			method (Literal["branch_and_bound", "mzn_gecode], optional): The method to use to solve the knapsack problem. Default is "branch_and_bound".
 			solve_all_nodes (bool, optional): Whether to find all nodes in the knapsack, including terminal nodes, and feasible nodes. Note, this method applies brute-force and may be infeasible for large instances. Default is False.
-			solve_second_best (bool, optional): Whether to find the second best node. Default is False.
 
 		Returns:
 			np.ndarray: Optimal arrangements for the knapsack problem.
 		"""
-		# Remove in 2.0.0
-		if solve_terminal_nodes:
-			self.solve_terminal_nodes()
-
-		# Remove in 2.0.0
-		if solve_feasible_nodes:
-			self.solve_feasible_nodes()
+		if method not in SOLVERS:
+			raise ValueError(f"`method` must be one of: {SOLVERS}.")
 
 		if solve_all_nodes:
 			self.solve_all_nodes()
+			return
 		
-		self.solve_branch_and_bound(solve_second_best = solve_second_best)
-	
+		if method == "branch_and_bound":
+			solver = BranchAndBound()
+			self.optimal_nodes = solver.solve(items = self.items, capacity = self.capacity)
+
+		if method == "mzn_gecode":
+			solver = MznGecode()
+			result = await solver.solve(items = self.items, capacity = self.capacity)
+			self.optimal_nodes = np.array([result])
+
+		return self.optimal_nodes
+
 
 	def add(self, item: Item):
 		"""
@@ -348,6 +358,11 @@ class Knapsack:
 		"""
 		Solves the optimal and second-best terminal nodes using best-first branch-and-bound.
 		"""
+		warn(
+			message="Use `solve` with `method = 'branch_and_bound'` instead.", 
+			category=DeprecationWarning,
+			stacklevel=2
+		)
 		self.items = np.array(sorted(
 			self.items, 
 			key = lambda item: item.value/item.weight, 
@@ -430,7 +445,6 @@ class Knapsack:
 			in nodes
 			if node[1] == nodes[0][1]
 		])
-		self.sahni_k = self.calculate_sahni_k(self.optimal_nodes[0])
 
 		if solve_second_best:
 			self.terminal_nodes = np.append(
@@ -545,7 +559,6 @@ class Knapsack:
 			in self.terminal_nodes
 			if arrangement.value == self.terminal_nodes[0].value
 		])
-		self.sahni_k = self.calculate_sahni_k(self.optimal_nodes[0])
 		return self.nodes
 	
 	
@@ -616,8 +629,9 @@ class Knapsack:
 					self.add(
 						out_items[densities.index(max(densities))]
 					)
-
-				if np.array_equal(arrangement.state, self.state):
+				# Check hamming distance between arrangement and current state
+				hamming_distance = sum(np.absolute(np.subtract(arrangement.state, self.state)))	
+				if hamming_distance == 0:
 					return subset_size
 
 
