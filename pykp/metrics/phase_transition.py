@@ -1,5 +1,26 @@
 """
+This module provides an implementation of the phase transition of the knapsack problem, based on the following paper:
+Yadav, Nitin, et al. "Phase transition in the knapsack problem." arXiv preprint arXiv:1806.10244 (2018).
 
+Example:
+	Compute the phase transition of the knapsack problem::
+
+		from pykp.metrics import phase_transition
+
+		grid, solvability_matrix = phase_transition(
+			num_items = 10, 
+			samples = 100,
+			resolution = (20, 20),
+		)
+
+	Save the phase transition to a CSV file by specifying an optional `path` argument ::
+	
+		phase_transition(
+			num_items = 10, 
+			samples = 100,
+			resolution = (20, 20),
+			path = "phase_transition.csv"
+		)
 """
 
 import numpy as np
