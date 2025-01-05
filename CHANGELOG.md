@@ -1,6 +1,82 @@
 # CHANGELOG
 
 
+## v2.0.0 (2025-01-05)
+
+### Breaking
+
+* feat(solvers): add minizinc gecode solver.
+
+Add minizinc gecode solver class.
+
+BREAKING CHANGE: knapsack.solve() is now an async method in order
+to inferface with minizinc. ([`3b4027b`](https://github.com/HRSAndrabi/pykp/commit/3b4027b9bc56047f65d7b5217bfd8ffdb1e9b58a))
+
+* refactor(knapsack.solve()): clean up branch and bound.
+
+Move branch and bound solver to own module. Make use of
+queue.PriorityQueue. Add __eq__ and __hash__ methods to Arrangement
+class.
+
+BREAKING CHANGE: new branch and bound solver introduces a new
+argument to knapsack.solve() method. This method should now be
+called with a `method` parameter that specifies the solver to use. ([`94cf4e6`](https://github.com/HRSAndrabi/pykp/commit/94cf4e6ac1c13798ff01fa4adfa8e5e79faab4d9))
+
+### Bug Fixes
+
+* fix(solvers): make return types consistent with docs.
+
+Branch and bound solver should return a numpy array of optimal
+solutions, but was returning a list instead. Similarly, minizinc
+gecode solver was returning an nparray, but should instead return
+a single arrangement since it is not robust to multiple solutions. ([`954e3e6`](https://github.com/HRSAndrabi/pykp/commit/954e3e64038ac671e6747ac506826fd01e8cd3d1))
+
+* fix(item): allow id-based hashing. ([`056a10e`](https://github.com/HRSAndrabi/pykp/commit/056a10e1b242865b7ab79d3833e529f4d65c7736))
+
+* fix(knapsack): density sort items on initialisation.
+
+Branch and bound requires items to be density sorted. This created
+a discrepancy between the order of items in the KP instance, and
+the order of the items in the optimal arangement returned by the
+branch and bound solver (which is assuming items are density
+sorted. ([`14e0260`](https://github.com/HRSAndrabi/pykp/commit/14e02607b53f55e257bcd205a2450da62188a794))
+
+* fix(branch_and_bound): return list instead of set.
+
+Optimal nodes were converted to a set to remove duplicates, but
+this creates issues with indexing through the optimal nodes array
+stored in the Knapsack instances. Now converts to a set and then a
+list. ([`065ce39`](https://github.com/HRSAndrabi/pykp/commit/065ce39c33ca89cc01c4c64141a14341b1ab2f26))
+
+### Documentation
+
+* docs(solvers): update documentation. ([`4bb25ac`](https://github.com/HRSAndrabi/pykp/commit/4bb25acae6f256669792d85bf4e1fbc9fd621cab))
+
+* docs(knapsack): simplify knapsack.summary() docstring. ([`fe0a0d6`](https://github.com/HRSAndrabi/pykp/commit/fe0a0d69fd4bc202b1b9930a1d51fee8badb00f1))
+
+### Features
+
+* feat: add greedy solver. ([`a9b4213`](https://github.com/HRSAndrabi/pykp/commit/a9b42134319906951f1a618449ef7409f389348b))
+
+### Refactoring
+
+* refactor(solvers): implement solver abstract class. ([`782e9b4`](https://github.com/HRSAndrabi/pykp/commit/782e9b41570f4678643e235c3b56f5ee9eb6f756))
+
+* refactor(item): convert to dataclass. ([`bee732f`](https://github.com/HRSAndrabi/pykp/commit/bee732fe69c1c9ab7079910099dd33a1d7a04cbb))
+
+### Unknown
+
+* Merge pull request #1 from HRSAndrabi/chore/clean-up-branch-and-bound
+
+Chore/clean up branch and bound
+
+- Create module for solvers
+- Convert Item to data class
+- Add minizinc geocode solver
+- Add greedy solver
+- Clean up branch and bound and refactor to own solver ([`ac89a18`](https://github.com/HRSAndrabi/pykp/commit/ac89a184ee2a4b932e2c93ff90afcf3ce3b6fa16))
+
+
 ## v1.2.0 (2024-11-18)
 
 ### Bug Fixes
