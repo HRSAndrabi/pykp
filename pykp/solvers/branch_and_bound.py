@@ -5,6 +5,7 @@ This module provides an implementation of branch and bound algorithm for solving
 import numpy as np
 from queue import PriorityQueue
 from dataclasses import dataclass, field
+from .solver import Solver
 from ..arrangement import Arrangement
 from ..item import Item
 
@@ -29,7 +30,7 @@ class Node():
 	excluded_items: np.ndarray[Item] = field(compare = False)
 
 
-class BranchAndBound():
+class BranchAndBound(Solver):
 	"""
 	Represents an implementation of the branch and bound algorithm for solving the knapsack problem. This solver is robust to multiple optimal solutions.
     """
@@ -157,8 +158,8 @@ class BranchAndBound():
 				return False
 		return True
 	
-
-	def solve(self, items: np.ndarray[Item], capacity: int) -> np.ndarray[Arrangement]:
+	@staticmethod
+	def solve(items: np.ndarray[Item], capacity: int) -> np.ndarray[Arrangement]:
 		"""
 		Solves the knapsack problem using the branch-and-bound algorithm.
 

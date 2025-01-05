@@ -3,17 +3,18 @@ This module provides an implementation of the greedy algorithm for solving the k
 """
 
 import numpy as np
+from .solver import Solver
 from ..arrangement import Arrangement
 from ..item import Item
 
 
-class Greedy():
+class Greedy(Solver):
 	"""
 	Represents an implementation of the greedy algorithm for solving the knapsack problem.
     """
 	
 	@staticmethod
-	def solve(
+	async def solve(
 		items: np.ndarray[Item],
 		capacity: int
 	) -> Arrangement:
