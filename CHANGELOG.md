@@ -1,6 +1,39 @@
 # CHANGELOG
 
 
+## v2.1.0 (2025-01-05)
+
+### Bug Fixes
+
+* fix(mzn_geocode): change input type to allow floats.
+
+Previous implementation only accepted knapsack instances with
+integer weights/values/capacity. Now accepts floats. ([`9728808`](https://github.com/HRSAndrabi/pykp/commit/9728808e0d9954f5efb77054a3b5c89a0cb5aa11))
+
+### Documentation
+
+* docs(phase_transition): add module docs. ([`1da8756`](https://github.com/HRSAndrabi/pykp/commit/1da8756f125101dd704dbab9634d38db34e3ee27))
+
+### Features
+
+* feat(phase_transition): add save method. ([`04d46b4`](https://github.com/HRSAndrabi/pykp/commit/04d46b4ab111c323313603d8005c0163df4af8db))
+
+* feat(metrics): add phase transition metric. ([`8dc3f19`](https://github.com/HRSAndrabi/pykp/commit/8dc3f1919cf5d8610a3545c8e978a63f7fa507ac))
+
+* feat(metrics): add metrics package, add Sahni-k metric. ([`bc0e725`](https://github.com/HRSAndrabi/pykp/commit/bc0e725192d5667d9aa526e50f53cb904e444fe0))
+
+### Refactoring
+
+* refactor(knapsack): remove knapsack.calculate_sahni_k(). ([`a584dba`](https://github.com/HRSAndrabi/pykp/commit/a584dbad810f75f78b7aab0add127aea32d84efb))
+
+* refactor(metrics.sahni_k): make independent of Knapsack class. ([`f3424aa`](https://github.com/HRSAndrabi/pykp/commit/f3424aaba17219f4022fc4cff12ea9cf5fc50303))
+
+* refactor(metrics.sahni_k): take capacity as input.
+
+Take capacity as input instead of the whole knapsack problem
+instances. This makes calls to the metric cleaner. ([`9add168`](https://github.com/HRSAndrabi/pykp/commit/9add1682f869f4b4ff137852185dd620071409db))
+
+
 ## v2.0.0 (2025-01-05)
 
 ### Breaking
