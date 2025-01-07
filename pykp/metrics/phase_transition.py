@@ -24,10 +24,11 @@ Example:
 """
 
 import numpy as np
-from pykp.solvers import *
+from ..solvers import *
 from pykp.item import Item
 from tqdm import tqdm
 import pandas as pd
+from typing import Callable
 
 
 SOLVERS = ["branch_and_bound", "mzn_gecode"]
@@ -89,7 +90,7 @@ def _simulate_cell_solvability(
 	norm_p_range: tuple[float, float],
 	num_items: int,
 	samples: int,
-	solver: Solver,
+	solver: Callable,
 	progress: tqdm
 ) -> float:
 	"""
@@ -100,7 +101,7 @@ def _simulate_cell_solvability(
 		norm_p_range (tuple[float, float]): The normalised target profit range of the cell.
 		num_items (int): The number of items in the instance.
 		samples (int): The number of samples to take.
-		solver (Solver): The solver to use.
+		solver (Callable): The solver to use.
 		progress (tqdm): tqdm progress bar to increment.
 
 	Returns:
@@ -116,7 +117,7 @@ def _simulate_cell_solvability(
 			norm_c = norm_c_draw,
 			norm_p = norm_p_draw
 		)
-		result = solver.solve(
+		result = solver(
 			items = items,
 			capacity = capacity
 		)
@@ -176,9 +177,9 @@ def phase_transition(
 	"""
 	match solver:
 		case "branch_and_bound":
-			solver = BranchAndBound()
+			solver = branch_and_bound
 		case "mzn_gecode":
-			solver = MznGecode()
+			solver = mzn_gecode
 		case _:
 			raise ValueError(f"`method` must be one of: {SOLVERS}.")
 	
