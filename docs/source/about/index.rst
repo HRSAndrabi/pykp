@@ -1,15 +1,51 @@
-About
-=============
+*******
+About 
+*******
 
 .. rst-class:: lead
 
-	Miscellaneous information about PyKP (py·kay·pee).
+   Sample, solve, and analyse instances of the 0-1 Knapsack Problem.
 
-I created this package as part of a research project, in attempt to better understand the 0-1 Knapsack Problem.
-While writing the package, I learned a lot about efficient optimisation.
-I hope this package will help others learn from my mistakes, and be useful in their own learning and research.
+**PyKP** (py·kay·pee) is a Python package for defining, solving, and analysing knapsack problem instances. 
+This package provides tools to define (or randomly sample) knapsack instances, and generate useful metrics and visualisations. 
 
+I created this package as part of a research project involving the knapsack problem.
 You can learn about me and my other projects by visiting my `personal website`_.
+
+
+Features
+------------
+
+* Define and solve knapsack problem instances.
+* Analyse computational complexity metrics.
+* Randomly sample knapsack instances based on distribution parameters.
+* Visualise knapsack instances and solutions.
+
+Quick Start
+-----------
+
+Here's a quick example to get started with PyKP:
+
+.. code-block:: python
+
+   from pykp import Knapsack
+   from pykp import Item
+
+   # Define knapsack items
+   items = [
+       Item(value=10, weight=5),
+       Item(value=15, weight=10),
+       Item(value=7, weight=3)
+   ]
+
+   # Initialise and solve a knapsack problem
+   capacity = 15
+   knapsack = Knapsack(items=items, capacity=capacity)
+   await knapsack.solve()
+
+   # Print the optimal solution
+   print("Optimal solution value:", knapsack.optimal_nodes[0].value)
+
 
 Versioning 
 ----------
@@ -21,5 +57,6 @@ License
 PyKP is open-source software, licensed under the MIT License. See the LICENSE file on `GitHub`_ for details.
 
 .. _GitHub: https://github.com/HRSAndrabi/pykp
+.. _knapsack problem: https://en.wikipedia.org/wiki/Knapsack_problem
 .. _personal website: https://hassan.andra.bi
 .. _Semantic Versioning standard: https://semver.org/
