@@ -1,6 +1,69 @@
 # CHANGELOG
 
 
+## v2.1.1 (2025-01-07)
+
+### Bug Fixes
+
+* fix: incorrect docs path. ([`80d357f`](https://github.com/HRSAndrabi/pykp/commit/80d357f42c0867db472f9dc1a9ad27cdbc2f4daa))
+
+### Chores
+
+* chore: remove underscores from filename. ([`fb687cd`](https://github.com/HRSAndrabi/pykp/commit/fb687cd069d52f38daa9d497dc1b9dcf7f3ad178))
+
+* chore: remove Solver ABC. ([`0821748`](https://github.com/HRSAndrabi/pykp/commit/0821748a9a06ef9feb3e20286c99b0acb2d23773))
+
+* chore: remove underscores from filename. ([`c982c2d`](https://github.com/HRSAndrabi/pykp/commit/c982c2d3d27dc1eb220c6342fadcbdaa97de8304))
+
+* chore: remove Solver ABC. ([`99f57d6`](https://github.com/HRSAndrabi/pykp/commit/99f57d60a68e51fd7af91eeb6f0031852a6910e9))
+
+### Documentation
+
+* docs: add missing import. ([`c6b1f5c`](https://github.com/HRSAndrabi/pykp/commit/c6b1f5ca6a026413a885c235dac296fa0d9bd851))
+
+* docs: add missing import. ([`f7049af`](https://github.com/HRSAndrabi/pykp/commit/f7049afb9c001a013685ee44ddcd6a0c8b652698))
+
+* docs: integrate pydata and autosummary.
+
+- Integrated pydata theme
+- Integrated sphinx.ext.autosummary to recursively document all modules in pykp
+
+Merge pull request #4 from HRSAndrabi/docs/clean-up ([`1657d5b`](https://github.com/HRSAndrabi/pykp/commit/1657d5bd8d32e42bd2c39e69f40d1db3e3d3481e))
+
+* docs(solvers): move examples to module level. ([`59f9cdf`](https://github.com/HRSAndrabi/pykp/commit/59f9cdfec43c349331f393b1e57eb8dde4118fa5))
+
+* docs(sampler): removed unintentional linebreaks. ([`8627520`](https://github.com/HRSAndrabi/pykp/commit/86275200c8176b4719b7b557f8a37ae3237220e0))
+
+* docs: integrate pydata docs and autosummary.
+
+Integrated pydata theme and autosummary to recursively generate
+documentation for all modules in pykp. ([`0505a70`](https://github.com/HRSAndrabi/pykp/commit/0505a70533e303e9dd2a3fa5306b7bbdca5d6917))
+
+* docs(solvers): move examples to module level. ([`9a183c4`](https://github.com/HRSAndrabi/pykp/commit/9a183c42672c7a709713c05fd4bf5274647ed9ff))
+
+### Refactoring
+
+* refactor(phase_transition): use refactored solvers. ([`89513be`](https://github.com/HRSAndrabi/pykp/commit/89513bee6d12cf3d2ebc2d4321d8c79aa82dd210))
+
+* refactor(mzn_gecode): make functional. ([`6e1fe82`](https://github.com/HRSAndrabi/pykp/commit/6e1fe822107b2460c15df43a7d3a3985ba63eea4))
+
+* refactor(greedy): make functional. ([`adbc5a0`](https://github.com/HRSAndrabi/pykp/commit/adbc5a0ea61fd27d26edf807fbbfc80ac73a2aed))
+
+* refactor(branch_and_bound): make functional. ([`e2009ff`](https://github.com/HRSAndrabi/pykp/commit/e2009ff2a135ab2a5756881198ec7ff146fcede6))
+
+* refactor(phase_transition): use refactored solvers. ([`156f3ec`](https://github.com/HRSAndrabi/pykp/commit/156f3ec48d0efb5ebadb3d0cc6c57e0559d6237e))
+
+* refactor(mzn_gecode): make functional. ([`f987124`](https://github.com/HRSAndrabi/pykp/commit/f987124ea94109e0e1cdfcd33002737a434c98cd))
+
+* refactor(greedy): make functional. ([`d3c14e9`](https://github.com/HRSAndrabi/pykp/commit/d3c14e95c3e5b5686095849e48f18c63472bf686))
+
+* refactor(branch_and_bound): make functional. ([`3af1327`](https://github.com/HRSAndrabi/pykp/commit/3af1327a665cb733e9a951c8d104849e656631d0))
+
+### Unknown
+
+* Merge branch 'main' into docs/clean-up ([`10f11ce`](https://github.com/HRSAndrabi/pykp/commit/10f11cedac7a462a32c9bc238f419665b53adaa6))
+
+
 ## v2.1.0 (2025-01-05)
 
 ### Bug Fixes
