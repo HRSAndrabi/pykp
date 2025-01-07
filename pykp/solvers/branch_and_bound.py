@@ -1,5 +1,33 @@
 """
 This module provides an implementation of branch and bound algorithm for solving the knapsack problem.
+
+Example:
+	To solve a knapsack problem instance using the branch-and-bound algorithm, first create a list of items and then call the solver with the items and capacity::
+	
+		from pykp import Item, Solvers
+
+		items = [
+			Item(value=10, weight=5), 
+			Item(value=15, weight=10), 
+			Item(value=7, weight=3)
+		]
+		capacity = 15
+		optimal_nodes = solvers.branch_and_bound(items, capacity)
+		print(optimal_nodes)
+
+	Alternatively, construct an instance of the `Knapsack` class and call the `solve` method with "branch_and_bound" as the `method` argument::
+
+		from pykp import Item, Knapsack
+		
+		items = [
+			Item(value=10, weight=5), 
+			Item(value=15, weight=10), 
+			Item(value=7, weight=3)
+		]
+		capacity = 15
+		instance = Knapsack(items=items, capacity=capacity)
+		optimal_nodes = instance.solve(method="branch_and_bound")
+		print(optimal_nodes)
 """
 
 import numpy as np
@@ -154,20 +182,6 @@ def _is_terminal_node(node: Node, capacity: int) -> bool:
 def branch_and_bound(items: np.ndarray[Item], capacity: int) -> np.ndarray[Arrangement]:
 	"""
 	Solves the knapsack problem using the branch-and-bound algorithm. This solver is robust to multiple optimal solutions.
-
-	Example:
-		To define a Knapsack instance, initialise the `Knapsack` class with `Items` and a capacity constraint::
-		
-			from pykp import Item, Solvers
-
-			items = [
-				Item(value=10, weight=5), 
-				Item(value=15, weight=10), 
-				Item(value=7, weight=3)
-			]
-			capacity = 15
-			optimal_nodes = solvers.branch_and_bound(items, capacity)
-			print(optimal_nodes)
 
 	Args:
 		items (np.ndarray[Item]): Items that can be included in the knapsack.
