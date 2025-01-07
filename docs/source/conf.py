@@ -60,7 +60,7 @@ html_sidebars = {
   	"index.html": [],
   	"about/*": [],
   	"quick-start/*": [],
-  	"reference/*": [],
+  	# "reference/*": [],
   	"contributing/*": [],
 }
 
