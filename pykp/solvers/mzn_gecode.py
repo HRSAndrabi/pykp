@@ -1,5 +1,33 @@
 """
-This module provides an implementation of the minizinc and gecode solver for solving the knapsack problem.
+This module provides an implementation of the MiniZinc and Gecode solver for solving the knapsack problem. You should have MiniZinc 2.5.0 (or higher) installed on your system to use this solver. Note that this solver is not robust to multiple solutions, and will report only the first optimal solution found. If knowing all optimal solutions is important, consider using the branch-and-bound solver.
+
+Example:
+	To solve a knapsack problem instance using the MiniZinc Gecode solver, first create a list of items and then call the solver with the items and capacity::
+	
+		from pykp import Item, Solvers
+
+		items = [
+			Item(value=10, weight=5), 
+			Item(value=15, weight=10), 
+			Item(value=7, weight=3)
+		]
+		capacity = 15
+		optimal_node = await solvers.mzn_gecode(items, capacity)
+		print(optimal_node)
+
+	Alternatively, construct an instance of the `Knapsack` class and call the `solve` method with "mzn_gecode" as the `method` argument::
+
+		from pykp import Item, Knapsack
+		
+		items = [
+			Item(value=10, weight=5), 
+			Item(value=15, weight=10), 
+			Item(value=7, weight=3)
+		]
+		capacity = 15
+		instance = Knapsack(items=items, capacity=capacity)
+		optimal_node = await instance.solve(method="mzn_gecode")
+		print(optimal_node)
 """
 
 import numpy as np
@@ -14,20 +42,6 @@ async def mzn_gecode(
 ) -> Arrangement:
 	"""
 	Solves the knapsack problem using the minizinc and gecode solver. This solver is not robust to multiple solutions.
-
-	Example:
-		Solve a knapsack problem using the minizinc and gecode solver::
-		
-			import numpy as np
-			from pykp import Item, solvers
-
-			items = np.array([
-				Item(weight = 10, value = 60),
-				Item(weight = 20, value = 100),
-				Item(weight = 30, value = 120),
-			])
-			capacity = 50
-			arrangement = await solvers.mzn_gecode(items, capacity)
 
 	Args:
 		items (np.ndarray[Item]): Items that can be included in the knapsack.
