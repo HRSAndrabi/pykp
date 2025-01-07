@@ -3,7 +3,6 @@ This module provides an implementation of the greedy algorithm for solving the k
 """
 
 import numpy as np
-from .solver import Solver
 from ..arrangement import Arrangement
 from ..item import Item
 

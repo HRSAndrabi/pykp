@@ -3,7 +3,6 @@ This module provides an implementation of the minizinc and gecode solver for sol
 """
 
 import numpy as np
-from .solver import Solver as SolverABC
 from ..arrangement import Arrangement
 from ..item import Item
 from minizinc import Instance, Model, Solver
