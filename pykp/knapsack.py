@@ -24,7 +24,7 @@ from typing import Literal
 import numpy as np
 from .item import Item
 from .arrangement import Arrangement
-from .solvers import branch_and_bound, Greedy, MznGecode
+from .solvers import branch_and_bound, greedy, MznGecode
 from .metrics import sahni_k
 import operator
 import itertools
