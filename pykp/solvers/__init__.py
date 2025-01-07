@@ -4,5 +4,5 @@ PyKP is a package to provide tooling for sampling and solving instances of the 0
 
 from .solver import Solver
 from ._branch_and_bound import branch_and_bound
-from .greedy import Greedy
+from ._greedy import greedy
 from .mzn_gecode import MznGecode
