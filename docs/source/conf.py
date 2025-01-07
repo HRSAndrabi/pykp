@@ -55,6 +55,7 @@ html_theme = "pydata_sphinx_theme"
 html_permalinks_icon = Icons.permalinks_icon
 html_static_path = ["_static"]
 
+
 html_sidebars = {
   "index.html": [],
   "about/*": [],
@@ -66,5 +67,10 @@ html_sidebars = {
 html_theme_options = {
   "header_links_before_dropdown": 4,
   "github_url": "https://github.com/HRSAndrabi/pykp",
+  "footer_start": ["copyright"],
+  "footer_end": [],
+	"logo": {
+	"image_light": "_static/logo-light.svg",
+	"image_dark": "_static/logo-dark.svg",
+},
 }
-
