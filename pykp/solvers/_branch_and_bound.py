@@ -5,7 +5,6 @@ This module provides an implementation of branch and bound algorithm for solving
 import numpy as np
 from queue import PriorityQueue
 from dataclasses import dataclass, field
-from .solver import Solver
 from ..arrangement import Arrangement
 from ..item import Item
 
