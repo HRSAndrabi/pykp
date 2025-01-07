@@ -1,5 +1,5 @@
 """
-This module contains the implementations of the solvers for the knapsack problem. 
+This module contains implementations of various solvers for the knapsack problem. 
 """
 
 from .branch_and_bound import branch_and_bound

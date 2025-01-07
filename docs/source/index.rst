@@ -1,60 +1,80 @@
-PyKP 
-==================
+:html_theme.sidebar_secondary.remove:
 
-.. rst-class:: lead
-
-   Sample, solve, and analyse instances of the 0-1 Knapsack Problem.
-
-**PyKP** (py·kay·pee) is a Python package for defining, solving, and analysing knapsack problem instances. 
-This package provides tools to set up knapsacks, and generate useful metrics and visualisations. 
-Additionally, it includes a sampling feature that generates knapsack instances based on defined distributions.
-
-
-Features
-------------
-
-* Define knapsack problem instances.
-* Solve knapsack problems efficiently.
-* Analyse computational complexity metrics.
-* Randomly sample knapsack instances based on distribution parameters.
-* Visualise knapsack instances and solutions.
-
-Quick Start
------------
-
-Here's a quick example to get started with PyKP:
-
-.. code-block:: python
-
-   from pykp import Knapsack
-   from pykp import Item
-
-   # Define knapsack items
-   items = [
-       Item(value=10, weight=5),
-       Item(value=15, weight=10),
-       Item(value=7, weight=3)
-   ]
-
-   # Initialise and solve a knapsack problem
-   capacity = 15
-   knapsack = Knapsack(items=items, capacity=capacity)
-   knapsack.solve()
-
-   # Print the optimal solution
-   print("Optimal solution value:", knapsack.optimal_nodes[0].value)
-
-
-Explore
----------
+####################
+PyKP documentation
+####################
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Documentation
+   :maxdepth: 1
+   :hidden:
 
-   about/index
-   installation/index
-   usage/index
-   pykp/index
-   contributing/index
-   changelog
+   About <about/index>
+   API reference <reference/index>
+   Quick Start <quick-start/index>
+   Contributing <contributing/index>
+
+**Useful links**:
+`Installation </installation/>`_ |
+`Source Repository <https://github.com/HRSAndrabi/pykp>`_ |
+`Issue Tracker <https://github.com/HRSAndrabi/pykp/issues>`_ 
+
+PyKP is a Python package for defining, solving, and analysing knapsack problem instances. This package provides tools to define (or randomly sample) knapsack instances, and generate useful metrics and visualisations.
+
+.. grid:: 1 2 2 3
+    :gutter: 2 3 4 4
+
+    .. grid-item-card::
+        :text-align: center
+
+        :material-regular:`download;1.5em;sd-text-primary sd-mr-1` **Installation**
+        ^^^
+
+        The installation guide provides instructions on how to install PyKP on your system. 
+
+        +++
+
+        .. button-ref:: installation/index
+            :expand:
+            :color: primary
+            :click-parent:
+
+            To the user guide
+
+    .. grid-item-card::
+        :img-top: ../source/_static/index-images/getting_started.svg
+        :text-align: center
+
+        :material-regular:`bolt;1.5em;sd-text-primary sd-mr-1` **Getting started**
+        ^^^
+
+        PyKP? Check out the Quick Start Guide. It contains an introduction to the main features of the package.
+
+        +++
+
+        .. button-ref:: quick-start/index
+            :expand:
+            :color: primary
+            :click-parent:
+
+            To the quick start guide
+
+
+    .. grid-item-card::
+        :img-top: ../source/_static/index-images/api.svg
+        :text-align: center
+
+        :material-regular:`terminal;1.5em;sd-text-primary sd-mr-1` **API reference**
+        ^^^
+
+        The reference guide contains a detailed description of the functions,
+        modules, and objects included in PyKP. 
+        +++
+
+        .. button-ref:: reference/index
+            :expand:
+            :color: primary
+            :click-parent:
+
+            To the reference guide
+
+    
