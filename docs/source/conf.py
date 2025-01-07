@@ -57,20 +57,20 @@ html_static_path = ["_static"]
 
 
 html_sidebars = {
-  "index.html": [],
-  "about/*": [],
-  "quick-start/*": [],
-  "reference/*": [],
-  "contributing/*": [],
+  	"index.html": [],
+  	"about/*": [],
+  	"quick-start/*": [],
+  	"reference/*": [],
+  	"contributing/*": [],
 }
 
 html_theme_options = {
-  "header_links_before_dropdown": 4,
-  "github_url": "https://github.com/HRSAndrabi/pykp",
-  "footer_start": ["copyright"],
-  "footer_end": [],
+  	"header_links_before_dropdown": 4,
+  	"github_url": "https://github.com/HRSAndrabi/pykp",
+  	"footer_start": ["copyright"],
+  	"footer_end": [],
 	"logo": {
-	"image_light": "_static/logo-light.svg",
-	"image_dark": "_static/logo-dark.svg",
-},
+		"image_light": "_static/logo-light.svg",
+		"image_dark": "_static/logo-dark.svg",
+	},
 }
