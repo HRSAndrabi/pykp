@@ -51,6 +51,7 @@ pygments_style = "sphinx"
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_static_path = ["_static"]
+html_js_files = ["pypi-icon.js"]
 html_theme = "pydata_sphinx_theme"
 html_permalinks_icon = Icons.permalinks_icon
 html_static_path = ["_static"]
@@ -66,11 +67,23 @@ html_sidebars = {
 
 html_theme_options = {
   	"header_links_before_dropdown": 4,
-  	"github_url": "https://github.com/HRSAndrabi/pykp",
+  	# "github_url": "https://github.com/HRSAndrabi/pykp",
   	"footer_start": ["copyright"],
   	"footer_end": [],
 	"logo": {
 		"image_light": "_static/logo-light.svg",
 		"image_dark": "_static/logo-dark.svg",
 	},
+	"icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/HRSAndrabi/pykp",
+            "icon": "fa-brands fa-github",
+        },
+        {
+            "name": "PyPI",
+            "url": "https://pypi.org/project/pykp",
+            "icon": "fa-custom fa-pypi",
+        },
+    ],
 }
