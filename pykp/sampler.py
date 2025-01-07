@@ -34,12 +34,9 @@ class Sampler():
 
 		Args:
 			num_items (int): The number of items to sample.
-			normalised_capacity (float): The normalised capacity of the knapsack 
-			(sum of weights / capacity constraint).
-			density_range (Tuple[float, float]): The range of item value densities 
-			to sample from.
-			solution_value_range (Tuple[int, int]): The range of solution values 
-			for the knapsack.
+			normalised_capacity (float): The normalised capacity of the knapsack (sum of weights / capacity constraint).
+			density_range (Tuple[float, float]): The range of item value densities to sample from.
+			solution_value_range (Tuple[int, int]): The range of solution values for the knapsack.
 		"""
 		self.num_items = num_items
 		self.normalised_capacity = normalised_capacity
