@@ -24,7 +24,7 @@ from typing import Literal
 import numpy as np
 from .item import Item
 from .arrangement import Arrangement
-from .solvers import branch_and_bound, greedy, MznGecode
+from .solvers import branch_and_bound, greedy, mzn_gecode
 from .metrics import sahni_k
 import operator
 import itertools
@@ -126,8 +126,7 @@ class Knapsack:
 			self.optimal_nodes = branch_and_bound(items = self.items, capacity = self.capacity)
 
 		if method == "mzn_gecode":
-			solver = MznGecode()
-			result = await solver.solve(items = self.items, capacity = self.capacity)
+			result = await mzn_gecode(items = self.items, capacity = self.capacity)
 			self.optimal_nodes = np.array([result])
 
 		return self.optimal_nodes
