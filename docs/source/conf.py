@@ -22,6 +22,7 @@ extensions = [
 	"sphinx.ext.autosectionlabel",
 	"sphinx_design",
 	"sphinx_copybutton",
+    "sphinx_favicon",
 ]
 
 autosummary_generate = True  # Turn on sphinx.ext.autosummary
@@ -53,6 +54,7 @@ pygments_style = "sphinx"
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_static_path = ["_static"]
+html_favicon = "_static/logo.svg"
 html_js_files = ["pypi-icon.js"]
 html_theme = "pydata_sphinx_theme"
 html_permalinks_icon = Icons.permalinks_icon
@@ -64,6 +66,23 @@ html_context = {
     "doc_path": "docs/source",
 }
 
+# see https://sphinx-favicon.readthedocs.io for more information about the
+# sphinx-favicon extension
+favicons = [
+    # generic icons compatible with most browsers
+    "favicon-32x32.png",
+    "favicon-16x16.png",
+    {"rel": "shortcut icon", "sizes": "any", "href": "favicon.ico"},
+    # chrome specific
+    "android-chrome-192x192.png",
+    # apple icons
+    {"rel": "mask-icon", "color": "#459db9", "href": "safari-pinned-tab.svg"},
+    {"rel": "apple-touch-icon", "href": "apple-touch-icon.png"},
+    # msapplications
+    {"name": "msapplication-TileColor", "content": "#459db9"},
+    {"name": "theme-color", "content": "#ffffff"},
+    {"name": "msapplication-TileImage", "content": "mstile-150x150.png"},
+]
 
 html_sidebars = {
   	"index.html": [],
@@ -80,7 +99,11 @@ html_theme_options = {
   	"footer_end": [],
 	"use_edit_page_button": True,
 	"secondary_sidebar_items": {
-        "**/*": ["page-toc", "edit-this-page"],
+        "about/*": ["page-toc", "edit-this-page"],
+        "contributing/*": ["page-toc", "edit-this-page"],
+        "installation/*": ["page-toc", "edit-this-page"],
+        "quick-start/*": ["page-toc", "edit-this-page"],
+        "reference/*": ["page-toc", "edit-this-page"],
         "**/generated/*": ["page-toc"],
     },
 	"logo": {
