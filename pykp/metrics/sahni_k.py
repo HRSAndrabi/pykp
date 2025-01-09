@@ -18,7 +18,7 @@ Example:
         ]
         capacity = 15
         instance = Knapsack(items=items, capacity=capacity)
-        await instance.solve()
+        instance.solve()
 
         sahni_k = metrics.sahni_k(instance.optimal_nodes[0], capacity)
         print(sahni_k)

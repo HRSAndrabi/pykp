@@ -41,7 +41,7 @@ Here's a quick example to get started with PyKP:
    # Initialise and solve a knapsack problem
    capacity = 15
    knapsack = Knapsack(items=items, capacity=capacity)
-   await knapsack.solve()
+   knapsack.solve()
 
    # Print the optimal solution
    print("Optimal solution value:", knapsack.optimal_nodes[0].value)
