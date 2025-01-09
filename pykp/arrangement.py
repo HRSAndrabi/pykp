@@ -1,5 +1,5 @@
 """
-This module provides an interface for defining arrangements of items.
+Provides an interface for defining arrangements of items.
 
 Example:
     Define an arangement of items for the knapsack problem::

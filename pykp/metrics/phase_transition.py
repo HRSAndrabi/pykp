@@ -1,5 +1,5 @@
 """
-This module provides an implementation of the phase transition of the knapsack
+Provides an implementation of the phase transition of the knapsack
 problem, based on the following paper: Yadav, Nitin, et al. "Phase transition
 in the knapsack problem." arXiv preprint arXiv:1806.10244 (2018).
 

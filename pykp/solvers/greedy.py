@@ -1,5 +1,5 @@
 """
-This module provides an implementation of the greedy algorithm for solving the
+Provides an implementation of the greedy algorithm for solving the
 knapsack problem.
 
 Example:

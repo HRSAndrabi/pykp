@@ -1,5 +1,5 @@
 """
-This module provides an implementation of the MiniZinc and Gecode solver for
+Provides an implementation of the MiniZinc and Gecode solver for
 solving the knapsack problem. You should have MiniZinc 2.5.0 (or higher)
 installed on your system to use this solver. Note that this solver is not
 robust to multiple solutions, and will report only the first optimal solution

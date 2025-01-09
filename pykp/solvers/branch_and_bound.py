@@ -1,5 +1,5 @@
 """
-This module provides an implementation of branch and bound algorithm for
+Provides an implementation of branch and bound algorithm for
 solving the knapsack problem.
 
 Example:
