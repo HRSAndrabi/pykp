@@ -112,13 +112,12 @@ def test_all_items_do_not_fit(solver):
 @pytest.mark.parametrize("case", TEST_CASES)
 def test_correct_optimal_found(solver, case):
 	"""
-	Test that the optimal solution is found for a small problem
+	Test that the correct optimal solution is found for a series of test cases.
 	"""
 	items = np.array([
 		Item(value=case["values"][i], weight=case["weights"][i]) for i in range(len(case["values"]))
 	])
 	solution = solver(np.array(items), case["capacity"])
-
 	if isinstance(solution, np.ndarray):
 		solution = solution[0]
 
