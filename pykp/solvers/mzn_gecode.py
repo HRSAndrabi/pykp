@@ -34,9 +34,10 @@ import numpy as np
 from ..arrangement import Arrangement
 from ..item import Item
 from minizinc import Instance, Model, Solver
+import nest_asyncio
 
 
-async def mzn_gecode(
+def mzn_gecode(
 	items: np.ndarray[Item],
 	capacity: int
 ) -> Arrangement:
@@ -50,6 +51,7 @@ async def mzn_gecode(
 	Returns:
 		Arrangement: The optimal arrangement of items in the knapsack.
 	"""
+	nest_asyncio.apply()
 	model = Model()
 	model.add_string(
 		"""
@@ -76,7 +78,7 @@ async def mzn_gecode(
 	instance["profit"] = [item.value for item in items]
 	instance["size"] = [item.weight for item in items]
 
-	result = await instance.solve_async()
+	result = instance.solve()
 
 	return Arrangement(
 		items = items,
