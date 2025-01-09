@@ -1,5 +1,5 @@
 """
-This module provides an interface for defining items inside a knapsack problem
+Provides an interface for defining items inside a knapsack problem
 instance.
 
 Example:

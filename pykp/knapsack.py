@@ -1,5 +1,5 @@
 """
-This module provides an interface for defining instances of the 0-1 Knapsack
+Provides an interface for defining instances of the 0-1 Knapsack
 Problem.
 
 Example:

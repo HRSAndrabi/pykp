@@ -1,5 +1,5 @@
 """
-This module provides an interface for sampling knapsack instances.
+Provides an interface for sampling knapsack instances.
 
 Example:
     Randomly sample a large number of knapsack instances using the Sampler

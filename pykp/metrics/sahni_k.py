@@ -1,5 +1,5 @@
 """
-This module provides an implementation of the Sahni-K metric for evaluating
+Provides an implementation of the Sahni-K metric for evaluating
     arrangements of items in the knapsack problem.
 
 Example:
