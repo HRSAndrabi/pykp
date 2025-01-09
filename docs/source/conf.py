@@ -12,21 +12,21 @@ copyright = "2025, Hassan Andrabi"
 author = "Hassan Andrabi"
 
 extensions = [
-	"sphinx.ext.napoleon", 
-	"sphinx.ext.autodoc", 
-	"sphinx.ext.autosummary",
-	"sphinx.ext.coverage",
-	"sphinx.ext.intersphinx",
-	"numpydoc",
-	# "sphinx_sitemap",
-	"sphinx.ext.autosectionlabel",
-	"sphinx_design",
-	"sphinx_copybutton",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.coverage",
+    "sphinx.ext.intersphinx",
+    "numpydoc",
+    # "sphinx_sitemap",
+    "sphinx.ext.autosectionlabel",
+    "sphinx_design",
+    "sphinx_copybutton",
     "sphinx_favicon",
 ]
 
 autosummary_generate = True  # Turn on sphinx.ext.autosummary
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # Napoleon settings
 napoleon_google_docstring = True
@@ -85,20 +85,20 @@ favicons = [
 ]
 
 html_sidebars = {
-  	"index.html": [],
-  	"about/*": [],
-  	"quick-start/*": [],
-  	# "reference/*": [],
-  	"contributing/*": [],
+    "index.html": [],
+    "about/*": [],
+    "quick-start/*": [],
+    # "reference/*": [],
+    "contributing/*": [],
 }
 
 html_theme_options = {
-  	"header_links_before_dropdown": 4,
-  	# "github_url": "https://github.com/HRSAndrabi/pykp",
-  	"footer_start": ["copyright"],
-  	"footer_end": [],
-	"use_edit_page_button": True,
-	"secondary_sidebar_items": {
+    "header_links_before_dropdown": 4,
+    # "github_url": "https://github.com/HRSAndrabi/pykp",
+    "footer_start": ["copyright"],
+    "footer_end": [],
+    "use_edit_page_button": True,
+    "secondary_sidebar_items": {
         "about/*": ["page-toc", "edit-this-page"],
         "contributing/*": ["page-toc", "edit-this-page"],
         "installation/*": ["page-toc", "edit-this-page"],
@@ -106,11 +106,11 @@ html_theme_options = {
         "reference/*": ["page-toc", "edit-this-page"],
         "**/generated/*": ["page-toc"],
     },
-	"logo": {
-		"image_light": "_static/logo-light.svg",
-		"image_dark": "_static/logo-dark.svg",
-	},
-	"icon_links": [
+    "logo": {
+        "image_light": "_static/logo-light.svg",
+        "image_dark": "_static/logo-dark.svg",
+    },
+    "icon_links": [
         {
             "name": "GitHub",
             "url": "https://github.com/HRSAndrabi/pykp",
@@ -123,6 +123,7 @@ html_theme_options = {
         },
     ],
 }
+
 
 def setup_to_main(
     app: Sphinx, pagename: str, templatename: str, context, doctree
@@ -145,7 +146,9 @@ def setup_to_main(
         """
         links = link.split("/")
         idx = links.index("edit")
-        return "/".join(links[: idx + 1]) + "/main/" + "/".join(links[idx + 2 :])
+        return (
+            "/".join(links[: idx + 1]) + "/main/" + "/".join(links[idx + 2 :])
+        )
 
     context["to_main"] = to_main
 
