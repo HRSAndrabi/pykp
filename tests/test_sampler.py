@@ -83,7 +83,7 @@ def test_sampler_different_normalised_capacities(normalised_capacity):
     sampler = Sampler(num_items=3, normalised_capacity=normalised_capacity)
     knapsack = sampler.sample()
     total_weight = sum(item.weight for item in knapsack.items)
-    expected_capacity = int(normalised_capacity * total_weight)
+    expected_capacity = normalised_capacity * total_weight
 
     assert knapsack.capacity == expected_capacity
     assert len(knapsack.items) == 3
