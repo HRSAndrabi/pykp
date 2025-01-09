@@ -5,7 +5,7 @@ from pykp import Item, solvers
 import json
 
 HEURISTIC_SOLVERS = ["greedy"]
-OPTIMAL_SOLVERS = ["branch_and_bound"]
+OPTIMAL_SOLVERS = ["branch_and_bound", "mzn_geocode"]
 ALL_SOLVERS = HEURISTIC_SOLVERS + OPTIMAL_SOLVERS
 
 with open("tests/test_cases.json") as f:
@@ -17,6 +17,8 @@ def solver(request):
 		solver = solvers.greedy
 	elif request.param == "branch_and_bound":
 		solver = solvers.branch_and_bound
+	elif request.param == "mzn_geocode":
+		solver = solvers.mzn_gecode
 	
 	return solver
 
