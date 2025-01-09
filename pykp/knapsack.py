@@ -100,7 +100,7 @@ class Knapsack:
 		self.optimal_nodes = np.array([])
 
 
-	async def solve(
+	def solve(
 		self, 
 		method: Literal["branch_and_bound", "mzn_gecode"] = "branch_and_bound",
 		solve_all_nodes: bool = False,
@@ -126,7 +126,7 @@ class Knapsack:
 			self.optimal_nodes = branch_and_bound(items = self.items, capacity = self.capacity)
 
 		if method == "mzn_gecode":
-			result = await mzn_gecode(items = self.items, capacity = self.capacity)
+			result = mzn_gecode(items = self.items, capacity = self.capacity)
 			self.optimal_nodes = np.array([result])
 
 		return self.optimal_nodes
@@ -709,7 +709,7 @@ class Knapsack:
 			path (str): Filepath to output file.
 		"""
 		if self.optimal_nodes.size == 0:
-			self.solve(solve_second_best = False)
+			self.solve()
 
 		instance_spec = {
 			"capacity": self.capacity,
