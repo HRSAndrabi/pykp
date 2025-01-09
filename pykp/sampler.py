@@ -4,16 +4,26 @@ This module provides an interface for sampling knapsack instances.
 Example:
 	Randomly sample a large number of knapsack instances using the Sampler class::
 
-		import numpy as np
+		from pykp.sampler import Sampler
 		samples = []
-		for _ in tqdm(range(10_000)):
-		   sampler = Sampler(
-			num_items = 10,
-			normalised_capacity = 0.5,
-			density_range = (0.1, 1.2),
-			solution_value_range = (1_300, 1_700),
-		   )
+		for _ in tqdm(range(100)):
+			sampler = Sampler(
+				num_items = 10,
+				normalised_capacity = 0.5,
+			)
 		   samples.append(Sampler.sample(sampler))
+
+	You can also specify the distribution to sample weights and values from::
+
+		from pykp.sampler import Sampler
+		samples = []
+		for _ in tqdm(range(100)):
+			sampler = Sampler(
+				num_items = 10,
+				normalised_capacity = 0.5,
+				weight_dist = (np.random.default_rng().normal, {"loc": 100, "scale": 10}),
+				value_dist = (np.random.default_rng().normal, {"loc": 100, "scale": 10}),
+			)
 """
 
 import numpy as np
@@ -26,8 +36,14 @@ class Sampler():
 		self, 
 		num_items: int, 
 		normalised_capacity: float,
-		density_range: Tuple[float, float],
-		solution_value_range: Tuple[int, int],
+		weight_dist: Tuple[np.random.Generator, dict] = (
+			np.random.default_rng().uniform, 
+			{"low": 0.001, "high": 1}
+		),
+		value_dist: Tuple[np.random.Generator, dict] = (
+			np.random.default_rng().uniform, 
+			{"low": 0.001, "high": 1}
+		),
 	):
 		"""
 		A class for sampling knapsack instances.
@@ -35,13 +51,13 @@ class Sampler():
 		Args:
 			num_items (int): The number of items to sample.
 			normalised_capacity (float): The normalised capacity of the knapsack (sum of weights / capacity constraint).
-			density_range (Tuple[float, float]): The range of item value densities to sample from.
-			solution_value_range (Tuple[int, int]): The range of solution values for the knapsack.
+			weight_dist (Tuple[np.random.Generator, dict], optional): The distribution to sample weights from. The argument should be a tuple where the first element is the generator function, and the second element is a dictionary of keyword arguments to the generator. Defaults to random uniform over open interval (0, 1).
+			value_dist (Tuple[np.random.Generator, dict], optional): The distribution to sample weights from. The argument should be a tuple where the first element is the generator function, and the second element is a dictionary of keyword arguments to the generator. Defaults to random uniform over open interval (0, 1).
 		"""
 		self.num_items = num_items
 		self.normalised_capacity = normalised_capacity
-		self.density_range = density_range
-		self.solution_value_range = solution_value_range
+		self.weight_dist, self.weight_dist_kwargs = weight_dist
+		self.value_dist, self.value_dist_kwargs = value_dist
 
 	
 	def sample(self) -> Knapsack:
@@ -52,40 +68,14 @@ class Sampler():
 		Returns:
 			Knapsack: The sampled knapsack instance.
 		"""
-		weights = np.random.uniform(
-			low = 100, 
-			high = 1000,
-			size = self.num_items,
-		)
-		densities = np.random.uniform(
-			low = self.density_range[0], 
-			high = self.density_range[1],
-			size = self.num_items,
-		)
-		values = weights * densities
-		items = np.array([Item(int(values[i]), int(weights[i])) for i in range(self.num_items)])	
+		weights = self.weight_dist(**self.weight_dist_kwargs, size=self.num_items)
+		profits = self.value_dist(**self.value_dist_kwargs, size=self.num_items)
+
+		items = np.array([Item(profits[i], weights[i]) for i in range(self.num_items)])	
 
 		sum_weights = np.sum([item.weight for item in items])
 		kp = Knapsack(
 			items = items,
 			capacity = int(self.normalised_capacity * sum_weights),
 		)
-		kp.solve()
-		solution_value = np.random.uniform(self.solution_value_range[0], self.solution_value_range[1])
-		scale_factor =  solution_value / kp.optimal_nodes[0].value
-		scaled_items = np.array([
-			Item(
-				np.max([int(item.value * scale_factor), 1]), 
-				np.max([int(item.weight * scale_factor), 1])
-			)
-			for item in items
-		])
-		scaled_items = np.array(
-			sorted(scaled_items, key=lambda item: item.value/item.weight, reverse=True)
-		)
-		scaled_kp = Knapsack(
-			items = scaled_items,
-			capacity = int(kp.capacity * scale_factor),
-		)
-		scaled_kp.solve()
-		return scaled_kp
+		return kp
