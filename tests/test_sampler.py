@@ -1,72 +1,89 @@
-import unittest
+import pytest
 import numpy as np
-from pykp import Knapsack, Item, Sampler
+from unittest.mock import MagicMock
+from pykp.sampler import Sampler
 
-class TestSampler(unittest.TestCase):
 
-    def setUp(self):
-        """
-        Initialise the sampler with some parameters
-        """
-        self.epsilon = 0.025
-        self.num_items = 7
-        self.normalised_capacity = 0.6
-        self.density_range = (0.5, 1.5)
-        self.solution_value_range = (1000, 1700)
-        self.sampler = Sampler(
-            num_items=self.num_items,
-            normalised_capacity=self.normalised_capacity,
-            density_range=self.density_range,
-            solution_value_range=self.solution_value_range,
-        )
-        self.samples = []
-        for _ in range(50):
-            self.samples.append(self.sampler.sample())
+def test_sampler_init_with_defaults():
+    """
+    Test that the Sampler object initialises correctly with default distributions.
+    """
+    sampler = Sampler(num_items=5, normalised_capacity=0.5)
+    assert sampler.num_items == 5
+    assert sampler.normalised_capacity == 0.5
+    assert callable(sampler.weight_dist)
+    assert isinstance(sampler.weight_dist_kwargs, dict)
+    assert "low" in sampler.weight_dist_kwargs
+    assert "high" in sampler.weight_dist_kwargs
 
-    def test_initialisation(self):
-        """
-        Test if the sampler initialises correctly
-        """
-        self.assertEqual(self.sampler.num_items, self.num_items)
-        self.assertEqual(self.sampler.normalised_capacity, self.normalised_capacity)
-        self.assertEqual(self.sampler.density_range, self.density_range)
-        self.assertEqual(self.sampler.solution_value_range, self.solution_value_range)
+    assert callable(sampler.value_dist)
+    assert isinstance(sampler.value_dist_kwargs, dict)
+    assert "low" in sampler.value_dist_kwargs
+    assert "high" in sampler.value_dist_kwargs
 
-    def test_sample_items_count(self):
-        """
-        Test if the sampled knapsack has the correct number of items
-        """
-        for sample in self.samples:
-            self.assertEqual(len(sample.items), self.num_items)
 
-    def test_sampled_item_density_range(self):
-        """
-        Test if the density of each item falls within the specified density range
-        """
-        lower_bound = self.density_range[0] * (1 - self.epsilon)
-        upper_bound = self.density_range[1] * (1 + self.epsilon)
-        for sample in self.samples:
-            densities = [item.value / item.weight for item in sample.items]
-            self.assertTrue(all(lower_bound <= d <= upper_bound for d in densities))
+def test_sampler_init_with_custom_distributions():
+    """
+    Test that the Sampler object can be initialised with custom distributions.
+    """
+    custom_weight_dist = (np.random.default_rng().normal, {"loc": 10, "scale": 5})
+    custom_value_dist = (np.random.default_rng().normal, {"loc": 20, "scale": 2})
 
-    def test_sample_capacity(self):
-        """
-        Verify that the sampled knapsack capacity is approximately equal to the specified normalized capacity
-        """
-        for sample in self.samples:
-            sum_weights = np.sum([item.weight for item in sample.items])
-            self.assertAlmostEqual(sample.capacity / sum_weights, self.normalised_capacity, delta=self.epsilon)
+    sampler = Sampler(
+        num_items=10,
+        normalised_capacity=0.3,
+        weight_dist=custom_weight_dist,
+        value_dist=custom_value_dist,
+    )
 
-    def test_solution_value_within_range(self):
-        """
-        Ensure that the solution value of the knapsack is within the specified solution value range
-        """
-        lower_bound = self.solution_value_range[0] * (1 - self.epsilon)
-        upper_bound = self.solution_value_range[1] * (1 + self.epsilon)
-        for sample in self.samples:
-            solution_value = sample.optimal_nodes[0].value
-            self.assertTrue(lower_bound <= solution_value <= upper_bound)
+    assert sampler.num_items == 10
+    assert sampler.normalised_capacity == 0.3
+    # Check references to the distributions
+    assert sampler.weight_dist == custom_weight_dist[0]
+    assert sampler.weight_dist_kwargs == custom_weight_dist[1]
+    assert sampler.value_dist == custom_value_dist[0]
+    assert sampler.value_dist_kwargs == custom_value_dist[1]
 
-if __name__ == '__main__':
-    unittest.main()
 
+def test_sampler_sample_returns_knapsack():
+    """
+    Test that the sample method returns a Knapsack instance containing the expected number of items.
+    """
+    sampler = Sampler(num_items=5, normalised_capacity=0.8)
+    knapsack = sampler.sample()
+
+    # Check that `knapsack` has the attributes we expect
+    # (depending on how your Knapsack class is implemented, these may differ).
+    assert hasattr(knapsack, "items")
+    assert hasattr(knapsack, "capacity")
+    assert len(knapsack.items) == 5
+
+
+def test_sampler_sample_capacity_calculation():
+    """
+    Test that the knapsack capacity is calculated as int(normalised_capacity * sum_weights).
+    """
+    sampler = Sampler(num_items=4, normalised_capacity=0.5)
+
+    # Mock the distributions to return a predictable weights array.
+    # For example, all weights = 2 => sum_weights = 8 => capacity = 4 (with normalised_capacity = 0.5).
+    sampler.weight_dist = MagicMock(return_value=np.array([2, 2, 2, 2]))
+    sampler.value_dist = MagicMock(return_value=np.array([5, 5, 5, 5]))
+
+    knapsack = sampler.sample()
+    assert knapsack.capacity == int(0.5 * 8)  # Should be 4
+
+
+@pytest.mark.parametrize("normalised_capacity", [0.0, 0.1, 0.9, 1.5])
+def test_sampler_different_normalised_capacities(normalised_capacity):
+    """
+    Test different normalised capacities to ensure capacity is computed appropriately.
+    This also checks that the code doesn't break for zero or capacities > 1.
+    """
+    sampler = Sampler(num_items=3, normalised_capacity=normalised_capacity)
+    knapsack = sampler.sample()
+    total_weight = sum(item.weight for item in knapsack.items)
+    expected_capacity = int(normalised_capacity * total_weight)
+
+    assert knapsack.capacity == expected_capacity
+    assert len(knapsack.items) == 3
