@@ -19,7 +19,7 @@ Example:
             Item(value=7, weight=3),
         ]
         capacity = 15
-        optimal_node = await solvers.mzn_gecode(items, capacity)
+        optimal_node = solvers.mzn_gecode(items, capacity)
         print(optimal_node)
 
     Alternatively, construct an instance of the `Knapsack` class and call the
@@ -34,7 +34,7 @@ Example:
         ]
         capacity = 15
         instance = Knapsack(items=items, capacity=capacity)
-        optimal_node = await instance.solve(method="mzn_gecode")
+        optimal_node = instance.solve(method="mzn_gecode")
         print(optimal_node)
 """
 
