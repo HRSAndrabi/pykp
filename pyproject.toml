@@ -105,3 +105,14 @@ insecure = false
 [tool.semantic_release.publish]
 upload_to_vcs_release = true
 
+[tool.ruff]
+line-length = 79
+
+[tool.ruff.format]
+docstring-code-format = true
+docstring-code-line-length = 72
+quote-style = "double"
+indent-style = "space"
+
+[tool.ruff.lint]
+select = ["E501"]
