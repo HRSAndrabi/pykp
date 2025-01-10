@@ -39,6 +39,7 @@ Example:
         print(optimal_nodes)
 """
 
+from collections import defaultdict
 from dataclasses import dataclass, field
 from queue import PriorityQueue
 
@@ -125,7 +126,7 @@ def _calculate_upper_bound(
 def _expand_node(
     node: Node,
     capacity: int,
-    incumbent: Node,
+    incumbent: float,
 ) -> np.ndarray:
     """
     Expands a node in the branch-and-bound tree. Returns child nodes to
@@ -134,7 +135,7 @@ def _expand_node(
     Args:
         node (Node): Node to expand.
         capacity (int): Maximum weight capacity of the knapsack.
-        incumbent (Node): The best node found so far.
+        incumbent (flaot): The best value found so far.
 
     Returns:
         np.ndarray: The child nodes of the expanded node.
@@ -183,7 +184,7 @@ def _expand_node(
             excluded_items=excluded_items,
             upper_bound=upper_bound,
         )
-        if child.upper_bound > incumbent.value:
+        if child.upper_bound >= incumbent:
             children.append(child)
 
     return children
@@ -204,15 +205,19 @@ def _is_terminal_node(node: Node, capacity: int) -> bool:
     balance = capacity - weight
     if balance < 0:
         return False
-    remaining_items = set(node.items) - set(node.included_items)
+    remaining_items = (
+        set(node.items) - set(node.included_items) - set(node.excluded_items)
+    )
     for i in remaining_items:
         if i.weight <= balance:
             return False
-    return True
+    return len(remaining_items) == 0
 
 
 def branch_and_bound(
-    items: np.ndarray[Item], capacity: int
+    items: np.ndarray[Item],
+    capacity: int,
+    n=1,
 ) -> np.ndarray[Arrangement]:
     """
     Provides an implementation of branch and bound algorithm for
@@ -250,14 +255,35 @@ def branch_and_bound(
             optimal_nodes = instance.solve(method="branch_and_bound")
             print(optimal_nodes)
 
+        Use the optional `n` argument to return the n-best solutions found by
+        the solver::
+
+            optimal_nodes = solvers.branch_and_bound(items, capacity, n=5)
+            print(optimal_nodes)
+
+        .. note::
+            The `n` argument is on solution values, not the number of
+            solutions. If `n` is set to 1, the solver returns all solutions
+            that achieve the distinct optimal value. More than one solution
+            may be returned if there are multiple solutions with the same
+            optimal value. Similarly, if `n` is set to n, the solver returns
+            all solutions that achieve the n-highest possible values.
+
     Args:
         items (np.ndarray[Item]): Items that can be included in the knapsack.
         capacity (int): Maximum weight capacity of the knapsack.
+        n (int, optional): The n-best solutions to return. If set to 1, the
+            solver returns all solutions that achieve the distinct optimal
+            value. If set to n, the solver returns the solutions that achieve
+            the n-highest possible values. Defaults to 1.
 
     Returns:
         np.ndarray[Arrangement]: The optimal arrangements of items in the
             knapsack.
     """
+    if len(items) == 0:
+        return np.array([Arrangement(items=items, state=np.array([]))])
+
     items = np.array(
         sorted(items, key=lambda item: item.value / item.weight, reverse=True)
     )
@@ -278,41 +304,37 @@ def branch_and_bound(
     )
     queue = PriorityQueue()
     queue.put(root)
-    incumbent = root
-    optimal_nodes = np.array([root])
-    next = queue.get()
+    incumbent = 0
+    nodes = []
+    n_best_values = [0]
 
-    while next.upper_bound >= incumbent.value:
+    while not queue.empty():
+        next = queue.get()
         children = _expand_node(next, capacity, incumbent)
         for child in children:
+            if child.upper_bound < incumbent:
+                continue
+
             queue.put(child)
-            if child.value > incumbent.value:
-                incumbent = child
-                if _is_terminal_node(node=child, capacity=capacity):
-                    optimal_nodes = np.array([child])
-            elif (
-                _is_terminal_node(node=child, capacity=capacity)
-                and child.value == incumbent.value
-            ):
-                optimal_nodes = np.append(optimal_nodes, child)
+            if child.value >= incumbent and _is_terminal_node(child, capacity):
+                n_best_values.append(child.value)
+                n_best_values = sorted(n_best_values, reverse=True)[:n]
+                incumbent = n_best_values[-1]
+                nodes.append(child)
 
-        if queue.empty():
-            break
-        next = queue.get()
+    nodes = [node for node in nodes if node.value >= incumbent]
+    result = [
+        Arrangement(
+            items=items,
+            state=np.array(
+                [int(item in node.included_items) for item in items]
+            ),
+        )
+        for node in nodes
+    ]
+    result = np.array(result)
 
-    result = np.array(
-        [
-            Arrangement(
-                items=items,
-                state=np.array(
-                    [int(item in node.included_items) for item in items]
-                ),
-            )
-            for node in optimal_nodes
-        ]
-    )
-
-    return np.array(list(set(result)))
+    return result
 
 
 def mzn_gecode(items: np.ndarray[Item], capacity: int) -> Arrangement:
