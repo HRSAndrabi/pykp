@@ -1,4 +1,4 @@
-name: Lint with Ruff
+name: Lint
 
 on:
   pull_request:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   lint:
-    name: Lint
+    name: Lint (Ruff)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

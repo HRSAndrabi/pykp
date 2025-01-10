@@ -1,4 +1,4 @@
-name: Run Unit Test with Pytest
+name: Unit tests
 
 on:
   pull_request:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   test:
-    name: Test via pytest
+    name: Unit tests (pytest)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
