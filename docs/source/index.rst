@@ -9,8 +9,8 @@ PyKP documentation
    :hidden:
 
    About <about/index>
-   API reference <reference/index>
    Quick Start <quick-start/index>
+   API reference <reference/index>
    Contributing <contributing/index>
 
 **Useful links**:
@@ -38,7 +38,7 @@ PyKP is a Python package for defining, solving, and analysing knapsack problem i
             :color: primary
             :click-parent:
 
-            To the user guide
+            To the installation guide
 
     .. grid-item-card::
         :img-top: ../source/_static/index-images/getting_started.svg
@@ -47,7 +47,7 @@ PyKP is a Python package for defining, solving, and analysing knapsack problem i
         :material-regular:`bolt;1.5em;sd-text-primary sd-mr-1` **Getting started**
         ^^^
 
-        PyKP? Check out the Quick Start Guide. It contains an introduction to the main features of the package.
+        New to PyKP? The Quick Start Guide provides an introduction to the main functionalities of the package.
 
         +++
 
@@ -66,7 +66,7 @@ PyKP is a Python package for defining, solving, and analysing knapsack problem i
         :material-regular:`terminal;1.5em;sd-text-primary sd-mr-1` **API reference**
         ^^^
 
-        The reference guide contains a detailed description of the functions,
+        The API reference contains detailed descriptions of the functions,
         modules, and objects included in PyKP. 
         +++
 
