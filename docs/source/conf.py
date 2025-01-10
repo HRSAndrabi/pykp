@@ -1,11 +1,25 @@
-from sphinxawesome_theme import ThemeOptions
-from sphinxawesome_theme.postprocess import Icons
+import os
+import sys
+from typing import Any, Dict
+from unittest.mock import MagicMock
+
 from sphinx.application import Sphinx
-from typing import Dict, Any
-import sys, os
 
+MOCK_MODULES = [
+    "numpy",
+    "pandas",
+    "networkx",
+    "matplotlib",
+    "matplotlib.pyplot",
+    "anytree",
+    "tqdm",
+    "nest_asyncio",
+    "minizinc",
+]
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = MagicMock()
 
-sys.path.insert(0, os.path.abspath(".."))
+sys.path.insert(0, os.path.abspath("../.."))
 
 project = "PyKP"
 copyright = "2025, Hassan Andrabi"
@@ -57,7 +71,6 @@ html_static_path = ["_static"]
 html_favicon = "_static/logo.svg"
 html_js_files = ["pypi-icon.js"]
 html_theme = "pydata_sphinx_theme"
-html_permalinks_icon = Icons.permalinks_icon
 html_static_path = ["_static"]
 html_context = {
     "github_user": "HRSAndrabi",
