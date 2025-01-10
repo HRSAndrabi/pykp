@@ -141,6 +141,29 @@ def phase_transition(
     path: str = None,
 ) -> tuple[np.ndarray, np.ndarray]:
     """
+    Provides an implementation of the phase transition of the knapsack
+    problem, based on Yadav, Nitin, et al. (2018).
+
+    Example:
+        Compute the phase transition of the knapsack problem::
+
+            from pykp.metrics import phase_transition
+
+            grid, solvability_matrix = phase_transition(
+                num_items=10,
+                samples=100,
+                resolution=(20, 20),
+            )
+
+        Save the phase transition to a CSV file by specifying an optional
+        `path` argument ::
+
+            phase_transition(
+                num_items=10,
+                samples=100,
+                resolution=(20, 20),
+                path="phase_transition.csv",
+            )
 
     Args:
         num_items (int): Number of items in the knapsack.
@@ -149,14 +172,20 @@ def phase_transition(
         solver (str, optional): Solver to use. Defaults to "branch_and_bound".
         resolution (tuple[int, int], optional): Resolution of the normalised
             capacity-normalised profit grid. The first number corresponds to
-                the resolution of normalised capacity, and the second to the
-                    resolution of normalised profit. Defaults to (41, 41).
+            the resolution of normalised capacity, and the second to the
+            resolution of normalised profit. Defaults to (41, 41).
         path (str, optional): Path to save the phase transition to. Defaults
             to None.
 
     Returns:
         tuple[np.ndarray, np.ndarray]: The grid of normalised capacities and
-            profits, and the phase transition.
+        profits, and the phase transition. The x-axis corresponds to the
+        normalised capacity, and the y-axis to the normalised profit.
+
+    References:
+
+        .. [1] Yadav, Nitin, et al. "Phase transition in the knapsack problem."
+           arXiv preprint arXiv:1806.10244 (2018).
     """
     match solver:
         case "branch_and_bound":
@@ -203,7 +232,17 @@ def sahni_k(
 ) -> int:
     """
     Provides an implementation of the Sahni-K metric for evaluating
-    arrangements of items in the knapsack problem.
+    arrangements of items in the knapsack problem. The Sahni-k metric
+    is a measure of complexity based on the approximation algorithm proposed by
+    Sahni et al. (1975),\ [1]_ and shown to predict human performance on the
+    0/1 knapsack problem [2]_. The metric is defined as the smallest subset of
+    `k` items that must be selected so that applying the greedy algorithm to
+    the remaining items yields an optimal solution.
+
+    If `k` equals zero, the Sahni-k algorithm coincides with the greedy
+    algorithm. If k is equal to the number of items in the solution, the
+    algorithm is similar to a brute-force search through the entire search
+    space.
 
     Example:
         To calculate the Sahni-k of the optimal solution to a knapsack problem
@@ -233,6 +272,16 @@ def sahni_k(
 
     Returns:
         int: Sahni-k value.
+
+    References:
+
+        .. [1] Sahni, Sartaj. "Approximate algorithms for the 0/1 knapsack
+           problem." Journal of the ACM (JACM) 22.1 (1975): 115-124.
+
+        .. [2] Murawski, Carsten, and Peter Bossaerts. "How humans solve
+           complex problems: The case of the knapsack problem." Scientific
+           reports 6.1 (2016): 34851.
+
     """
     if not isinstance(arrangement, Arrangement):
         raise ValueError("`arrangement` must be of type `Arrangement`.")
