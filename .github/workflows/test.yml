@@ -1,6 +1,9 @@
 name: Run Unit Test with Pytest
 
-on: [push, pull_request, workflow_call]
+on:
+  pull_request:
+    branches: [main]
+  workflow_call:
 
 jobs:
   test:
