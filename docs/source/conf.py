@@ -6,13 +6,11 @@ from unittest.mock import MagicMock
 from sphinx.application import Sphinx
 
 MOCK_MODULES = [
-    "numpy",
     "pandas",
     "networkx",
     "matplotlib",
     "matplotlib.pyplot",
     "anytree",
-    "tqdm",
     "nest_asyncio",
     "minizinc",
 ]
