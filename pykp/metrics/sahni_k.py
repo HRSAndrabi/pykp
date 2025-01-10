@@ -1,11 +1,11 @@
 """
 Provides an implementation of the Sahni-K metric for evaluating
-    arrangements of items in the knapsack problem.
+arrangements of items in the knapsack problem.
 
 Example:
     To calculate the Sahni-k of the optimal solution to a knapsack problem
-        instance, first solve the instance and then call the metric on the
-            optimal arrangement::
+    instance, first solve the instance and then call the metric on the
+    optimal arrangement::
 
         from pyinstance import Knapsack
         from pyinstance import Item
