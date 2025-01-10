@@ -1,6 +1,118 @@
 # CHANGELOG
 
 
+## v3.0.0 (2025-01-10)
+
+### Breaking
+
+* refactor(sampler): remove `*_range` args.
+
+Removed `weight_range`, `solution_value_range` and `density_range`
+arguments from `Sampler()`. `Sampler()` now works by sampling
+weights and values based on a supplied distribution, which is
+unifrom (0,1) by default.
+
+BREAKING CHANGE: `weight_range`, `solution_value_range` and
+`density_range` arguments to `pykp.Sampler()` no longer exist. ([`358c3a6`](https://github.com/HRSAndrabi/pykp/commit/358c3a66dfcfedfe6fcdf3d282a6c1b0c72f37e0))
+
+### Bug Fixes
+
+* fix(mzn_geocode): nest asynchronous loops.
+
+MiniZinc raised an error when being called from a Jupyter notebook
+because both MiniZinc's solve() method and Jupyter run their own
+conflicting async loop. The issue is fixed by patching asyncio
+using the nested_asyncio package.
+
+See https://github.com/MiniZinc/minizinc-python/issues/38. ([`3a94ea4`](https://github.com/HRSAndrabi/pykp/commit/3a94ea4a1e249f3ce41094171430ba563f66ab72))
+
+* fix(sampler): don't convert capacity to int. ([`a182e16`](https://github.com/HRSAndrabi/pykp/commit/a182e16857de6e5edc4af4552027bb1c8992b256))
+
+* fix: remove unexpected argument from .solve().
+
+The old .solve() method accepted an argument for
+`solve_second_best`. This was removed in 2.0 with the addition of
+a seperate package for solvers. ([`5754958`](https://github.com/HRSAndrabi/pykp/commit/5754958a8742c8159e01340314573f2687682309))
+
+### Build System
+
+* build: update requirements. ([`ce5db33`](https://github.com/HRSAndrabi/pykp/commit/ce5db33db8496e6dfa3d6b8c0c4ce7f5f84bbd8b))
+
+* build: update dependencies. ([`7bf4110`](https://github.com/HRSAndrabi/pykp/commit/7bf4110823edb1c4efe4b2893a6b5b94bed14cc0))
+
+### Chores
+
+* chore: fix tab spacing. ([`28f511b`](https://github.com/HRSAndrabi/pykp/commit/28f511b309515d97694cbed875b54fab8f35caaf))
+
+### Continuous Integration
+
+* ci: create release workflow.
+
+Refined version of the previous continuous-delivery workflow.
+Lints and tests before publishing release on pushes to the main
+branch. ([`4b1b9bc`](https://github.com/HRSAndrabi/pykp/commit/4b1b9bce43a391a611c0c82375a8caa851eb06b9))
+
+* ci(lint): make callable. ([`bc69b09`](https://github.com/HRSAndrabi/pykp/commit/bc69b099060ddd2901557a0729701dd3f1aa3aa8))
+
+* ci: add lint with Ruff workflow. ([`4a97d52`](https://github.com/HRSAndrabi/pykp/commit/4a97d5260736471762f0602c3793497f8019cf1f))
+
+* ci: add test with pytest workflow. ([`1b78077`](https://github.com/HRSAndrabi/pykp/commit/1b780773c4c7ebaa5aea86a0cdd559f9638fe69d))
+
+* ci: point to correct requirements. ([`c0b90df`](https://github.com/HRSAndrabi/pykp/commit/c0b90dfbf4c7ba6ebe022918487b7a3055daf097))
+
+* ci: generate requirements from pyproject.toml
+
+Add script to extract dependencies from pyproject.toml into
+separate files. ([`a1f7555`](https://github.com/HRSAndrabi/pykp/commit/a1f75558e308ed75f4568de62f74044ecf1d9f6d))
+
+* ci: mock dependancy imports. ([`240ec64`](https://github.com/HRSAndrabi/pykp/commit/240ec643c63fa6de2809ddd3df2023aec2c5dbf9))
+
+* ci: add ruff action. ([`84254e8`](https://github.com/HRSAndrabi/pykp/commit/84254e87b0b4beebfb65db9b8b4b5c80e3c342bb))
+
+### Documentation
+
+* docs: remove 'await' from solve() calls. ([`a19520d`](https://github.com/HRSAndrabi/pykp/commit/a19520dff1b2eb502f3a26a219fecfab41d25a48))
+
+* docs: shorten phrasing.
+
+Global find and replace 'This module provides' -> 'Provides'. ([`7ce509e`](https://github.com/HRSAndrabi/pykp/commit/7ce509e853690d5f4c106f646754631aab05bdc7))
+
+* docs(tests): add docstring for test. ([`4ddeb4d`](https://github.com/HRSAndrabi/pykp/commit/4ddeb4d166e64f0d2f860e335a483cb1d875a310))
+
+* docs: add favicons. Fix wildcard warnings. ([`7a5d4df`](https://github.com/HRSAndrabi/pykp/commit/7a5d4dfc6249778bc26d4108d1e5cca5b1edbc47))
+
+* docs: add 'edit page' button. ([`6125aae`](https://github.com/HRSAndrabi/pykp/commit/6125aae53343c0a392c4d14134630e26a77301be))
+
+* docs: add PyPi icon. ([`242ff80`](https://github.com/HRSAndrabi/pykp/commit/242ff8052b93a9c7a7d47771fdc287bf9619ec0d))
+
+* docs: show primary sidebar on reference. ([`7e80eec`](https://github.com/HRSAndrabi/pykp/commit/7e80eec59e50dcc80da795a53dfe253fad3a0a9a))
+
+* docs: add logo. ([`28533b7`](https://github.com/HRSAndrabi/pykp/commit/28533b707435827b1a3da2b79d6e633def1d0337))
+
+* docs: add missing imports. ([`4e9f272`](https://github.com/HRSAndrabi/pykp/commit/4e9f2723d09f0a5da8c266ed8ba89be478750f82))
+
+### Testing
+
+* test: remove solver.mzn_geocode tests.
+
+Minizinc tests only work if the solver is installed on the machine.
+It doesn't make sense to call these tests regularly. ([`dcfaf17`](https://github.com/HRSAndrabi/pykp/commit/dcfaf1713aa52f104df85224ac7e7c9376907e95))
+
+* test: wrap assert in ([`c0dd273`](https://github.com/HRSAndrabi/pykp/commit/c0dd2738fb2736c8b9d017b0ed39f785c6ae79a6))
+
+* test: remove incorrect int conversion. ([`3a1fcc8`](https://github.com/HRSAndrabi/pykp/commit/3a1fcc8155c944f56a24c00a509eb85d485db4a7))
+
+* test: write tests for pykp.solvers. ([`2468af1`](https://github.com/HRSAndrabi/pykp/commit/2468af1d169453c16f1851c025626d98a94156c6))
+
+* test: write tests for pykp.sampler. ([`f45c8bc`](https://github.com/HRSAndrabi/pykp/commit/f45c8bc553c92fcda5ebbf24da65ed8049596780))
+
+* test: write tests for pykp.knapsack. ([`c9d3be0`](https://github.com/HRSAndrabi/pykp/commit/c9d3be0789b7f7782711a948086bb273bb11ca69))
+
+### Unknown
+
+* Apply ruff formatting. ([`77ea023`](https://github.com/HRSAndrabi/pykp/commit/77ea02399c99d69d224457de021df5dcb455b74a))
+
+
 ## v2.1.1 (2025-01-07)
 
 ### Bug Fixes
