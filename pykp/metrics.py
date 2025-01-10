@@ -112,7 +112,9 @@ def _simulate_cell_solvability(
     return score / samples
 
 
-def _save(phase_transition: np.ndarray, grid: np.ndarray, path: str):
+def _save_phase_transition(
+    phase_transition: np.ndarray, grid: np.ndarray, path: str
+):
     """
     Save the phase transition to a CSV file.
 
@@ -221,7 +223,7 @@ def phase_transition(
     )
 
     if path:
-        _save(phase_transition, grid, path)
+        _save_phase_transition(phase_transition, grid, path)
 
     return grid, phase_transition
 
@@ -234,7 +236,7 @@ def sahni_k(
     Provides an implementation of the Sahni-K metric for evaluating
     arrangements of items in the knapsack problem. The Sahni-k metric
     is a measure of complexity based on the approximation algorithm proposed by
-    Sahni et al. (1975),\ [1]_ and shown to predict human performance on the
+    Sahni et al. (1975), [1]_ and shown to predict human performance on the
     0/1 knapsack problem [2]_. The metric is defined as the smallest subset of
     `k` items that must be selected so that applying the greedy algorithm to
     the remaining items yields an optimal solution.
