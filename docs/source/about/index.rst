@@ -7,10 +7,9 @@ About
    Sample, solve, and analyse instances of the 0-1 Knapsack Problem.
 
 **PyKP** (py·kay·pee) is a Python package for defining, solving, and analysing knapsack problem instances. 
-This package provides tools to define (or randomly sample) knapsack instances, and generate useful metrics and visualisations. 
+The package provides tools to define (or randomly sample) knapsack instances, and generate useful metrics and visualisations. 
 
-I created this package as part of a research project involving the knapsack problem.
-You can learn about me and my other projects by visiting my `personal website`_.
+I created this package as part of a research project. You can learn about me and my other projects by visiting my `personal website`_.
 
 
 Features

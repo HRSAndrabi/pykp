@@ -5,9 +5,7 @@ To solve a knapsack problem, initialise a ``Knapsack`` instance with the items a
 
 .. code-block:: python
 
-	from pykp import Item
-   	from pykp.knapsack import Knapsack
-
+   	from pykp import Knapsack, Item
 
 	# Define a list of items
 	items = [

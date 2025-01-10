@@ -1,7 +1,7 @@
 Sampling Random Knapsack Instances
 ------------------------------------
 
-PyKP includes a ``Sampler`` class to generate random knapsack problem instances based on defined ranges for densities (item value to weight ratios), and solution values. 
+PyKP includes a :doc:`Sampler </reference/generated/pykp.sampler.Sampler>` class to generate random knapsack problem instances. 
 
 .. code-block:: python
 
@@ -11,10 +11,31 @@ PyKP includes a ``Sampler`` class to generate random knapsack problem instances 
    sampler = Sampler(
        num_items=5,
        normalised_capacity=0.6,
-       density_range=(0.5, 1.5),
-       solution_value_range=(100, 200)
    )
 
    # Generate a sampled knapsack instance
    sampled_knapsack = sampler.sample()
-   print("Sampled knapsack capacity:", sampled_knapsack.capacity)
+   print("Sampled knapsack items:", sampled_knapsack.items)
+
+Item weights and values are sampled from a uniform distribution by default, but you can customise these distributions by specifying optional parameters to the sampler. The example below defines normal distributions with mean 100 and standard deviation 10 for both weights and values:
+
+.. code-block:: python
+
+   # Define custom distribution parameters
+    sampler = Sampler(
+        num_items=10,
+        normalised_capacity=0.5,
+        weight_dist=(
+            np.random.default_rng().normal,
+            {"loc": 100, "scale": 10},
+        ),
+        value_dist=(
+            np.random.default_rng().normal,
+            {"loc": 100, "scale": 10},
+        ),
+    )
+
+   # Generate a sampled knapsack instance
+   sampled_knapsack = sampler.sample()
+   print("Sampled knapsack items:", sampled_knapsack.items)
+
