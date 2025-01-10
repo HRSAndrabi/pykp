@@ -1,5 +1,5 @@
 Development Environment
---------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^
 
 1. **Fork the Repository**: Start by forking the PyKP repository on GitHub.
 
@@ -17,14 +17,15 @@ Development Environment
       python3 -m venv venv
       source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
 
-4. **Install Dependencies**: Install the package dependencies in "editable" mode, including development dependencies.
+4. **Install Dependencies**: Install the package in "editable" mode, along with the development dependencies.
 
    .. code-block:: bash
 
       pip install --editable .
+      pip install -r requirements/all.txt
 
 5. **Run Tests**: Run the test suite to ensure the setup is working correctly.
 
    .. code-block:: bash
 
-      python -m unittest discover -s tests
+      pytest
