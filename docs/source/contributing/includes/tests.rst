@@ -1,14 +1,14 @@
-Writing Tests
--------------
+Testing
+^^^^^^^^^^^^
 
-If you make a contribution to the code, please write a test for it. To add a test:
+If you make a contribution to the code, please write a test for it. PyKP uses the `pytest`_ framework. Create new test files in the ``tests/`` directory, using the naming convention ``test_<feature>.py``. Use one of the existing tests as a guide.
 
-1. **Create a new test file**: Place new test files in the ``tests/`` directory, using the naming convention ``test_<feature>.py``.
-2. **Use `unittest`**: PyKP uses the ``unittest`` framework. Use one of the existing tests as a guide.
-3. **Run Tests**: Run the tests using the command below to ensure everything works as expected.
+Run the tests using the command below to ensure everything works as expected.
 
-   .. code-block:: bash
+.. code-block:: bash
 
-      python -m unittest discover -s tests
+   pytest --cov=pykp
 
+You should see a summary of the test results and code coverage. If any tests fail, you should try and fix the issues before submitting a Pull Request.
 
+.. _`pytest`: https://docs.pytest.org/en/latest/
