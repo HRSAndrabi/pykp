@@ -1,4 +1,9 @@
 """
+This module contains implementations of various solvers for the knapsack
+problem.
+"""
+
+"""
 Provides an implementation of branch and bound algorithm for
 solving the knapsack problem.
 
@@ -37,10 +42,12 @@ Example:
 from dataclasses import dataclass, field
 from queue import PriorityQueue
 
+import nest_asyncio
 import numpy as np
+from minizinc import Instance, Model, Solver
 
-from ..arrangement import Arrangement
-from ..item import Item
+from .arrangement import Arrangement
+from .item import Item
 
 
 @dataclass(order=True, frozen=True)
@@ -208,8 +215,40 @@ def branch_and_bound(
     items: np.ndarray[Item], capacity: int
 ) -> np.ndarray[Arrangement]:
     """
-    Solves the knapsack problem using the branch-and-bound algorithm. This
-    solver is robust to multiple optimal solutions.
+    Provides an implementation of branch and bound algorithm for
+    solving the knapsack problem.
+
+    Example:
+        To solve a knapsack problem instance using the branch-and-bound
+        algorithm, first create a list of items and then call the solver
+        with the items and capacity::
+
+            from pykp import Item, Solvers
+
+            items = [
+                Item(value=10, weight=5),
+                Item(value=15, weight=10),
+                Item(value=7, weight=3),
+            ]
+            capacity = 15
+            optimal_nodes = solvers.branch_and_bound(items, capacity)
+            print(optimal_nodes)
+
+        Alternatively, construct an instance of the `Knapsack` class and
+        call the `solve` method with "branch_and_bound" as the `method`
+        argument::
+
+            from pykp import Item, Knapsack
+
+            items = [
+                Item(value=10, weight=5),
+                Item(value=15, weight=10),
+                Item(value=7, weight=3),
+            ]
+            capacity = 15
+            instance = Knapsack(items=items, capacity=capacity)
+            optimal_nodes = instance.solve(method="branch_and_bound")
+            print(optimal_nodes)
 
     Args:
         items (np.ndarray[Item]): Items that can be included in the knapsack.
@@ -274,3 +313,122 @@ def branch_and_bound(
     )
 
     return np.array(list(set(result)))
+
+
+def mzn_gecode(items: np.ndarray[Item], capacity: int) -> Arrangement:
+    """
+    Provides an implementation of the MiniZinc and Gecode solver for
+    solving the knapsack problem. You should have MiniZinc 2.5.0 (or higher)
+    installed on your system to use this solver. Note that this solver is not
+    robust to multiple solutions, and will report only the first optimal
+    solution found. If knowing all optimal solutions is important, consider
+    using the branch-and-bound solver.
+
+    Example:
+        To solve a knapsack problem instance using the MiniZinc Gecode solver,
+        first create a list of items and then call the solver with the items
+        and capacity::
+
+            from pykp import Item, Solvers
+
+            items = [
+                Item(value=10, weight=5),
+                Item(value=15, weight=10),
+                Item(value=7, weight=3),
+            ]
+            capacity = 15
+            optimal_node = solvers.mzn_gecode(items, capacity)
+            print(optimal_node)
+
+        Alternatively, construct an instance of the `Knapsack` class and call
+        the `solve` method with "mzn_gecode" as the `method` argument::
+
+            from pykp import Item, Knapsack
+
+            items = [
+                Item(value=10, weight=5),
+                Item(value=15, weight=10),
+                Item(value=7, weight=3),
+            ]
+            capacity = 15
+            instance = Knapsack(items=items, capacity=capacity)
+            optimal_node = instance.solve(method="mzn_gecode")
+            print(optimal_node)
+
+        Args:
+            items (np.ndarray[Item]): Items that can be included in the
+            knapsack. capacity (int): Maximum weight capacity of the knapsack.
+
+        Returns:
+            Arrangement: The optimal arrangement of items in the knapsack.
+    """
+    nest_asyncio.apply()
+    model = Model()
+    model.add_string(
+        """
+		int: n; % number of objects
+		set of int: OBJ = 1..n;
+		float: capacity;
+		array[OBJ] of float: profit;
+		array[OBJ] of float: size;
+
+		%var set of OBJ: x;
+		array[OBJ] of var 0..1: x;
+		var float: P=sum(i in OBJ)(profit[i]*x[i]);
+
+		constraint sum(i in OBJ)(size[i]*x[i]) <= capacity;
+
+		solve :: int_search(x, first_fail, indomain_max, complete) maximize P;
+		"""
+    )
+    gecode = Solver.lookup("gecode")
+
+    instance = Instance(gecode, model)
+    instance["n"] = len(items)
+    instance["capacity"] = capacity
+    instance["profit"] = [item.value for item in items]
+    instance["size"] = [item.weight for item in items]
+
+    result = instance.solve()
+
+    return Arrangement(items=items, state=np.array(result["x"]))
+
+
+def greedy(items: np.ndarray[Item], capacity: int) -> Arrangement:
+    """
+    Provides an implementation of the greedy algorithm for solving the
+    knapsack problem.
+
+    Example:
+        Solve a knapsack problem using the greedy algorithm::
+
+            import numpy as np
+            from pykp import Item, solvers
+
+            items = np.array([
+                    Item(weight = 10, value = 60),
+                    Item(weight = 20, value = 100),
+                    Item(weight = 30, value = 120),
+            ])
+            capacity = 50
+            arrangement = solvers.greedy(items, capacity
+    """
+    state = np.zeros(len(items))
+    weight = 0
+    balance = capacity
+    while balance > 0:
+        remaining_items = [
+            items[i]
+            for i, element in enumerate(state)
+            if element == 0 and items[i].weight + weight <= capacity
+        ]
+        if len(remaining_items) == 0:
+            break
+        best_item = max(
+            remaining_items, key=lambda item: item.value / item.weight
+        )
+        state[np.where(items == best_item)[0][0]] = 1
+        balance -= best_item.weight
+        weight += best_item.weight
+
+    return Arrangement(items=items, state=state)
