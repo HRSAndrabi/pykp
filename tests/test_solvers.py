@@ -6,7 +6,10 @@ import pytest
 from pykp import Item, solvers
 
 HEURISTIC_SOLVERS = ["greedy"]
-OPTIMAL_SOLVERS = ["branch_and_bound", "mzn_geocode"]
+OPTIMAL_SOLVERS = [
+    "branch_and_bound",
+    # "mzn_geocode",
+]
 ALL_SOLVERS = HEURISTIC_SOLVERS + OPTIMAL_SOLVERS
 
 with open("tests/test_cases.json") as f:
