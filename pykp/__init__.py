@@ -6,6 +6,14 @@ PyKP is a package to provide tooling for sampling and solving instances of the
 from .arrangement import Arrangement
 from .item import Item
 from .knapsack import Knapsack
+from .metrics import phase_transition, sahni_k
 from .sampler import Sampler
 
-__all__ = ["Arrangement", "Item", "Knapsack", "Sampler"]
+__all__ = [
+    "Arrangement",
+    "Item",
+    "Knapsack",
+    "Sampler",
+    "phase_transition",
+    "sahni_k",
+]
