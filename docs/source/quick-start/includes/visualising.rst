@@ -1,9 +1,9 @@
 Visualising Knapsacks
 ---------------------
 
-The `Knapsack` class provides methods to visualise solution distributions.
+The ``Knapsack`` class provides methods to visualise solution distributions.
 
-* ``Plot Terminal Nodes Histogram()``: This method plots a histogram of the values for feasible, at-capacity solutions.
+* ``plot_terminal_nodes_histogram()``: This method plots a histogram of the values for feasible, at-capacity solutions.
 
 .. code-block:: python
 

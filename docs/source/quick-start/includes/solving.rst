@@ -12,22 +12,8 @@ Once initialised, you can solve the knapsack instance using the ``solve`` method
    print("Optimal solution value:", knapsack.optimal_nodes[0].value)
 
 
-The `solve` method offers additional options to identify non-optimal nodes. 
-
-* ``solve_terminal_nodes``: Set to ``true`` to compute all terminal nodes.
-* ``solve_feasible_nodes``: Set to ``true`` to find all feasible nodes.
-* ``solve_second_best``: Set to ``true`` to also find the second-best solution.
+The ``solve()`` method accepts an optional ``method`` parameter to specify the solver used to solve the instance. Some of these solvers are heuristic solvers, and others are exact solvers.
+By default, the solver is set to ``branch_and_bound``. The full list of available solvers can be found in :doc:`/reference/generated/pykp.solvers`
 
 .. note::
-	Depending on the size of the instance, specifying these options can be computationally expensive.
-
-Example:
-
-.. code-block:: python
-
-   	# Solve with additional options
-   	knapsack.solve(
-	   solve_terminal_nodes=True, 
-	   solve_feasible_nodes=True, 
-	   solve_second_best=True
-	)
+	Depending on the size of the instance, specifying certain solvers can be computationally expensive.
