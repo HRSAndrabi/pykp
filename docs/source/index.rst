@@ -41,7 +41,6 @@ PyKP is a Python package for defining, solving, and analysing knapsack problem i
             To the installation guide
 
     .. grid-item-card::
-        :img-top: ../source/_static/index-images/getting_started.svg
         :text-align: center
 
         :material-regular:`bolt;1.5em;sd-text-primary sd-mr-1` **Getting started**
@@ -60,7 +59,6 @@ PyKP is a Python package for defining, solving, and analysing knapsack problem i
 
 
     .. grid-item-card::
-        :img-top: ../source/_static/index-images/api.svg
         :text-align: center
 
         :material-regular:`terminal;1.5em;sd-text-primary sd-mr-1` **API reference**
