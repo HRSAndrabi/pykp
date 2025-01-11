@@ -44,28 +44,24 @@ SOLVERS = ["branch_and_bound", "mzn_gecode", "brute_force"]
 class Knapsack:
     """
     Represents a knapsack problem solver.
+
+    Parameters:
+        items (list[Item]): An array of items for the knapsack
+        problem.
+        capacity (float): The capacity constraint of the knapsack.
+        load_from_json (bool, optional): Whether to load the instance from
+            a .json spec. Default is False.
+        path_to_spec (str, optional): Path to json spec file. Default
+            is None.
     """
 
     def __init__(
         self,
         items: list[Item],
-        capacity: int,
+        capacity: float,
         load_from_json: bool = False,
         path_to_spec: str = None,
     ):
-        """
-        Initialises a Knapsack instance.
-
-        Parameters:
-            items (list[Item]): An array of items for the knapsack
-            problem.
-            capacity (int): The maximum weight capacity of the knapsack.
-            load_from_json (bool, optional): Whether to load the instance from
-                a .json spec. Default is False.
-            path_to_spec (str, optional): Path to json spec file. Default
-                is None.
-        """
-
         if load_from_json:
             self.load_from_json(path_to_spec)
             return
@@ -79,7 +75,7 @@ class Knapsack:
         if not isinstance(items, np.ndarray):
             items = np.array(items)
 
-        self.items = np.array(
+        self._items = np.array(
             sorted(
                 items, key=lambda item: item.value / item.weight, reverse=True
             )
@@ -213,15 +209,15 @@ class Knapsack:
 
         if method == "branch_and_bound":
             self._optimal_nodes = branch_and_bound(
-                items=self.items, capacity=self._capacity
+                items=self._items, capacity=self._capacity
             )
 
         if method == "mzn_gecode":
-            result = mzn_gecode(items=self.items, capacity=self._capacity)
+            result = mzn_gecode(items=self._items, capacity=self._capacity)
             self._optimal_nodes = np.array([result])
 
         if method == "brute_force":
-            if len(self.items) > 15:
+            if len(self._items) > 15:
                 warn(
                     message="Brute force is infeasible for large instances.",
                     category=RuntimeWarning,
@@ -232,7 +228,7 @@ class Knapsack:
                 self._terminal_nodes,
                 self._feasible_nodes,
                 self._nodes,
-            ) = brute_force(items=self.items, capacity=self._capacity)
+            ) = brute_force(items=self._items, capacity=self._capacity)
 
         return self._optimal_nodes
 
@@ -248,14 +244,14 @@ class Knapsack:
         """
         if not isinstance(item, Item):
             raise ValueError("`item` must be of type `Item`.")
-        if item not in self.items:
+        if item not in self._items:
             raise ValueError(
                 """`item` must be an existing `item` inside the `Knapsack`
                 instance."""
             )
-        self.state[np.where(self.items == item)[0][0]] = 1
+        self._state[np.where(self._items == item)[0][0]] = 1
         self.__update_state()
-        return self.state
+        return self._state
 
     def remove(self, item: Item):
         """
@@ -269,15 +265,15 @@ class Knapsack:
         """
         if not isinstance(item, Item):
             raise ValueError("`item` must be of type `Item`.")
-        if item not in self.items:
+        if item not in self._items:
             raise ValueError(
                 """`item` must be an existing `item` inside the `Knapsack`
                 instance."""
             )
 
-        self.state[np.where(self.items == item)] = 0
+        self._state[np.where(self._items == item)] = 0
         self.__update_state()
-        return self.state
+        return self._state
 
     def empty(self):
         """
@@ -286,9 +282,9 @@ class Knapsack:
         Returns:
             np.ndarray: The updated knapsack state.
         """
-        self._state = np.zeros_like(self.items)
+        self._state = np.zeros_like(self._items)
         self.__update_state()
-        return self.state
+        return self._state
 
     def __update_state(self):
         """
@@ -298,11 +294,11 @@ class Knapsack:
         self._weight = self.__calculate_weight()
         self._is_feasible = self._capacity >= self._weight
         out_items = [
-            self.items[i]
-            for i, element in enumerate(self.state)
+            self._items[i]
+            for i, element in enumerate(self._state)
             if element == 0
         ]
-        if sum(self.state) == len(self.state):
+        if sum(self._state) == len(self._state):
             self._is_at_capacity = True
         else:
             self._is_at_capacity = (
@@ -317,8 +313,8 @@ class Knapsack:
         Returns:
             float: The total value of items in the knapsack.
         """
-        mask = np.ma.make_mask(self.state, shrink=False)
-        return sum([item.value for item in self.items[mask]])
+        mask = np.ma.make_mask(self._state, shrink=False)
+        return sum([item.value for item in self._items[mask]])
 
     def __calculate_weight(self):
         """
@@ -327,17 +323,17 @@ class Knapsack:
         Returns:
             float: The total weight of items in the knapsack.
         """
-        mask = np.ma.make_mask(self.state, shrink=False)
-        return sum([item.weight for item in self.items[mask]])
+        mask = np.ma.make_mask(self._state, shrink=False)
+        return sum([item.weight for item in self._items[mask]])
 
-    def plot_terminal_nodes_histogram(self) -> tuple[plt.Figure, plt.Axes]:
+    def plot_terminal_nodes_histogram(self):
         """
         Plots a histogram of values for possible at-capacity arrangements.
 
         Returns:
                 tuple[plt.Figure, plt.Axes]: Figure and Axes objects.
         """
-        if not self._nodes.size == 2 ** len(self.items):
+        if not self._nodes.size == 2 ** len(self._items):
             self.solve(method="brute_force")
 
         fig, axes = plt.subplots(
@@ -370,23 +366,23 @@ class Knapsack:
 
     def plot_network(
         self,
-        fig: plt.Figure = None,
-        ax: plt.Axes = None,
-        show: bool = False,
-    ) -> tuple[plt.Figure, plt.Axes]:
+        fig=None,
+        ax=None,
+        show: bool = True,
+    ):
         """
         Plots a network of knapsack nodes.
 
-        Paramaters:
+        Args:
             fig (plt.Figure, optional): Figure object. Default is None.
             ax (plt.Axes, optional): Axes object. Default is None.
             show (bool, optional): Whether to display the plot. Default
-                is False.
+                is True.
 
         Returns:
             tuple[plt.Figure, plt.Axes]: Figure and Axes objects.
         """
-        if not self._nodes.size == 2 ** len(self.items):
+        if not self._nodes.size == 2 ** len(self._items):
             self.solve_all_nodes()
 
         kp_network = kp_network = nx.DiGraph()
@@ -415,7 +411,7 @@ class Knapsack:
 
         if fig is None or ax is None:
             fig, ax = plt.subplots(
-                figsize=(4 * len(self.items) / 10, 4 * len(self.items) / 10),
+                figsize=(4 * len(self._items) / 10, 4 * len(self._items) / 10),
                 dpi=1000,
                 nrows=1,
                 ncols=1,
@@ -459,7 +455,7 @@ class Knapsack:
                     "value": item.value,
                     "weight": item.weight,
                 }
-                for i, item in enumerate(self.items)
+                for i, item in enumerate(self._items)
             ],
         }
 
@@ -492,7 +488,7 @@ class Knapsack:
         Returns:
             pd.DataFrame: Summary DataFrame.
         """
-        n_terminal = 2 ** len(self.items)
+        n_terminal = 2 ** len(self._items)
         n_optimal = len(self._optimal_nodes)
 
         header = [
@@ -500,7 +496,7 @@ class Knapsack:
             f"nC = {
                 round(
                     self._capacity
-                    / np.sum([item.weight for item in self.items]),
+                    / np.sum([item.weight for item in self._items]),
                     2,
                 )
             }",
@@ -523,15 +519,15 @@ class Knapsack:
 
         columns = pd.MultiIndex.from_arrays(
             [
-                [header] * len(self.items),
-                [i + 1 for i, item in enumerate(self.items)],
+                [header] * len(self._items),
+                [i + 1 for i, item in enumerate(self._items)],
             ]
         )
 
         rows = [
-            [item.value for item in self.items],
-            [item.weight for item in self.items],
-            [round(item.value / item.weight, 3) for item in self.items],
+            [item.value for item in self._items],
+            [item.weight for item in self._items],
+            [round(item.value / item.weight, 3) for item in self._items],
         ]
         rows.extend(
             [
