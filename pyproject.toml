@@ -139,4 +139,7 @@ quote-style = "double"
 indent-style = "space"
 
 [tool.ruff.lint]
-select = ["E501"]
+select = ["E501", "D"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"  
