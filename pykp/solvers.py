@@ -39,9 +39,12 @@ Example:
         print(optimal_nodes)
 """
 
+import itertools
+import operator
 from collections import defaultdict
 from dataclasses import dataclass, field
 from queue import PriorityQueue
+from typing import Tuple
 
 import nest_asyncio
 import numpy as np
@@ -190,7 +193,7 @@ def _expand_node(
     return children
 
 
-def _is_terminal_node(node: Node, capacity: int) -> bool:
+def _is_leaf_node(node: Node, capacity: int) -> bool:
     """
     Private method to determine whether subset of items is a terminal node.
 
@@ -316,7 +319,7 @@ def branch_and_bound(
                 continue
 
             queue.put(child)
-            if child.value >= incumbent and _is_terminal_node(child, capacity):
+            if child.value >= incumbent and _is_leaf_node(child, capacity):
                 n_best_values.append(child.value)
                 n_best_values = sorted(n_best_values, reverse=True)[:n]
                 incumbent = n_best_values[-1]
@@ -454,3 +457,159 @@ def greedy(items: np.ndarray[Item], capacity: int) -> Arrangement:
         weight += best_item.weight
 
     return Arrangement(items=items, state=state)
+
+
+def _is_subset_feasible(subset: list[Item], capacity) -> bool:
+    """
+    Private method to determine whether subset of items is feasible
+    (below capacity limit).
+
+    Args:
+        subset (list[Item]): Subset of items.
+        capacity (int): Capacity of the knapsack.
+
+    Returns:
+        bool: True if the node is terminal, otherwise False.
+    """
+    weight = sum([i.weight for i in subset])
+    balance = capacity - weight
+    if balance < 0:
+        return False
+    return True
+
+
+def _is_subset_terminal(
+    subset: list[Item], items: list[Item], capacity
+) -> bool:
+    """
+    Private method to determine whether subset of items is a terminal node.
+
+    Args:
+        subset (list[Item]): Subset of items.
+        items (list[Item]): All items in the knapsack.
+        capacity (int): Capacity of the knapsack.
+
+    Returns:
+        bool: True if the node is terminal, otherwise False.
+    """
+    weight = sum([i.weight for i in subset])
+    balance = capacity - weight
+    if balance < 0:
+        return False
+    remaining_items = set(items) - set(subset)
+    for i in remaining_items:
+        if i.weight <= balance:
+            return False
+    return True
+
+
+def brute_force(
+    items: list[Item], capacity: int
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Finds the optimal solution to the knapsack problem using brute force.
+    Also generates all possible, feasible, and terminal nodes in the
+    knapsack problem.
+
+    Example:
+        To solve a knapsack problem instance using the brute-force
+        algorithm, first create a list of items and then call the solver
+        with the items and capacity::
+
+            from pykp import Item, solvers
+
+            items = [
+                Item(value=10, weight=5),
+                Item(value=15, weight=10),
+                Item(value=7, weight=3),
+            ]
+            capacity = 15
+            (optimal, terminal, feasible, all) = solvers.brute_force(
+                items, capacity
+            )
+            print(optimal)
+
+        Alternatively, construct an instance of the `Knapsack` class and
+        call the `solve` method with "brute_force" as the `method`
+        argument::
+
+            from pykp import Item, Knapsack
+
+            items = [
+                Item(value=10, weight=5),
+                Item(value=15, weight=10),
+                Item(value=7, weight=3),
+            ]
+            capacity = 15
+            instance = Knapsack(items=items, capacity=capacity)
+            instance.solve(method="branch_and_bound")
+            print(instance.optimal_nodes)
+
+    Args:
+        items (list[Item]): Items that can be included in the knapsack.
+        capacity (int): Capacity of the knapsack.
+
+    Returns:
+        np.ndarray: Optimal nodes in the knapsack problem.
+        np.ndarray: Terminal nodes in the knapsack problem.
+        np.ndarray: Feasible nodes in the knapsack problem.
+        np.ndarray: All nodes in the knapsack problem.
+    """
+    nodes = np.array([])
+    feasible_nodes = np.array([])
+    terminal_nodes = np.array([])
+    optimal_nodes = np.array([])
+
+    for i in range(1, len(items) + 1):
+        subsets = list(itertools.combinations(items, i))
+        for subset in subsets:
+            nodes = np.append(
+                nodes,
+                Arrangement(
+                    items=items,
+                    state=np.array([int(item in subset) for item in items]),
+                ),
+            )
+            if _is_subset_feasible(subset, capacity):
+                feasible_nodes = np.append(
+                    feasible_nodes,
+                    Arrangement(
+                        items=items,
+                        state=np.array(
+                            [int(item in subset) for item in items]
+                        ),
+                    ),
+                )
+            if _is_subset_terminal(subset, items, capacity):
+                terminal_nodes = np.append(
+                    terminal_nodes,
+                    Arrangement(
+                        items=items,
+                        state=np.array(
+                            [int(item in subset) for item in items]
+                        ),
+                    ),
+                )
+    nodes = np.append(
+        nodes,
+        Arrangement(items=items, state=np.zeros(len(items), dtype=int)),
+    )
+    feasible_nodes = np.append(
+        feasible_nodes,
+        Arrangement(items=items, state=np.zeros(len(items), dtype=int)),
+    )
+    feasible_nodes = sorted(
+        feasible_nodes,
+        key=operator.attrgetter("value"),
+    )
+    terminal_nodes = sorted(
+        terminal_nodes, key=operator.attrgetter("value"), reverse=True
+    )
+    optimal_nodes = np.array(
+        [
+            arrangement
+            for arrangement in terminal_nodes
+            if arrangement.value == terminal_nodes[0].value
+        ]
+    )
+    return optimal_nodes, terminal_nodes, feasible_nodes, nodes
