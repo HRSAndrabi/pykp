@@ -51,10 +51,10 @@ class Arrangement:
         if not np.all(np.isin(state, [0, 1])):
             raise ValueError("Elements of `state` must be 0 or 1.")
 
-        if not isinstance(items, np.ndarray):
+        if isinstance(items, list):
             items = np.array(items)
 
-        if not isinstance(state, np.ndarray):
+        if isinstance(state, list):
             state = np.array(state)
 
         self._items = items
