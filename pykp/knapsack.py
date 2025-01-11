@@ -36,9 +36,9 @@ from anytree import Node, PreOrderIter
 from .arrangement import Arrangement
 from .item import Item
 from .metrics import sahni_k
-from .solvers import branch_and_bound, mzn_gecode
+from .solvers import branch_and_bound, brute_force, mzn_gecode
 
-SOLVERS = ["branch_and_bound", "mzn_gecode"]
+SOLVERS = ["branch_and_bound", "mzn_gecode", "brute_force"]
 
 
 class Knapsack:
@@ -115,16 +115,18 @@ class Knapsack:
 
     def solve(
         self,
-        method: Literal["branch_and_bound", "mzn_gecode"] = "branch_and_bound",
+        method: Literal[
+            "branch_and_bound", "mzn_gecode", "brute_force"
+        ] = "branch_and_bound",
         solve_all_nodes: bool = False,
     ):
         """
         Solves the knapsack problem and returns optimal arrangements.
 
         Parameters:
-            method (Literal["branch_and_bound", "mzn_gecode], optional): The
-                method to use to solve the knapsack problem. Default is
-                "branch_and_bound".
+            method (Literal["branch_and_bound", "mzn_gecode", "brute_force"],
+                optional): The method to use to solve the knapsack problem.
+                Default is "branch_and_bound".
             solve_all_nodes (bool, optional): Whether to find all nodes in the
                 knapsack, including terminal nodes, and feasible nodes. Note,
                 this method applies brute-force and may be infeasible for large
@@ -148,6 +150,20 @@ class Knapsack:
         if method == "mzn_gecode":
             result = mzn_gecode(items=self.items, capacity=self.capacity)
             self.optimal_nodes = np.array([result])
+
+        if method == "brute_force":
+            if len(self.items) > 15:
+                warn(
+                    message="Brute force is infeasible for large instances.",
+                    category=RuntimeWarning,
+                    stacklevel=2,
+                )
+            (
+                self.optimal_nodes,
+                self.terminal_nodes,
+                self.feasible_nodes,
+                self.nodes,
+            ) = brute_force(items=self.items, capacity=self.capacity)
 
         return self.optimal_nodes
 
@@ -260,401 +276,6 @@ class Knapsack:
         mask = np.ma.make_mask(self.state, shrink=False)
         return sum([item.weight for item in self.items[mask]])
 
-    def __calculate_upper_bound(
-        self,
-        included_items: np.ndarray[Item],
-        excluded_items: np.ndarray[Item],
-    ) -> float:
-        """
-        Calculates the upper bound of the supplied branch.
-
-        Args:
-            included_items (np.ndarray[Item]): Items included by all nodes
-                within the branch.
-            excluded_items (np.ndarray[Item]): Items excluded by all nodes
-                within the branch.
-
-        Returns:
-            float: Upper bound of the branch.
-        """
-        arrangement = Arrangement(
-            items=self.items,
-            state=np.array(
-                [int(item in included_items) for item in self.items]
-            ),
-        )
-        candidate_items = np.array(
-            sorted(
-                set(self.items) - set(included_items) - set(excluded_items),
-                key=lambda item: item.value / item.weight,
-                reverse=True,
-            )
-        )
-        balance = self.capacity - arrangement.weight
-
-        if len(candidate_items) == 0:
-            upper_bound = arrangement.value
-        else:
-            i = 0
-            upper_bound = arrangement.value
-            while balance > 0 and i < len(candidate_items):
-                item = candidate_items[i]
-                added_weight = min(balance, item.weight)
-                upper_bound = (
-                    upper_bound + added_weight * item.value / item.weight
-                )
-                balance = balance - added_weight
-                i += 1
-        return upper_bound
-
-    def __explore_node(
-        self,
-        included_items: np.ndarray[Item],
-        excluded_items: np.ndarray[Item],
-        parent: Node,
-        upper_bound: float,
-        solve_second_best: bool,
-    ):
-        """
-        Determines weight/value of node and the upper bound of the branch
-        containing the node. Prunes the branch if the upper bound is below
-        the second-highest-valued terminal node discovered so far.
-
-        Args:
-            included_items (np.ndarray[Item]): Items included in the node.
-            excluded_items (np.ndarray[Item]): Items excluded in the branch.
-            parent (Node): Parent of the node.
-            upper_bound (float): Upper bound of the node.
-        """
-        arrangement = Arrangement(
-            items=self.items,
-            state=np.array(
-                [int(item in included_items) for item in self.items]
-            ),
-        )
-        balance = self.capacity - arrangement.weight
-        if balance < 0:
-            return
-
-        if self.__is_subset_terminal(included_items):
-            self.__bb_minimum_values = sorted(
-                set([*self.__bb_minimum_values, arrangement.value])
-            )[-1 * (1 + int(solve_second_best)) :]
-
-        node = Node(
-            name={"state": arrangement.state, "value": arrangement.value},
-            items=arrangement.items,
-            state=arrangement.state,
-            value=arrangement.value,
-            weight=arrangement.weight,
-            upper_bound=upper_bound,
-            parent=parent,
-        )
-
-        if len(excluded_items) + len(included_items) < len(self.items):
-            next_item = self.items[len(excluded_items) + len(included_items)]
-
-            upper_bound = self.__calculate_upper_bound(
-                included_items=np.append(included_items, next_item),
-                excluded_items=excluded_items,
-            )
-            if upper_bound > np.min(self.__bb_minimum_values):
-                self.__bb_queue = np.append(
-                    self.__bb_queue,
-                    {
-                        "included_items": np.append(included_items, next_item),
-                        "excluded_items": excluded_items,
-                        "parent": node,
-                        "upper_bound": upper_bound,
-                        "solve_second_best": solve_second_best,
-                    },
-                )
-
-            upper_bound = self.__calculate_upper_bound(
-                included_items=included_items,
-                excluded_items=np.append(excluded_items, next_item),
-            )
-            if upper_bound > np.min(self.__bb_minimum_values):
-                self.__bb_queue = np.append(
-                    self.__bb_queue,
-                    {
-                        "included_items": included_items,
-                        "excluded_items": np.append(excluded_items, next_item),
-                        "parent": node,
-                        "upper_bound": upper_bound,
-                        "solve_second_best": solve_second_best,
-                    },
-                )
-
-    def solve_branch_and_bound(self, solve_second_best: bool):
-        """
-        Solves the optimal and second-best terminal nodes using best-first
-        branch-and-bound.
-        """
-        warn(
-            message="Use `solve` with `method = 'branch_and_bound'` instead.",
-            category=DeprecationWarning,
-            stacklevel=2,
-        )
-        self.items = np.array(
-            sorted(
-                self.items,
-                key=lambda item: item.value / item.weight,
-                reverse=True,
-            )
-        )
-        self.__bb_queue = np.array([])
-        self.__bb_minimum_values = np.array([-1])
-        initial_arrangement = Arrangement(
-            items=self.items, state=np.zeros_like(self.items)
-        )
-        upper_bound = self.__calculate_upper_bound(
-            included_items=np.array([]), excluded_items=np.array([])
-        )
-        root = Node(
-            name={
-                "state": initial_arrangement.state,
-                "value": initial_arrangement.value,
-            },
-            items=self.items,
-            state=np.zeros_like(self.items),
-            value=0,
-            weight=0,
-            upper_bound=upper_bound,
-            parent=None,
-        )
-
-        self.__bb_queue = np.append(
-            {
-                "included_items": np.array([self.items[0]]),
-                "excluded_items": np.array([]),
-                "parent": root,
-                "upper_bound": self.__calculate_upper_bound(
-                    included_items=np.array([self.items[0]]),
-                    excluded_items=np.array([]),
-                ),
-                "solve_second_best": solve_second_best,
-            },
-            self.__bb_queue,
-        )
-        self.__bb_queue = np.append(
-            {
-                "included_items": np.array([]),
-                "excluded_items": np.array([self.items[0]]),
-                "parent": root,
-                "upper_bound": self.__calculate_upper_bound(
-                    included_items=np.array([]),
-                    excluded_items=np.array([self.items[0]]),
-                ),
-                "solve_second_best": solve_second_best,
-            },
-            self.__bb_queue,
-        )
-
-        while len(self.__bb_queue) > 0:
-            kwargs, self.__bb_queue = self.__bb_queue[0], self.__bb_queue[1:]
-            self.__explore_node(**kwargs)
-
-            self.__bb_queue = np.array(
-                sorted(
-                    [
-                        item
-                        for item in self.__bb_queue
-                        if item["upper_bound"]
-                        > np.min(self.__bb_minimum_values)
-                    ],
-                    key=lambda x: x["upper_bound"],
-                    reverse=True,
-                )
-            )
-
-        self.tree = root
-        nodes = sorted(
-            set(
-                [
-                    (tuple(node.state), node.value)
-                    for node in PreOrderIter(root)
-                    if self.__is_subset_terminal(
-                        [
-                            self.items[i]
-                            for i, inside in enumerate(node.state)
-                            if bool(inside)
-                        ]
-                    )
-                ]
-            ),
-            key=lambda x: x[1],
-            reverse=True,
-        )
-        self.optimal_nodes = np.array(
-            [
-                Arrangement(items=self.items, state=np.array(node[0]))
-                for node in nodes
-                if node[1] == nodes[0][1]
-            ]
-        )
-
-        if solve_second_best:
-            self.terminal_nodes = np.append(
-                self.optimal_nodes,
-                np.array(
-                    Arrangement(
-                        items=self.items,
-                        state=np.array(nodes[len(self.optimal_nodes)][0]),
-                    )
-                ),
-            )
-
-    def solve_terminal_nodes(self):
-        """
-        Solves the knapsack problem and returns optimal arrangements. This
-        method will be deprecated in future versions. Use `solve` with
-        `solve_feasible_nodes=True` instead.
-
-        Returns:
-            np.ndarray: Optimal arrangements for the knapsack problem.
-        """
-        warn(
-            message="Use `solve` with `solve_terminal_nodes=True` instead.",
-            category=DeprecationWarning,
-            stacklevel=2,
-        )
-        self.solve_all_nodes()
-
-        return self.terminal_nodes
-
-    def solve_feasible_nodes(self) -> np.ndarray:
-        """
-        Solves the knapsack problem and returns optimal arrangements.
-        This method will be deprecated in future versions. Use `solve` with
-        `solve_feasible_nodes=True` instead.
-
-        Parameters:
-            verbose (bool, optional): If True, prints the string representation
-                of the knapsack summary. Default is True.
-
-        Returns:
-            np.ndarray: Optimal arrangements for the knapsack problem.
-        """
-        warn(
-            message="Use `solve` with `solve_terminal_nodes=True` instead.",
-            category=DeprecationWarning,
-            stacklevel=2,
-        )
-        self.solve_all_nodes()
-
-        return self.feasible_nodes
-
-    def solve_all_nodes(self) -> np.ndarray:
-        """
-        Computes all nodes in the knapsack problem. Populates attributes
-        `nodes`, `feasible_nodes`, `terminal_nodes`, `optimal_nodes`.
-
-        Returns:
-            np.ndarray: All nodes in the knapsack problem.
-        """
-        self.nodes = np.array([])
-        self.feasible_nodes = np.array([])
-        self.terminal_nodes = np.array([])
-        self.optimal_nodes = np.array([])
-
-        for i in range(1, len(self.items) + 1):
-            subsets = list(itertools.combinations(self.items, i))
-            for subset in subsets:
-                self.nodes = np.append(
-                    self.nodes,
-                    Arrangement(
-                        items=self.items,
-                        state=np.array(
-                            [int(item in subset) for item in self.items]
-                        ),
-                    ),
-                )
-                if self.__is_subset_feasible(subset):
-                    self.feasible_nodes = np.append(
-                        self.feasible_nodes,
-                        Arrangement(
-                            items=self.items,
-                            state=np.array(
-                                [int(item in subset) for item in self.items]
-                            ),
-                        ),
-                    )
-                if self.__is_subset_terminal(subset):
-                    self.terminal_nodes = np.append(
-                        self.terminal_nodes,
-                        Arrangement(
-                            items=self.items,
-                            state=np.array(
-                                [int(item in subset) for item in self.items]
-                            ),
-                        ),
-                    )
-        self.nodes = np.append(
-            self.nodes,
-            Arrangement(
-                items=self.items, state=np.zeros(len(self.items), dtype=int)
-            ),
-        )
-        self.feasible_nodes = np.append(
-            self.feasible_nodes,
-            Arrangement(
-                items=self.items, state=np.zeros(len(self.items), dtype=int)
-            ),
-        )
-        self.feasible_nodes = sorted(
-            self.feasible_nodes,
-            key=operator.attrgetter("value"),
-        )
-        self.terminal_nodes = sorted(
-            self.terminal_nodes, key=operator.attrgetter("value"), reverse=True
-        )
-        self.optimal_nodes = np.array(
-            [
-                arrangement
-                for arrangement in self.terminal_nodes
-                if arrangement.value == self.terminal_nodes[0].value
-            ]
-        )
-        return self.nodes
-
-    def __is_subset_feasible(self, subset: list[Item]) -> bool:
-        """
-        Private method to determine whether subset of items is feasible
-        (below capacity limit).
-
-        Args:
-            subset (list[Item]): Subset of items.
-
-        Returns:
-            bool: True if the node is terminal, otherwise False.
-        """
-        weight = sum([i.weight for i in subset])
-        balance = self.capacity - weight
-        if balance < 0:
-            return False
-        return True
-
-    def __is_subset_terminal(self, subset: list[Item]) -> bool:
-        """
-        Private method to determine whether subset of items is a terminal node.
-
-        Args:
-            subset (list[Item]): Subset of items.
-
-        Returns:
-            bool: True if the node is terminal, otherwise False.
-        """
-        weight = sum([i.weight for i in subset])
-        balance = self.capacity - weight
-        if balance < 0:
-            return False
-        remaining_items = set(self.items) - set(subset)
-        for i in remaining_items:
-            if i.weight <= balance:
-                return False
-        return True
-
     def plot_terminal_nodes_histogram(self) -> tuple[plt.Figure, plt.Axes]:
         """
         Plots a histogram of values for possible at-capacity arrangements.
@@ -663,7 +284,7 @@ class Knapsack:
                 tuple[plt.Figure, plt.Axes]: Figure and Axes objects.
         """
         if not self.nodes.size == 2 ** len(self.items):
-            self.solve_all_nodes()
+            self.solve(method="brute_force")
 
         fig, axes = plt.subplots(
             figsize=(8, 3), dpi=300, nrows=1, ncols=1, constrained_layout=True
