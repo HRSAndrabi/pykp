@@ -647,7 +647,6 @@ class Knapsack:
         """
         instance_spec = {
             "capacity": self._capacity,
-            "optimal_value": self._optimal_nodes[0].value,
             "items": [
                 {
                     "id": i,
