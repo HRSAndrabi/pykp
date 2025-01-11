@@ -1,6 +1,7 @@
-"""
-Provides an interface for defining items inside a knapsack problem
-instance.
+"""Interface for defining items inside a knapsack problem.
+
+The :class:`Item` class is used to define items for the knapsack problem. Each
+item has a value and a weight associated with it.
 
 Example:
     Use the Item class to define items for the knapsack problem::
@@ -23,9 +24,12 @@ class Item:
     """
     Represents an item for the knapsack problem.
 
-    Parameters:
-        value (int): The value of the item.
-        weight (int): The weight of the item.
+    Parameters
+    ----------
+        value: int
+            The value of the item.
+        weight: int
+            The weight of the item.
     """
 
     value: int = field(compare=False)
