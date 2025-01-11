@@ -1,24 +1,27 @@
-"""
-Provides an interface for defining instances of the 0-1 Knapsack
-Problem.
+"""Interface for defining instances of the 0-1 Knapsack Problem.
 
-Example:
-    To define a Knapsack instance, initialise the `Knapsack` class with `Items`
-    and a capacity constraint::
+Knapsack instances are defined by a set of items, each with weights and values,
+and a capacity constraint. The :class:`Knapsack` class provides methods to
+solve instances using different algorithms, add or remove items, and visualise
+the solution.
 
-        from pykp import Knapsack
-        from pykp import Item
+Examples
+--------
+To define a Knapsack instance, initialise the `Knapsack` class with `Items`
+and a capacity constraint
 
-        items = [
-            Item(value=10, weight=5),
-            Item(value=15, weight=10),
-            Item(value=7, weight=3),
-        ]
-        capacity = 15
-        knapsack = Knapsack(items=items, capacity=capacity)
-        knapsack.solve()
-        print(knapsack.optimal_nodes)
-
+>>> from pykp import Knapsack
+>>> from pykp import Item
+>>> items = [
+...     Item(value=10, weight=5),
+...     Item(value=15, weight=10),
+...     Item(value=7, weight=3),
+... ]
+>>> capacity = 15
+>>> knapsack = Knapsack(items=items, capacity=capacity)
+>>> knapsack.solve()
+>>> print(knapsack.optimal_nodes)
+[(v: 25, w: 15, s: 3)]
 """
 
 import itertools
@@ -42,17 +45,74 @@ SOLVERS = ["branch_and_bound", "mzn_gecode", "brute_force"]
 
 
 class Knapsack:
-    """
-    Represents a knapsack problem solver.
+    """Represents a knapsack problem solver.
 
-    Parameters:
-        items (list[Item]): An array of items for the knapsack
-        problem.
-        capacity (float): The capacity constraint of the knapsack.
-        load_from_json (bool, optional): Whether to load the instance from
-            a .json spec. Default is False.
-        path_to_spec (str, optional): Path to json spec file. Default
-            is None.
+    An instance is defined by a set of `items` and a `capacity` constraint.
+    The `Knapsack` class provides methods to dynamically add or remove items,
+    solve the knapsack problem using different algorithms, and visualise the
+    solution.
+
+    Parameters
+    ----------
+    items : list of Item
+        A list of `Item` objects, each representing a candidate for the
+        knapsack with associated value and weight.
+    capacity : float
+        The maximum total weight allowed in the knapsack.
+    load_from_json : bool, optional
+        Whether to load the items and capacity from a JSON file. If set to
+        True, `path_to_spec` must be provided. Default is False.
+    path_to_spec : str, optional
+        Path to the JSON specification file containing an array of items
+        (`value`, `weight`) and the knapsack capacity. Only used if
+        `load_from_json` is True. Default is None.
+
+    Examples
+    --------
+    Create a knapsack instance and solve using default settings:
+
+    >>> from pykp import Knapsack
+    >>> from pykp import Item
+    >>> items = [
+    ...     Item(value=10, weight=5),
+    ...     Item(value=15, weight=10),
+    ...     Item(value=7, weight=3),
+    ... ]
+    >>> capacity = 15
+    >>> knapsack = Knapsack(items=items, capacity=capacity)
+    >>> knapsack.solve()
+    >>> print(knapsack.optimal_nodes)
+    [(v: 25, w: 15, s: 3)]
+
+    Solve the knapsack using the branch-and-bound method
+    and explore the optimal nodes:
+
+    >>> from knapsack_solver import Item, Knapsack
+    >>> items = [
+    ...     Item(value=10, weight=10),
+    ...     Item(value=5, weight=5),
+    ...     Item(value=5, weight=5),
+    ... ]
+    >>> knapsack = Knapsack(items=items, capacity=10)
+    >>> knapsack.solve(method="branch_and_bound")
+    >>> print(len(knapsack.optimal_nodes)
+    2
+    >>> for arrangement in knapsack.optimal_nodes:
+    ...     print(
+    ...         "Value:",
+    ...         arrangement.value,
+    ...         "Weight:",
+    ...         arrangement.weight,
+    ...         "State:",
+    ...         arrangement.state,
+    ...     )
+    Value: 10 Weight: 10 State: [1.0 0.0 0.0]
+    Value: 10 Weight: 10 State: [0.0 1.0 0.0]
+
+    See Also
+    --------
+    pykp.item : Represents an item with value and weight attributes.
+    pykp.solvers : Module containing solvers for the knapsack problem.
     """
 
     def __init__(
@@ -109,10 +169,10 @@ class Knapsack:
 
     @state.setter
     def state(self, state: Union[list, np.ndarray]):
-        """
-        Sets the knapsack state using the provided binary array.
+        """Set the knapsack state using the provided binary array.
 
-        Parameters:
+        Parameters
+        ----------
             state (list or np.ndarry): Binary array indicating the
                 inclusion/exclusion of items in the knapsack.
         """
@@ -138,38 +198,41 @@ class Knapsack:
 
     @property
     def is_at_capacity(self) -> bool:
-        """
-        Whether the knapsack is at full capacity, i.e placing in any item
-        from the current set of excluded items would exceed the capacity.
+        """Whether the knapsack is at full capacity.
+
+        A knapsack is at full capacity when placing in any item
+        from the current set of excluded items would cause the sum of
+        weights to exceed the capacity constraint.
         """
         return self._is_at_capacity
 
     @property
     def optimal_nodes(self) -> list[Arrangement]:
-        """
-        An array of optimal nodes in the knapsack. Optimal nodes are
-        arrangements of items that maximise the total value of items in the
-        knapsack, subject to the weight constraint. Optimal nodes are a subset
-        of ``terminal_nodes``.
+        """An array of optimal nodes in the knapsack.
+
+        Optimal nodes are arrangements of items that maximise the total value
+        of items in the knapsack, subject to the weight constraint.
+        Optimal nodes are a subset of ``terminal_nodes``.
         """
         return list(self._optimal_nodes)
 
     @property
     def terminal_nodes(self) -> list[Arrangement]:
-        """
-        An array of terminal nodes in the knapsack. Terminal nodes are
-        arrangements of items that are under the weight constraint, and at
-        full capacity (no more items can be added without exceeding the
-        capacity constraint). Terminal nodes are a subset of
+        """An array of terminal nodes in the knapsack.
+
+        Terminal nodes are arrangements of items that are under the weight
+        constraint, and at full capacity (no more items can be added without
+        exceeding the capacity constraint). Terminal nodes are a subset of
         ``feasible_nodes``.
         """
         return list(self._terminal_nodes)
 
     @property
     def feasible_nodes(self) -> list[Arrangement]:
-        """
-        An array of feasible nodes in the knapsack. Feasible nodes are
-        arrangements of items that are under the weight constraint.
+        """An array of feasible nodes in the knapsack.
+
+        Feasible nodes are arrangements of items that are under the weight
+        constraint.
         """
         return list(self._feasible_nodes)
 
@@ -183,29 +246,42 @@ class Knapsack:
         method: Literal[
             "branch_and_bound", "mzn_gecode", "brute_force"
         ] = "branch_and_bound",
-        solve_all_nodes: bool = False,
     ):
-        """
-        Solves the knapsack problem and returns optimal arrangements.
+        """Solves the knapsack problem to find optimal arrangements.
 
-        Parameters:
-            method (Literal["branch_and_bound", "mzn_gecode", "brute_force"],
-                optional): The method to use to solve the knapsack problem.
-                Default is "branch_and_bound".
-            solve_all_nodes (bool, optional): Whether to find all nodes in the
-                knapsack, including terminal nodes, and feasible nodes. Note,
-                this method applies brute-force and may be infeasible for large
-                instances. Default is False.
+        Parameters
+        ----------
+        method : {"branch_and_bound", "mzn_gecode", "brute_force"}, optional
+            The algorithm to use for solving. Default is "branch_and_bound".
 
-        Returns:
-            np.ndarray: Optimal arrangements for the knapsack problem.
+        Returns
+        -------
+        np.ndarray
+            An array of `Arrangement` objects representing the optimal
+            solutions.
+
+        Raises
+        ------
+        ValueError
+            If the specified `method` is invalid.
+
+        Examples
+        --------
+        >>> from pykp import Knapsack
+        >>> from pykp import Item
+        >>> items = [
+        ...     Item(value=10, weight=5),
+        ...     Item(value=15, weight=10),
+        ...     Item(value=7, weight=3),
+        ... ]
+        >>> capacity = 15
+        >>> knapsack = Knapsack(items=items, capacity=capacity)
+        >>> knapsack.solve(method="branch_and_bound")
+        >>> print(knapsack.optimal_nodes)
+        [(v: 25, w: 15, s: 3)]
         """
         if method not in SOLVERS:
             raise ValueError(f"`method` must be one of: {SOLVERS}.")
-
-        if solve_all_nodes:
-            self.solve_all_nodes()
-            return
 
         if method == "branch_and_bound":
             self._optimal_nodes = branch_and_bound(
@@ -230,17 +306,41 @@ class Knapsack:
                 self._nodes,
             ) = brute_force(items=self._items, capacity=self._capacity)
 
-        return self._optimal_nodes
+        return self.optimal_nodes
 
-    def add(self, item: Item):
+    def add(self, item: Item) -> list:
         """
-        Adds the specified item to the knapsack.
+        Includes a specific item in the knapsack.
 
-        Parameters:
-            item (Item): The item to be added to the knapsack.
+        Parameters
+        ----------
+        item : Item
+            The item to add. Must already exist among `self.items`.
 
-        Returns:
-            np.ndarray: The updated knapsack state.
+        Returns
+        -------
+        list
+            The updated binary state array after adding the item.
+
+        Raises
+        ------
+        ValueError
+            If `item` is not of type `Item` or if it is not present in
+            `self.items`.
+
+        Examples
+        --------
+        >>> items = [Item(10, 5), Item(15, 5)]
+        >>> knapsack = Knapsack(
+        >>>     items=items,
+        ...     capacity=6
+        ... )
+        >>> knapsack.add(items[1])
+        array([0, 1])
+        >>> knapsack.value
+        15
+        >>> knapsack.weight
+        5
         """
         if not isinstance(item, Item):
             raise ValueError("`item` must be of type `Item`.")
@@ -251,17 +351,43 @@ class Knapsack:
             )
         self._state[np.where(self._items == item)[0][0]] = 1
         self.__update_state()
-        return self._state
+        return self.state
 
-    def remove(self, item: Item):
+    def remove(self, item: Item) -> list:
         """
-        Removes the specified item from the knapsack.
+        Remove a specific item from the knapsack.
 
-        Parameters:
-            item (Item): The item to be removed from the knapsack.
+        Parameters
+        ----------
+        item : Item
+            The item to remove. Must already exist among `self.items`.
 
-        Returns:
-            np.ndarray: The updated knapsack state.
+        Returns
+        -------
+        list
+            The updated binary state array after removing the item.
+
+        Raises
+        ------
+        ValueError
+            If `item` is not of type `Item` or if it is not present in
+            `self.items`.
+
+        Examples
+        --------
+        >>> items = [Item(10, 5), Item(15, 5)]
+        >>> knapsack = Knapsack(
+        >>>     items=items,
+        ...     capacity=6
+        ... )
+        >>> knapsack.add(items[1])
+        array([0, 1])
+        >>> knapsack.remove(items[1])
+        array([0, 0])
+        >>> knapsack.value
+        0
+        >>> knapsack.weight
+        0
         """
         if not isinstance(item, Item):
             raise ValueError("`item` must be of type `Item`.")
@@ -273,23 +399,30 @@ class Knapsack:
 
         self._state[np.where(self._items == item)] = 0
         self.__update_state()
-        return self._state
+        return self.state
 
     def empty(self):
-        """
-        Empties the knapsack by setting all items to be excluded.
+        """Remove all items from the knapsack.
 
-        Returns:
-            np.ndarray: The updated knapsack state.
+        Returns
+        -------
+        list
+            The updated binary state array, all set to 0.
+
+        Examples
+        --------
+        >>> knapsack = Knapsack(items=[Item(10, 2), Item(15, 4)], capacity=6)
+        >>> knapsack.add(knapsack.items[0])
+        array([1, 0])
+        >>> knapsack.empty()
+        array([0, 0])
         """
         self._state = np.zeros_like(self._items)
         self.__update_state()
-        return self._state
+        return self.state
 
     def __update_state(self):
-        """
-        Private method to update the knapsacks internal state.
-        """
+        """Update the internal state of the knapsack."""
         self._value = self.__calculate_value()
         self._weight = self.__calculate_weight()
         self._is_feasible = self._capacity >= self._weight
@@ -306,53 +439,90 @@ class Knapsack:
                 > self._capacity
             )
 
-    def __calculate_value(self):
-        """
-        Calculates the total value of items currently in the knapsack.
+    def __calculate_value(self) -> float:
+        """Calculate the total value of items included in the current state.
 
-        Returns:
-            float: The total value of items in the knapsack.
+        Returns
+        -------
+        float
+            Sum of the values of included items.
         """
         mask = np.ma.make_mask(self._state, shrink=False)
         return sum([item.value for item in self._items[mask]])
 
     def __calculate_weight(self):
-        """
-        Calculates the total weight of items currently in the knapsack.
+        """Calculate the total weight of items included in the current state.
 
-        Returns:
-            float: The total weight of items in the knapsack.
+        Returns
+        -------
+        float
+            Sum of the weights of included items.
         """
         mask = np.ma.make_mask(self._state, shrink=False)
         return sum([item.weight for item in self._items[mask]])
 
-    def plot_terminal_nodes_histogram(self):
-        """
-        Plots a histogram of values for possible at-capacity arrangements.
+    def plot_terminal_nodes_histogram(
+        self, ax: plt.Axes = None
+    ) -> tuple[plt.Figure, plt.Axes]:
+        """Plot a histogram of terminal node values.
 
-        Returns:
-                tuple[plt.Figure, plt.Axes]: Figure and Axes objects.
+        All nodes are enumerated to find terminal nodes, and then plotted
+        as a histogram. Terminal nodes are arrangements of items that are
+        under the weight constraint, and at full capacity––that is, no more
+        items can be added without exceeding the capacity constraint. Terminal
+        nodes are a subset of ``feasible_nodes``.
+
+        If the terminal nodes have not been enumerated, this method will first
+        call `solve` with the `brute_force` method to find the terminal nodes.
+        Note that this is infeasible for large n.
+
+        Parameters
+        ----------
+        ax : matplotlib.pyplot.Axes, optional
+            The axes object to plot the histogram. Defaults to None.
+
+        Returns
+        -------
+        tuple of (matplotlib.pyplot.Figure, matplotlib.pyplot.Axes)
+            The figure and axes objects of the resulting histogram.
+
+        Examples
+        --------
+        .. plot::
+
+            >>> import random
+            >>> from pykp import Item, Knapsack
+            >>> import matplotlib.pyplot as plt
+            >>>
+            >>> random.seed(42)
+            >>> weights = [random.randint(1, 100) for _ in range(12)]
+            >>> values = [random.randint(1, 100) for _ in range(12)]
+            >>> items = [Item(v, w) for v, w in zip(values, weights)]
+            >>> capacity = sum(weights) / 2
+            >>> knapsack = Knapsack(items=items, capacity=capacity)
+            >>> knapsack.solve(method="brute_force")
+            [(v: 372, w: 300, s: 4000)]
+            >>> fig, ax = knapsack.plot_terminal_nodes_histogram()
+            >>> plt.show()
         """
         if not self._nodes.size == 2 ** len(self._items):
             self.solve(method="brute_force")
 
-        fig, axes = plt.subplots(
-            figsize=(8, 3), dpi=300, nrows=1, ncols=1, constrained_layout=True
-        )
+        if not ax:
+            fig, ax = plt.subplots(nrows=1, ncols=1, constrained_layout=True)
 
-        axes.hist(
+        ax.hist(
             [arrangement.value for arrangement in self._terminal_nodes],
             bins=100,
-            color="#FF2C00",
-            alpha=0.7,
+            alpha=1,
         )
-        axes.set_ylabel("Number of solutions")
-        axes.set_xlabel("Solution value")
-        plt.show()
+        ax.set_ylabel("Number of terminal nodes")
+        ax.set_xlabel("Value")
 
-        return fig, axes
+        return fig, ax
 
     def __get_node_color(self, arrangement):
+        """Get the colour of a node in the network plot."""
         # Optimal node
         if arrangement.value == self._optimal_nodes[0].value:
             return "#57ff29"
@@ -367,20 +537,44 @@ class Knapsack:
     def plot_network(
         self,
         fig=None,
-        ax=None,
-        show: bool = True,
-    ):
+        ax=plt.Axes,
+    ) -> tuple[plt.Figure, plt.Axes]:
         """
-        Plots a network of knapsack nodes.
+        Visualises a graph representation of the knapsack problem.
 
-        Args:
-            fig (plt.Figure, optional): Figure object. Default is None.
-            ax (plt.Axes, optional): Axes object. Default is None.
-            show (bool, optional): Whether to display the plot. Default
-                is True.
+        Each node in the graph represents a unqiue arrangement of items inside
+        the knapsack. Edges connect nodes whose states differ by a single
+        item,  and represent the elementary operations of adding or removing a
+        single item from the knapsack.
 
-        Returns:
-            tuple[plt.Figure, plt.Axes]: Figure and Axes objects.
+        Parameters
+        ----------
+        ax : matplotlib.pyplot.Axes, optional
+            An existing axes object to plot on. Defaults to None.
+
+        Returns
+        -------
+        tuple of (matplotlib.pyplot.Figure, matplotlib.pyplot.Axes)
+            The figure and axes of the created or updated plot.
+
+        Examples
+        --------
+        .. plot::
+
+            >>> import random
+            >>> from pykp import Item, Knapsack
+            >>> import matplotlib.pyplot as plt
+            >>>
+            >>> random.seed(42)
+            >>> weights = [random.randint(1, 100) for _ in range(5)]
+            >>> values = [random.randint(1, 100) for _ in range(5)]
+            >>> items = [Item(v, w) for v, w in zip(values, weights)]
+            >>> capacity = sum(weights) / 2
+            >>> knapsack = Knapsack(items=items, capacity=capacity)
+            >>> knapsack.solve(method="brute_force")
+            [(v: 142, w: 114, s: 28)]
+            >>> fig, ax = knapsack.plot_network()
+            >>> plt.show()
         """
         if not self._nodes.size == 2 ** len(self._items):
             self.solve_all_nodes()
@@ -409,7 +603,7 @@ class Knapsack:
                 ]
             )
 
-        if fig is None or ax is None:
+        if ax is None:
             fig, ax = plt.subplots(
                 figsize=(4 * len(self._items) / 10, 4 * len(self._items) / 10),
                 dpi=1000,
@@ -431,23 +625,28 @@ class Knapsack:
             arrowsize=0.01,
             with_labels=False,
         )
-        if show:
-            plt.show()
+
         return fig, ax
 
     def write_to_json(self, path: str):
-        """
-        Writes the knapsack instance to .json.
+        """Write the knapsack configuration to a JSON file.
 
-        Args:
-            path (str): Filepath to output file.
-        """
-        if self._optimal_nodes.size == 0:
-            self.solve()
+        The output file can be used to load the knapsack instance at a later
+        time using the `load_from_json` method.
 
+        Parameters
+        ----------
+        path : str
+            The file path for the output JSON file.
+
+        Examples
+        --------
+        >>> knapsack = Knapsack(items=[Item(10, 2), Item(20, 4)], capacity=6)
+        >>> knapsack.solve()
+        >>> knapsack.write_to_json("output.json")
+        """
         instance_spec = {
             "capacity": self._capacity,
-            "sahni_k": sahni_k(self._optimal_nodes[0], self._capacity),
             "optimal_value": self._optimal_nodes[0].value,
             "items": [
                 {
@@ -463,11 +662,21 @@ class Knapsack:
             json.dump(instance_spec, f, indent=4, default=int)
 
     def load_from_json(self, path: str):
-        """
-        Loads knapsack instance from a .json file.
+        """Load a knapsack configuration from a JSON file.
 
-        Args:
-            path (str): Filepath to instance .json file.
+        Parameters
+        ----------
+        path : str
+            The file path of the JSON specification.
+
+        Examples
+        --------
+        >>> knapsack = Knapsack(
+        ...     items=[],
+        ...     capacity=0,
+        ...     load_from_json=True,
+        ...     path_to_spec="knapsack_config.json",
+        ... )
         """
         with open(path) as f:
             spec = json.load(f)
@@ -482,11 +691,19 @@ class Knapsack:
             )
 
     def summary(self):
-        """
-        Generates a summary of the knapsack instance.
+        """Return a DataFrame summarising the knapsack instance.
 
-        Returns:
-            pd.DataFrame: Summary DataFrame.
+        Returns
+        -------
+        pandas.DataFrame
+            A summary table describing the knapsack instance.
+
+        Examples
+        --------
+        >>> knapsack = Knapsack(items=[Item(10, 2), Item(20, 4)], capacity=6)
+        >>> knapsack.solve(method="brute_force")
+        >>> df = knapsack.summary()
+        >>> print(df)
         """
         n_terminal = 2 ** len(self._items)
         n_optimal = len(self._optimal_nodes)
@@ -568,4 +785,5 @@ class Knapsack:
         return pd.DataFrame(rows, columns=columns, index=index, dtype="object")
 
     def __str__(self):
+        """Return a string representation of the knapsack instance."""
         return repr(self.summary())
