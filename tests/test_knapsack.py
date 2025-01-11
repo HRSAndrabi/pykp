@@ -56,7 +56,7 @@ def test_remove_item(knapsack: Knapsack):
 
 
 def test_set_state(knapsack: Knapsack):
-    knapsack.set_state([1, 0, 1, 0])
+    knapsack.state = [1, 0, 1, 0]
     print(knapsack.items)
     assert knapsack.value == 22
     assert knapsack.weight == 13
@@ -65,7 +65,7 @@ def test_set_state(knapsack: Knapsack):
 
 
 def test_empty(knapsack: Knapsack):
-    knapsack.set_state([1, 0, 1, 0])
+    knapsack.state = [1, 0, 1, 0]
     knapsack.empty()
     assert knapsack.value == 0
     assert knapsack.weight == 0
