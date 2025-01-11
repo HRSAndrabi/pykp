@@ -21,9 +21,9 @@ from dataclasses import dataclass, field
 @dataclass(frozen=True, eq=False)
 class Item:
     """
-        Represents an item for the knapsack problem.
+    Represents an item for the knapsack problem.
 
-    Attributes:
+    Parameters:
         value (int): The value of the item.
         weight (int): The weight of the item.
     """
