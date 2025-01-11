@@ -44,6 +44,27 @@ from .knapsack import Knapsack
 
 
 class Sampler:
+    """
+    A class for sampling knapsack instances.
+
+    Parameters:
+        num_items (int): The number of items to sample.
+        normalised_capacity (float): The normalised capacity of the
+            knapsack (sum of weights / capacity constraint).
+        weight_dist (Tuple[np.random.Generator, dict], optional): The
+            distribution to sample weights from. The argument should be a
+            tuple where the first element is the generator function, and
+            the second element is a dictionary of keyword arguments to the
+            generator. Defaults to random uniform over open
+            interval (0, 1).
+        value_dist (Tuple[np.random.Generator, dict], optional): The
+            distribution to sample weights from. The argument should be a
+            tuple where the first element is the generator function, and
+            the second element is a dictionary of keyword arguments to the
+            generator. Defaults to random uniform over open
+            interval (0, 1).
+    """
+
     def __init__(
         self,
         num_items: int,
@@ -57,26 +78,6 @@ class Sampler:
             {"low": 0.001, "high": 1},
         ),
     ):
-        """
-        A class for sampling knapsack instances.
-
-        Args:
-            num_items (int): The number of items to sample.
-            normalised_capacity (float): The normalised capacity of the
-                knapsack (sum of weights / capacity constraint).
-            weight_dist (Tuple[np.random.Generator, dict], optional): The
-                distribution to sample weights from. The argument should be a
-                tuple where the first element is the generator function, and
-                the second element is a dictionary of keyword arguments to the
-                generator. Defaults to random uniform over open
-                interval (0, 1).
-            value_dist (Tuple[np.random.Generator, dict], optional): The
-                distribution to sample weights from. The argument should be a
-                tuple where the first element is the generator function, and
-                the second element is a dictionary of keyword arguments to the
-                generator. Defaults to random uniform over open
-                interval (0, 1).
-        """
         self.num_items = num_items
         self.normalised_capacity = normalised_capacity
         self.weight_dist, self.weight_dist_kwargs = weight_dist
