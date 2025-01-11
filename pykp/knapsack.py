@@ -24,7 +24,7 @@ Example:
 import itertools
 import json
 import operator
-from typing import Literal
+from typing import Literal, Union
 from warnings import warn
 
 import matplotlib.pyplot as plt
@@ -44,28 +44,11 @@ SOLVERS = ["branch_and_bound", "mzn_gecode", "brute_force"]
 class Knapsack:
     """
     Represents a knapsack problem solver.
-
-    Attributes:
-        items (np.ndarray[Item]): An array of items available for the knapsack
-            problem.
-        capacity (int): The maximum weight capacity of the knapsack.
-        state (np.ndarray): Binary array indicating the inclusion/exclusion of
-            items in the knapsack.
-        value (float): The total value of items currently in the knapsack.
-        weight (float): The total weight of items currently in the knapsack.
-        is_feasible (bool): Indicates if the knapsack is within its weight
-            capacity.
-        is_at_capacity (bool): Indicates if the knapsack is at full capacity.
-        terminal_nodes (np.ndarray[Arrangement]): An array of all possible
-            arrangements of items that are under the weight constraint, and at
-            full capacity
-        optimal_nodes (np.ndarray[Arrangement]): An array of optimal solutions
-            to the knapsack problem.
     """
 
     def __init__(
         self,
-        items: np.ndarray[Item],
+        items: list[Item],
         capacity: int,
         load_from_json: bool = False,
         path_to_spec: str = None,
@@ -74,7 +57,7 @@ class Knapsack:
         Initialises a Knapsack instance.
 
         Parameters:
-            items (np.ndarray[Item]): An array of items for the knapsack
+            items (list[Item]): An array of items for the knapsack
             problem.
             capacity (int): The maximum weight capacity of the knapsack.
             load_from_json (bool, optional): Whether to load the instance from
@@ -101,17 +84,103 @@ class Knapsack:
                 items, key=lambda item: item.value / item.weight, reverse=True
             )
         )
-        self.capacity = capacity
-        self.state = np.zeros_like(items)
-        self.value = 0
-        self.weight = 0
-        self.is_feasible = True
-        self.is_at_capacity = False
+        self._capacity = capacity
+        self._state = np.zeros_like(items)
+        self._value = 0
+        self._weight = 0
+        self._is_feasible = True
+        self._is_at_capacity = False
 
-        self.nodes = np.array([])
-        self.feasible_nodes = np.array([])
-        self.terminal_nodes = np.array([])
-        self.optimal_nodes = np.array([])
+        self._nodes = np.array([])
+        self._feasible_nodes = np.array([])
+        self._terminal_nodes = np.array([])
+        self._optimal_nodes = np.array([])
+
+    @property
+    def items(self) -> list[Item]:
+        """The items in the knapsack."""
+        return list(self._items)
+
+    @property
+    def capacity(self) -> float:
+        """The capacity constraint of the knapsack."""
+        return self._capacity
+
+    @property
+    def state(self) -> list[int]:
+        """The binary array indicating the inclusion/exclusion of items."""
+        return list(self._state)
+
+    @state.setter
+    def state(self, state: Union[list, np.ndarray]):
+        """
+        Sets the knapsack state using the provided binary array.
+
+        Parameters:
+            state (list or np.ndarry): Binary array indicating the
+                inclusion/exclusion of items in the knapsack.
+        """
+        if isinstance(state, list):
+            state = np.array(state)
+        self._state = state
+        self.__update_state()
+
+    @property
+    def value(self) -> float:
+        """The total value of items currently in the knapsack."""
+        return self._value
+
+    @property
+    def weight(self) -> float:
+        """The total weight of items currently in the knapsack."""
+        return self._weight
+
+    @property
+    def is_feasible(self) -> bool:
+        """Whether the knapsack is within its weight capacity."""
+        return self._is_feasible
+
+    @property
+    def is_at_capacity(self) -> bool:
+        """
+        Whether the knapsack is at full capacity, i.e placing in any item
+        from the current set of excluded items would exceed the capacity.
+        """
+        return self._is_at_capacity
+
+    @property
+    def optimal_nodes(self) -> list[Arrangement]:
+        """
+        An array of optimal nodes in the knapsack. Optimal nodes are
+        arrangements of items that maximise the total value of items in the
+        knapsack, subject to the weight constraint. Optimal nodes are a subset
+        of ``terminal_nodes``.
+        """
+        return list(self._optimal_nodes)
+
+    @property
+    def terminal_nodes(self) -> list[Arrangement]:
+        """
+        An array of terminal nodes in the knapsack. Terminal nodes are
+        arrangements of items that are under the weight constraint, and at
+        full capacity (no more items can be added without exceeding the
+        capacity constraint). Terminal nodes are a subset of
+        ``feasible_nodes``.
+        """
+        return list(self._terminal_nodes)
+
+    @property
+    def feasible_nodes(self) -> list[Arrangement]:
+        """
+        An array of feasible nodes in the knapsack. Feasible nodes are
+        arrangements of items that are under the weight constraint.
+        """
+        return list(self._feasible_nodes)
+
+    @property
+    def nodes(self) -> list[Arrangement]:
+        """An array of all nodes in the knapsack."""
+        return list(self._nodes)
 
     def solve(
         self,
@@ -143,13 +212,13 @@ class Knapsack:
             return
 
         if method == "branch_and_bound":
-            self.optimal_nodes = branch_and_bound(
-                items=self.items, capacity=self.capacity
+            self._optimal_nodes = branch_and_bound(
+                items=self.items, capacity=self._capacity
             )
 
         if method == "mzn_gecode":
-            result = mzn_gecode(items=self.items, capacity=self.capacity)
-            self.optimal_nodes = np.array([result])
+            result = mzn_gecode(items=self.items, capacity=self._capacity)
+            self._optimal_nodes = np.array([result])
 
         if method == "brute_force":
             if len(self.items) > 15:
@@ -159,13 +228,13 @@ class Knapsack:
                     stacklevel=2,
                 )
             (
-                self.optimal_nodes,
-                self.terminal_nodes,
-                self.feasible_nodes,
-                self.nodes,
-            ) = brute_force(items=self.items, capacity=self.capacity)
+                self._optimal_nodes,
+                self._terminal_nodes,
+                self._feasible_nodes,
+                self._nodes,
+            ) = brute_force(items=self.items, capacity=self._capacity)
 
-        return self.optimal_nodes
+        return self._optimal_nodes
 
     def add(self, item: Item):
         """
@@ -210,21 +279,6 @@ class Knapsack:
         self.__update_state()
         return self.state
 
-    def set_state(self, state: np.ndarray):
-        """
-        Sets the knapsack state using the provided binary array.
-
-        Parameters:
-            state (np.ndarray): Binary array indicating the inclusion/exclusion
-                of items in the knapsack.
-
-        Returns:
-            np.ndarray: The updated knapsack state.
-        """
-        self.state = state
-        self.__update_state()
-        return self.state
-
     def empty(self):
         """
         Empties the knapsack by setting all items to be excluded.
@@ -232,7 +286,7 @@ class Knapsack:
         Returns:
             np.ndarray: The updated knapsack state.
         """
-        self.state = np.zeros_like(self.items)
+        self._state = np.zeros_like(self.items)
         self.__update_state()
         return self.state
 
@@ -240,20 +294,20 @@ class Knapsack:
         """
         Private method to update the knapsacks internal state.
         """
-        self.value = self.__calculate_value()
-        self.weight = self.__calculate_weight()
-        self.is_feasible = self.capacity >= self.weight
+        self._value = self.__calculate_value()
+        self._weight = self.__calculate_weight()
+        self._is_feasible = self._capacity >= self._weight
         out_items = [
             self.items[i]
             for i, element in enumerate(self.state)
             if element == 0
         ]
         if sum(self.state) == len(self.state):
-            self.is_at_capacity = True
+            self._is_at_capacity = True
         else:
-            self.is_at_capacity = (
-                min([self.weight + item.weight for item in out_items])
-                > self.capacity
+            self._is_at_capacity = (
+                min([self._weight + item.weight for item in out_items])
+                > self._capacity
             )
 
     def __calculate_value(self):
@@ -283,7 +337,7 @@ class Knapsack:
         Returns:
                 tuple[plt.Figure, plt.Axes]: Figure and Axes objects.
         """
-        if not self.nodes.size == 2 ** len(self.items):
+        if not self._nodes.size == 2 ** len(self.items):
             self.solve(method="brute_force")
 
         fig, axes = plt.subplots(
@@ -291,7 +345,7 @@ class Knapsack:
         )
 
         axes.hist(
-            [arrangement.value for arrangement in self.terminal_nodes],
+            [arrangement.value for arrangement in self._terminal_nodes],
             bins=100,
             color="#FF2C00",
             alpha=0.7,
@@ -304,11 +358,11 @@ class Knapsack:
 
     def __get_node_color(self, arrangement):
         # Optimal node
-        if arrangement.value == self.optimal_nodes[0].value:
+        if arrangement.value == self._optimal_nodes[0].value:
             return "#57ff29"
 
         # Feasible nodes
-        if arrangement.weight < self.capacity:
+        if arrangement.weight < self._capacity:
             return "#003CAB"
 
         # Infeasible nodes
@@ -332,15 +386,15 @@ class Knapsack:
         Returns:
             tuple[plt.Figure, plt.Axes]: Figure and Axes objects.
         """
-        if not self.nodes.size == 2 ** len(self.items):
+        if not self._nodes.size == 2 ** len(self.items):
             self.solve_all_nodes()
 
         kp_network = kp_network = nx.DiGraph()
 
-        for arrangement in self.nodes:
+        for arrangement in self._nodes:
             neighbours = [
                 alt_arrangement
-                for alt_arrangement in self.nodes
+                for alt_arrangement in self._nodes
                 if np.sum(
                     np.abs(
                         np.subtract(alt_arrangement.state, arrangement.state)
@@ -392,13 +446,13 @@ class Knapsack:
         Args:
             path (str): Filepath to output file.
         """
-        if self.optimal_nodes.size == 0:
+        if self._optimal_nodes.size == 0:
             self.solve()
 
         instance_spec = {
-            "capacity": self.capacity,
-            "sahni_k": sahni_k(self.optimal_nodes[0], self.capacity),
-            "optimal_value": self.optimal_nodes[0].value,
+            "capacity": self._capacity,
+            "sahni_k": sahni_k(self._optimal_nodes[0], self._capacity),
+            "optimal_value": self._optimal_nodes[0].value,
             "items": [
                 {
                     "id": i,
@@ -439,13 +493,13 @@ class Knapsack:
             pd.DataFrame: Summary DataFrame.
         """
         n_terminal = 2 ** len(self.items)
-        n_optimal = len(self.optimal_nodes)
+        n_optimal = len(self._optimal_nodes)
 
         header = [
-            f"C = {self.capacity}",
+            f"C = {self._capacity}",
             f"nC = {
                 round(
-                    self.capacity
+                    self._capacity
                     / np.sum([item.weight for item in self.items]),
                     2,
                 )
@@ -454,12 +508,12 @@ class Knapsack:
             f"nOptimal = {n_optimal}",
         ]
 
-        if len(self.terminal_nodes) > len(self.optimal_nodes):
-            best_inferior_solution = self.terminal_nodes[
-                len(self.optimal_nodes)
+        if len(self._terminal_nodes) > len(self._optimal_nodes):
+            best_inferior_solution = self._terminal_nodes[
+                len(self._optimal_nodes)
             ]
-            delta = self.optimal_nodes[0].value - best_inferior_solution.value
-            delta_pct = delta / self.optimal_nodes[0].value
+            delta = self._optimal_nodes[0].value - best_inferior_solution.value
+            delta_pct = delta / self._optimal_nodes[0].value
             header.append(f"Δ = {delta}")
             header.append(f"Δ% = {delta_pct:.3}")
         else:
@@ -482,7 +536,7 @@ class Knapsack:
         rows.extend(
             [
                 np.where(arrangement.state == 1, "IN", "OUT")
-                for arrangement in self.optimal_nodes
+                for arrangement in self._optimal_nodes
             ]
         )
 
@@ -493,10 +547,10 @@ class Knapsack:
                     [
                         f"solution (v = {arrangement.value}",
                         f"w = {arrangement.weight}",
-                        f"k = {sahni_k(arrangement, self.capacity)})",
+                        f"k = {sahni_k(arrangement, self._capacity)})",
                     ]
                 )
-                for arrangement in self.optimal_nodes
+                for arrangement in self._optimal_nodes
             ]
         )
         if best_inferior_solution is not None:
@@ -506,7 +560,7 @@ class Knapsack:
                         f"best inferior (v = {best_inferior_solution.value}",
                         f"w = {best_inferior_solution.weight}",
                         f"k = {
-                            sahni_k(best_inferior_solution, self.capacity)
+                            sahni_k(best_inferior_solution, self._capacity)
                         })",
                     ]
                 )
