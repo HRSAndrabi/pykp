@@ -255,8 +255,8 @@ def branch_and_bound(
             ]
             capacity = 15
             instance = Knapsack(items=items, capacity=capacity)
-            optimal_nodes = instance.solve(method="branch_and_bound")
-            print(optimal_nodes)
+            instance.solve(method="branch_and_bound")
+            print(self.optimal_nodes)
 
         Use the optional `n` argument to return the n-best solutions found by
         the solver::
@@ -377,8 +377,8 @@ def mzn_gecode(items: np.ndarray[Item], capacity: int) -> Arrangement:
             ]
             capacity = 15
             instance = Knapsack(items=items, capacity=capacity)
-            optimal_node = instance.solve(method="mzn_gecode")
-            print(optimal_node)
+            instance.solve(method="mzn_gecode")
+            print(instance.optimal_nodes)
 
         Args:
             items (np.ndarray[Item]): Items that can be included in the
@@ -542,8 +542,13 @@ def brute_force(
             ]
             capacity = 15
             instance = Knapsack(items=items, capacity=capacity)
+
             instance.solve(method="branch_and_bound")
-            print(instance.optimal_nodes)
+
+            print(f"Optimal: {instance.optimal_nodes}")
+            print(f"Terminal: {len(instance.terminal_nodes)}")
+            print(f"Feasible: {len(instance.feasible_nodes)}")
+            print(f"All nodes: {len(instance.nodes)}")
 
     Args:
         items (list[Item]): Items that can be included in the knapsack.
