@@ -1,32 +1,31 @@
-{{ fullname | escape | underline}}
+.. raw:: html
+
+   <div class="prename">{{ module }}.</div>
+   <div class="empty"></div>
+
+{{ name }}
+{{ underline }}
 
 .. currentmodule:: {{ module }}
 
-.. autoclass:: {{ fullname }}
-   :members:
-   :show-inheritance:
-   :inherited-members:
+.. autoclass:: {{ objname }}
+   :no-members:
+   :no-inherited-members:
+   :no-special-members:
+   
 
    {% block methods %}
-   .. automethod:: __init__
-
-   {% if methods %}
-   .. rubric:: {{ _('Methods') }}
-
-   .. autosummary::
-   {% for item in methods %}
-      ~{{ name }}.{{ item }}
-   {%- endfor %}
-   {% endif %}
-   {% endblock %}
-
-   {% block attributes %}
-   {% if attributes %}
-   .. rubric:: {{ _('Attributes') }}
-
-   .. autosummary::
-   {% for item in attributes %}
-      ~{{ name }}.{{ item }}
-   {%- endfor %}
-   {% endif %}
+   .. HACK -- the point here is that we don't want this to appear in the output, but the autosummary should still generate the pages.
+      .. autosummary::
+         :toctree:
+      {% for item in all_methods %}
+         {%- if not item.startswith('_') or item in ['__call__', '__mul__', '__getitem__', '__len__', '__pow__', '__init__'] %}
+         {{ name }}.{{ item }}
+         {%- endif -%}
+      {%- endfor %}
+      {% for item in inherited_members %}
+         {%- if item in ['__call__', '__mul__', '__getitem__', '__len__', '__pow__', '__init__'] %}
+         {{ name }}.{{ item }}
+         {%- endif -%}
+      {%- endfor %}
    {% endblock %}

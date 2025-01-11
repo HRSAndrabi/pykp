@@ -2,4 +2,4 @@
 
 .. currentmodule:: {{ module }}
 
-method
+.. automethod:: {{ fullname }}
