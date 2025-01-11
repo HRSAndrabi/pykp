@@ -38,6 +38,7 @@ extensions = [
 ]
 
 autosummary_generate = True  # Turn on sphinx.ext.autosummary
+autodoc_member_order = "groupwise"
 templates_path = ["_templates"]
 
 # Napoleon settings
