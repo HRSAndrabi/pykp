@@ -1,6 +1,21 @@
 # CHANGELOG
 
 
+## v3.2.0 (2025-01-12)
+
+### Chores
+
+* chore: remove outdated comment. ([`6c8df81`](https://github.com/HRSAndrabi/pykp/commit/6c8df8120e0d9b5ff233b32f1843ea31ab0d4a0d))
+
+### Features
+
+* feat:  to accept random seed. ([`b43e5a6`](https://github.com/HRSAndrabi/pykp/commit/b43e5a67b754a9949fb61b119319a842f8865036))
+
+### Testing
+
+* test(phase_transition): check reproducibility. ([`247fe2a`](https://github.com/HRSAndrabi/pykp/commit/247fe2affa3e1e74b13bebb7a8da8c017cea329f))
+
+
 ## v3.1.3 (2025-01-12)
 
 ### Bug Fixes
