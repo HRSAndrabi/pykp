@@ -54,7 +54,7 @@ def test_single_item_fits(solver):
     capacity = 10
     solutions = solver(items, capacity)
 
-    if not isinstance(solutions, np.ndarray):
+    if not isinstance(solutions, list):
         solutions = [solutions]
 
     assert len(solutions) == 1
@@ -71,7 +71,7 @@ def test_single_item_does_not_fit(solver):
     capacity = 10
     solutions = solver(items, capacity)
 
-    if not isinstance(solutions, np.ndarray):
+    if not isinstance(solutions, list):
         solutions = [solutions]
 
     assert len(solutions) == 1
@@ -94,7 +94,7 @@ def test_all_items_fit(solver):
     capacity = 15
     solutions = solver(items, capacity)
 
-    if not isinstance(solutions, np.ndarray):
+    if not isinstance(solutions, list):
         solutions = [solutions]
 
     assert len(solutions) == 1
@@ -117,7 +117,7 @@ def test_all_items_do_not_fit(solver):
     capacity = 10
     solutions = solver(items, capacity)
 
-    if not isinstance(solutions, np.ndarray):
+    if not isinstance(solutions, list):
         solutions = [solutions]
 
     assert len(solutions) == 1
@@ -139,7 +139,7 @@ def test_correct_optimal_found(solver, case):
         ]
     )
     solution = solver(np.array(items), case["capacity"])
-    if isinstance(solution, np.ndarray):
+    if isinstance(solution, list):
         solution = solution[0]
 
     assert np.isclose(solution.value, case["optimal_value"])
