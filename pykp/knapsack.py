@@ -24,9 +24,7 @@ and a capacity constraint
 [(v: 25, w: 15, s: 3)]
 """
 
-import itertools
 import json
-import operator
 from typing import Literal, Union
 from warnings import warn
 
@@ -34,7 +32,6 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import pandas as pd
-from anytree import Node, PreOrderIter
 
 from .arrangement import Arrangement
 from .item import Item
