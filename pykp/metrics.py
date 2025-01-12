@@ -41,12 +41,12 @@ def _initialise_grid(
         The first array corresponds to normalised capacities, and the second
         to normalised profits.
     """
-    norm_c_step_size = 1 / resolution[0]
-    norm_p_step_size = 1 / resolution[1]
+    norm_c_step_size = 1 / resolution[1]
+    norm_p_step_size = 1 / resolution[0]
 
     grid = np.meshgrid(
-        np.linspace(0, 1 - norm_c_step_size, resolution[0]),
-        np.linspace(1 - norm_p_step_size, 0, resolution[1]),
+        np.linspace(0, 1 - norm_c_step_size, resolution[1]),
+        np.linspace(1 - norm_p_step_size, 0, resolution[0]),
     )
 
     return grid
@@ -218,9 +218,10 @@ def phase_transition(
 
     Returns
     -------
-        grid : tuple of np.ndarray
-            The mesh grid for normalszed capacities (x-axis) and profits
-            (y-axis).
+        coordinate_matrices : tuple of np.ndarray
+            The coordinate matrices for normalised capacities and normalised
+            profits. The first matrix corresponds to normalised capacities,
+            and the second to normalised profits.
         phase_transition : np.ndarray
             A 2D matrix of solvability (ranging from 0.0 to 1.0) corresponding
             to each cell in `grid`.
@@ -233,7 +234,7 @@ def phase_transition(
     resolution: tuple[int, int], optional
         Resolution of the normalised capacity-normalised profit grid.
         The first element corresponds to the resolution of normalised
-        capacity, and the second to the resolution of normalised profit.
+        profit, and the second to the resolution of normalised capacity.
         Defaults to (41, 41).
     path (str, optional): Path to save the phase transition to. Defaults
         to None.
@@ -323,9 +324,7 @@ def phase_transition(
             )
             phase_transition.append(solvability)
 
-    phase_transition = np.array(phase_transition).reshape(
-        (resolution[0], resolution[1])
-    )
+    phase_transition = np.array(phase_transition).reshape(resolution)
 
     if path:
         _save_phase_transition(phase_transition, grid, path)

@@ -22,8 +22,10 @@ def test_phase_transition_returns_correct_shape(resolution):
         resolution=resolution,
         path=None,
     )
-    assert grid[0].shape == (resolution[1], resolution[0])
-    assert grid[1].shape == (resolution[1], resolution[0])
+    # The expected resolution is switched since we want the nc to vary across
+    # the x-axis (columns) and np to vary across the y-axis (rows)
+    assert grid[0].shape == resolution
+    assert grid[1].shape == resolution
 
     assert solvability_matrix.shape == resolution
 
