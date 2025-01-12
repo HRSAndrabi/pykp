@@ -1,6 +1,176 @@
 # CHANGELOG
 
 
+## v3.1.0 (2025-01-12)
+
+### Bug Fixes
+
+* fix: remove reference to missing .size attribute. ([`a7f950d`](https://github.com/HRSAndrabi/pykp/commit/a7f950d93469cb6c562d5fc853085c081f21cc98))
+
+* fix(Knapsack.plot_network): fix incorrect default for `ax`. ([`37b109f`](https://github.com/HRSAndrabi/pykp/commit/37b109f1a0d0e62d45e2a13ce4114d518576e4d5))
+
+* fix: remove reference to missing .size attribute. ([`528868c`](https://github.com/HRSAndrabi/pykp/commit/528868c1d74b3837b549d5a31a3514622de33221))
+
+* fix: store optimal nodes as list not np.ndarray. ([`dcff89f`](https://github.com/HRSAndrabi/pykp/commit/dcff89f2d0aa9b289792cbc27b99e255b7750e9e))
+
+* fix(arrangement): internal state should be np.array. ([`1b932b2`](https://github.com/HRSAndrabi/pykp/commit/1b932b28509b01a05f7d9cd9b71687437f727033))
+
+### Build System
+
+* build: add matplotlib to doc. ([`e70c379`](https://github.com/HRSAndrabi/pykp/commit/e70c3795ba1b3f57532ac5d651e5f36794962ea0))
+
+* build: add venv* pattern. ([`90d82be`](https://github.com/HRSAndrabi/pykp/commit/90d82be77888fd941df916c08ece0f80589be2d9))
+
+* build: add missing docs dependency. ([`5572c4c`](https://github.com/HRSAndrabi/pykp/commit/5572c4c1bdf7bfd05faf1f1324b9e074b5ef68f3))
+
+* build: add numpy and tqdm to doc deps.
+
+These packages are imported in pykp, and thus required to render
+documentation. The previous solution was to use `MagicMock` to do
+a mock import, but this messed with the rendering of type hints
+in the documentation. Listing numpy and tqdm as 'doc' dependencies
+rectifies this issue. ([`d836764`](https://github.com/HRSAndrabi/pykp/commit/d836764c25b30ce6334b5d9c9baf0b02dd6a5fd2))
+
+### Chores
+
+* chore: remove redundant requirements.txt. ([`4c78cec`](https://github.com/HRSAndrabi/pykp/commit/4c78cecbb64f25a4bd1a7412c0517de811f23682))
+
+* chore: clean up and comment sphinx conf. ([`a03e88c`](https://github.com/HRSAndrabi/pykp/commit/a03e88cf908626e18bc8fe07aee677dcfca710d0))
+
+* chore: remove test notebook. ([`84b0ef8`](https://github.com/HRSAndrabi/pykp/commit/84b0ef8bb3e54093770ce5aed037497e3ef9591e))
+
+### Code Style
+
+* style: fix lint errors. ([`db90708`](https://github.com/HRSAndrabi/pykp/commit/db90708317fe7576e5294b485b1a0cbba4ead792))
+
+* style: rename ambigious _save function. ([`e9bf8df`](https://github.com/HRSAndrabi/pykp/commit/e9bf8dfc6507d9c7a1f02338b3d9c47a1698e3a6))
+
+### Continuous Integration
+
+* ci: update doc requirements. ([`be932c6`](https://github.com/HRSAndrabi/pykp/commit/be932c6cad48c74f999369880a183f95103260cb))
+
+* ci: docstring convention to numpy. ([`311d158`](https://github.com/HRSAndrabi/pykp/commit/311d158ce2ec18b089d1c317310d528f37a99920))
+
+* ci: shorten workflow names. ([`c92708a`](https://github.com/HRSAndrabi/pykp/commit/c92708a39c07d0e75e88999b60c107cf11e8fffa))
+
+* ci: clearer workflow names. ([`e9cf9a0`](https://github.com/HRSAndrabi/pykp/commit/e9cf9a02c91f3c738a6609fd91e30d30d95b58b5))
+
+* ci: prevent redundant workflow runs.
+
+Lint and test workflows were running two times.
+(1) When a pull request was submitted, to verify that it was okay
+to merge into main.
+(2) After a pull request was merged, as a check before building
+and releasing the next version of the package on PyPi.
+The second run is unnecessary, as (1) ensures that (2) will always
+pass. This commit removes (2). ([`b30f529`](https://github.com/HRSAndrabi/pykp/commit/b30f529323b1b33fa4a9914594bd9b2f5ce86a29))
+
+* ci: start workflows on pull request. ([`d5bcb22`](https://github.com/HRSAndrabi/pykp/commit/d5bcb2260f00e321ae021b94a799e79f94e4d6f9))
+
+### Documentation
+
+* docs: add terminal nodes plot. ([`827e803`](https://github.com/HRSAndrabi/pykp/commit/827e803d651f3f38e0786a3c760bdd0718bc87c3))
+
+* docs(tests): docstrings to numpydoc. ([`6eecbcc`](https://github.com/HRSAndrabi/pykp/commit/6eecbcc7db33797e5c128202080fd2157415f196))
+
+* docs(pykp): docstrings to numpydoc. ([`298a945`](https://github.com/HRSAndrabi/pykp/commit/298a94591183641e91ec5e50c3d8ba330bd89ded))
+
+* docs(solvers): docstrings to numpydoc. ([`008eafa`](https://github.com/HRSAndrabi/pykp/commit/008eafaa974147a52d4f19db0a69346869d1a910))
+
+* docs(sampler): docstrings to numpydoc. ([`312dfb1`](https://github.com/HRSAndrabi/pykp/commit/312dfb184c069670a634a59e36c885f95f0c55c3))
+
+* docs: add phase transition plot. ([`5c5a8df`](https://github.com/HRSAndrabi/pykp/commit/5c5a8df7d7585717751842119e7398b9bb5b43e7))
+
+* docs(metrics): docstrings to numpydoc. ([`e0122cf`](https://github.com/HRSAndrabi/pykp/commit/e0122cfad3899532e31d2759f62fe278f5393f74))
+
+* docs(knapsack): docstrings to numpydoc. ([`dc4353e`](https://github.com/HRSAndrabi/pykp/commit/dc4353e3cead439bda889b078bdb297ec03afb58))
+
+* docs(item): docstrings to numpydoc. ([`60179a6`](https://github.com/HRSAndrabi/pykp/commit/60179a68d989ef24b3c696d2faf9bb6fe4cae392))
+
+* docs(arrangement): docstrings to numpydoc. ([`9c9f50b`](https://github.com/HRSAndrabi/pykp/commit/9c9f50bf52abae7f8d5830df9c12b4cc80b77e45))
+
+* docs: update templates to match scipy style. ([`39d5496`](https://github.com/HRSAndrabi/pykp/commit/39d54967fa84fcaea9cdfc5984378571f1d4c08a))
+
+* docs: set groupwise autodoc. ([`afd68d3`](https://github.com/HRSAndrabi/pykp/commit/afd68d3c44fd56995ca83c674951fed0f0e04083))
+
+* docs(knapsack): minor improvements for clarity. ([`45a4801`](https://github.com/HRSAndrabi/pykp/commit/45a48017bb2e0ecafe861528dbf1f090a7e9b875))
+
+* docs(sampler): move init doc to class level. ([`6fc9a4d`](https://github.com/HRSAndrabi/pykp/commit/6fc9a4d15e704e473217ee1f532f5cc5861e46bf))
+
+* docs(item): fix style errors. ([`da3a12a`](https://github.com/HRSAndrabi/pykp/commit/da3a12abb36a9a0ca8351e8906419f4e65684255))
+
+* docs(knapsack): add property documentation. ([`4c2b2c6`](https://github.com/HRSAndrabi/pykp/commit/4c2b2c65b8f272e75678cc2f244804c5ad2d9f72))
+
+* docs: minor improvements for clarity. ([`0e5fbc9`](https://github.com/HRSAndrabi/pykp/commit/0e5fbc929ea8dff3b63db335a12c434601233542))
+
+* docs: clarify solver documentation. ([`c861f24`](https://github.com/HRSAndrabi/pykp/commit/c861f24fd3b0c09d04709a3ac6c05c8127c15459))
+
+* docs(sahni-k): fix indendtation. ([`e3b34aa`](https://github.com/HRSAndrabi/pykp/commit/e3b34aa34fcfba48b34d9fe9e4899b1a49a2e820))
+
+* docs: add complexity metrics to quick-start. ([`100a244`](https://github.com/HRSAndrabi/pykp/commit/100a2440d7bf0354c406e0c8ca5825cface00d4e))
+
+* docs: remove references to missing images. ([`7da8d2f`](https://github.com/HRSAndrabi/pykp/commit/7da8d2fd680020776817b31bd663804d4f3df4d5))
+
+* docs: update quick-start guide. ([`5c1d027`](https://github.com/HRSAndrabi/pykp/commit/5c1d0276c886287f5397cc006554030aff6ab0d2))
+
+* docs: change order of nav items. ([`5f319d8`](https://github.com/HRSAndrabi/pykp/commit/5f319d8bc10ff301b62e6eda309e5a280b0d2910))
+
+* docs: update contributer guide. ([`7e404e3`](https://github.com/HRSAndrabi/pykp/commit/7e404e3067b0e5250497bfd6a709909fd89d997d))
+
+### Features
+
+* feat(solvers): add brute force solver.
+
+Add brute force solver to compute optimal, terminal, feasible, and
+all possible nodes in the graph of a provided KP instance. Changed
+the name of `_is_terminal_node()` method used by branch and bound
+algorithm to `_is_leaf_node()`, to avoid confusion with the
+`is_subset_terminal()` method used by the new brute force
+algorithm. ([`8918eb1`](https://github.com/HRSAndrabi/pykp/commit/8918eb1989119aec7f67bf7e4b155bf6b40bbdb3))
+
+* feat(branch_and_bound): add n-best functionality.
+
+`pykp.solvers.branch_and_bound` now accepts an optional argument
+`n`, which specifies the number of 'best' solutions to return.
+The `n` argument is on solution values, not the number of
+solutions. If `n` is set to 1, the solver returns all solutions
+that achieve the distinct optimal value. More than one solution
+may be returned if there are multiple solutions with the same
+optimal value. Similarly, if `n` is set to n, the solver returns
+all solutions that achieve the n-highest possible values. ([`574b509`](https://github.com/HRSAndrabi/pykp/commit/574b5099dcf15fff53deb4d9fea7d4e3ccd17cfa))
+
+### Refactoring
+
+* refactor(knapsack): don't save optimal to config. ([`464bce4`](https://github.com/HRSAndrabi/pykp/commit/464bce4619779b53c97dfd375f504ca361960bc1))
+
+* refactor(arrangement): add @property decorators. ([`b63f6b5`](https://github.com/HRSAndrabi/pykp/commit/b63f6b5aa8be43bfc04d2c1c1cfbc1cc53a1b0f8))
+
+* refactor(knapsack): implement brute_force solver.
+
+Allow "brute_force" to specified as the `method` argument to
+`Knapsack.solve()`. Remove methods in `Knapsack` that are now
+redundant with the addition of a seperate brute-force solver. ([`fa81822`](https://github.com/HRSAndrabi/pykp/commit/fa81822f3a5a0c0adbb2459bce751fcb5567da67))
+
+* refactor(solvers): move pacakge to module.
+
+Refactored pykp.solvers pacakage to pykp.solvers module. This
+makes auto generated documentation appear in a more sensible way.
+Under the previous approach, documentation for functions inside
+modules in the pykp.solvers package would not render, because these
+functions shared the same name as the module. Including all
+functions inside a single solvers.py module rectifies this problem. ([`f425dc4`](https://github.com/HRSAndrabi/pykp/commit/f425dc46c834a080a9e115c9ffb0489cbb7d194a))
+
+* refactor: move metrics package to module. ([`47e2686`](https://github.com/HRSAndrabi/pykp/commit/47e2686bee73156d358b3bf8f400383ba52fa5bd))
+
+### Testing
+
+* test: ammend test for list solution type. ([`318f37d`](https://github.com/HRSAndrabi/pykp/commit/318f37d44af52d87559291a763c44e692b359c56))
+
+### Unknown
+
+* tests(knapsack): account for new state setter. ([`4c144e8`](https://github.com/HRSAndrabi/pykp/commit/4c144e874d6a6e958055c36fa11d17903f37e20b))
+
+
 ## v3.0.0 (2025-01-10)
 
 ### Breaking
