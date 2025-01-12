@@ -53,7 +53,7 @@ def _initialise_grid(
 
 
 def _sample_instance(
-    num_items: int, norm_c: float, norm_p: float
+    num_items: int, norm_c: float, norm_p: float, rng: np.random.Generator
 ) -> tuple[list[Item], float, float]:
     """
     Sample a knapsack instance based on normalised capacity and profit targets.
@@ -71,6 +71,8 @@ def _sample_instance(
         Normalised capacity factor to scale the total weight.
     norm_p : float
         Normalised profit factor to scale the total value.
+    rng : np.random.Generator
+        Random number generator for sampling.
 
     Returns
     -------
@@ -81,8 +83,8 @@ def _sample_instance(
     target_profit : float
         The scaled target profit.
     """
-    weights = np.random.uniform(0, 1, num_items)
-    profits = np.random.uniform(0, 1, num_items)
+    weights = rng.uniform(0.001, 1, num_items)
+    profits = rng.uniform(0.001, 1, num_items)
 
     capacity = sum(weights) * norm_c
     target_profit = sum(profits) * norm_p
@@ -99,6 +101,7 @@ def _simulate_cell_solvability(
     num_items: int,
     samples: int,
     solver: Callable,
+    rng: np.random.Generator,
     progress: tqdm,
 ) -> float:
     """Estimate the solvability of a grid cell.
@@ -121,6 +124,8 @@ def _simulate_cell_solvability(
     solver : Callable
         A solver function that takes items and capacity as arguments and
         returns an optimal node or array of optimal nodes.
+    rng : np.random.Generator
+        Random number generator for sampling.
     progress : tqdm
         Progress bar for tracking iterations.
 
@@ -133,11 +138,14 @@ def _simulate_cell_solvability(
     """
     score = 0
     for _ in range(samples):
-        norm_c_draw = np.random.uniform(norm_c_range[0], norm_c_range[1])
-        norm_p_draw = np.random.uniform(norm_p_range[0], norm_p_range[1])
+        norm_c_draw = rng.uniform(norm_c_range[0], norm_c_range[1])
+        norm_p_draw = rng.uniform(norm_p_range[0], norm_p_range[1])
 
         items, capacity, target_profit = _sample_instance(
-            num_items=num_items, norm_c=norm_c_draw, norm_p=norm_p_draw
+            num_items=num_items,
+            norm_c=norm_c_draw,
+            norm_p=norm_p_draw,
+            rng=rng,
         )
         result = solver(items=items, capacity=capacity)
         if isinstance(result, list):
@@ -187,6 +195,7 @@ def phase_transition(
     samples: int = 100,
     solver: str = "branch_and_bound",
     resolution: tuple[int, int] = (41, 41),
+    seed: int | None = None,
     path: str = None,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Compute the phase transition matrix for knapsack instances.
@@ -236,7 +245,10 @@ def phase_transition(
         The first element corresponds to the resolution of normalised
         profit, and the second to the resolution of normalised capacity.
         Defaults to (41, 41).
-    path (str, optional): Path to save the phase transition to. Defaults
+    seed : int | None, optional
+        Seed for sampling. Defaults to None.
+    path str, optional:
+        Path to save the phase transition to. Defaults
         to None.
 
     Examples
@@ -310,6 +322,7 @@ def phase_transition(
             [(p, p + 1 / resolution[1]) for p in grid[1].flatten()],
         )
     )
+    rng = np.random.default_rng(seed)
 
     phase_transition = []
     with tqdm(total=samples * len(points)) as progress:
@@ -321,6 +334,7 @@ def phase_transition(
                 samples=samples,
                 solver=solver,
                 progress=progress,
+                rng=rng,
             )
             phase_transition.append(solvability)
 
