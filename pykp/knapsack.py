@@ -290,7 +290,7 @@ class Knapsack:
 
         if method == "mzn_gecode":
             result = mzn_gecode(items=self._items, capacity=self._capacity)
-            self._optimal_nodes = np.array([result])
+            self._optimal_nodes = list(result)
 
         if method == "brute_force":
             if len(self._items) > 15:
