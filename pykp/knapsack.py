@@ -502,6 +502,9 @@ class Knapsack:
         [(v: 372, w: 300, s: 4000)]
         >>> fig, ax = knapsack.plot_terminal_nodes_histogram()
         >>> plt.show()
+
+        .. image:: /_static/plots/terminal_nodes_hist.png
+            :alt: Histogram of terminal node values
         """
         if not len(self.nodes) == 2 ** len(self.items):
             self.solve(method="brute_force")
