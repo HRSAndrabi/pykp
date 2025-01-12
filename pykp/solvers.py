@@ -1,7 +1,4 @@
-"""
-This module contains implementations of various solvers for the knapsack
-problem.
-"""
+"""Implementations of various solvers for the knapsack problem."""
 
 """
 Provides an implementation of branch and bound algorithm for
@@ -56,15 +53,24 @@ from .item import Item
 
 @dataclass(order=True, frozen=True)
 class Node:
-    """
-    Represents a node in the branch-and-bound tree.
+    """Represents a node in the branch-and-bound tree.
 
-    Attributes:
-        priority (float): The priority of the node.
-        upper_bound (float): The upper bound of the node.
-        items (np.ndarray[Item]): Items that can be included in the knapsack.
-        value (int): The total value of items in the node.
-        weight (int): The total weight of items in the node.
+    Parameters
+    ----------
+    priority : float
+        The priority of the node.
+    upper_bound : float
+        The upper bound of the node.
+    items : np.ndarray[Item]
+        Items that can be included in the knapsack.
+    value : int
+        The total value of items in the node.
+    weight : int
+        The total weight of items in the node.
+    included_items : np.ndarray[Item]
+        Items included by this node.
+    excluded_items : np.ndarray[Item]
+        Items excluded by this node.
     """
 
     priority: float = field(compare=True)
@@ -82,19 +88,26 @@ def _calculate_upper_bound(
     included_items: np.ndarray[Item],
     excluded_items: np.ndarray[Item],
 ) -> float:
-    """
-    Calculates the upper bound of the supplied branch.
+    """Calculate the upper bound of the supplied branch.
 
-    Args:
-        items (np.ndarray[Item]): Items that can be included in the knapsack.
-        capacity (int): Maximum weight capacity of the knapsack.
-        included_items (np.ndarray[Item]): Items included by all nodes within
-            the branch.
-        excluded_items (np.ndarray[Item]): Items excluded by all nodes within
-            the branch.
+    The upper bound is calculated by filling the fractional knapsack with
+    items in descending order of value-to-weight ratio.
 
-    Returns:
-        float: Upper bound of the branch.
+    Parameters
+    ----------
+    items: np.ndarray[Item]
+        Items that can be included in the knapsack.
+    capacity: int
+        Maximum weight capacity of the knapsack.
+    included_items: np.ndarray[Item]
+        Items included by all nodes within the branch.
+    excluded_items: np.ndarray[Item]
+        Items excluded by all nodes within the branch.
+
+    Returns
+    -------
+    float
+        Upper bound of the branch.
     """
     arrangement = Arrangement(
         items=items,
@@ -131,17 +144,26 @@ def _expand_node(
     capacity: int,
     incumbent: float,
 ) -> np.ndarray:
-    """
-    Expands a node in the branch-and-bound tree. Returns child nodes to
-    explore.
+    """Expand a node in the branch-and-bound tree.
 
-    Args:
-        node (Node): Node to expand.
-        capacity (int): Maximum weight capacity of the knapsack.
-        incumbent (flaot): The best value found so far.
+    The node is expanded by generating two children nodes: one that includes
+    the next item in the knapsack and one that excludes it. The children are
+    only returned if the upper bound of the child is greater than or equal to
+    the incumbent value.
 
-    Returns:
-        np.ndarray: The child nodes of the expanded node.
+    Parameters
+    ----------
+    node: Node
+        Node to expand.
+    capacity: int
+        Maximum weight capacity of the knapsack.
+    incumbent: float
+        The best value found so far.
+
+    Returns
+    -------
+    np.ndarray
+        The child nodes of the expanded node.
     """
     arrangement = Arrangement(
         items=node.items,
@@ -194,15 +216,22 @@ def _expand_node(
 
 
 def _is_leaf_node(node: Node, capacity: int) -> bool:
-    """
-    Private method to determine whether subset of items is a terminal node.
+    """Whether a provided node is a leaf node.
 
-    Args:
-        node (Node): Node to check.
-        capacity (int): Maximum weight capacity of the knapsack.
+    A node is considered a leaf node if the balance is under capacity,
+    and all items in the branch have been either included or excluded.
 
-    Returns:
-        bool: True if the node is terminal, otherwise False.
+    Parameters
+    ----------
+    node: Node
+        Node to check.
+    capacity: int
+        Maximum weight capacity of the knapsack.
+
+    Returns
+    -------
+    bool
+        Wheter the node is a leaf node.
     """
     weight = sum([i.weight for i in node.included_items])
     balance = capacity - weight
@@ -211,78 +240,111 @@ def _is_leaf_node(node: Node, capacity: int) -> bool:
     remaining_items = (
         set(node.items) - set(node.included_items) - set(node.excluded_items)
     )
-    for i in remaining_items:
-        if i.weight <= balance:
-            return False
     return len(remaining_items) == 0
 
 
 def branch_and_bound(
-    items: np.ndarray[Item],
+    items: list[Item],
     capacity: int,
     n=1,
-) -> np.ndarray[Arrangement]:
-    """
-    Provides an implementation of branch and bound algorithm for
-    solving the knapsack problem.
+) -> list[Arrangement]:
+    """Solves the knapsack problem using the branch-and-bound algorithm.
 
-    Example:
-        To solve a knapsack problem instance using the branch-and-bound
-        algorithm, first create a list of items and then call the solver
-        with the items and capacity::
+    Parameters
+    ----------
+    items: list[Item]
+        Items that can be included in the knapsack.
+    capacity: int
+        Maximum weight capacity of the knapsack.
 
-            from pykp import Item, Solvers
+    Other Parameters
+    ----------------
+    n: int, optional
+        The n-best solutions to return. If set to 1, the solver returns all
+        solutions that achieve the distinct optimal value. If set to n, the
+        solver returns the solutions that achieve the n-highest possible
+        values. Defaults to 1.
 
-            items = [
-                Item(value=10, weight=5),
-                Item(value=15, weight=10),
-                Item(value=7, weight=3),
-            ]
-            capacity = 15
-            optimal_nodes = solvers.branch_and_bound(items, capacity)
-            print(optimal_nodes)
-
-        Alternatively, construct an instance of the `Knapsack` class and
-        call the `solve` method with "branch_and_bound" as the `method`
-        argument::
-
-            from pykp import Item, Knapsack
-
-            items = [
-                Item(value=10, weight=5),
-                Item(value=15, weight=10),
-                Item(value=7, weight=3),
-            ]
-            capacity = 15
-            instance = Knapsack(items=items, capacity=capacity)
-            instance.solve(method="branch_and_bound")
-            print(self.optimal_nodes)
-
-        Use the optional `n` argument to return the n-best solutions found by
-        the solver::
-
-            optimal_nodes = solvers.branch_and_bound(items, capacity, n=5)
-            print(optimal_nodes)
-
-        .. note::
-            The `n` argument is on solution values, not the number of
-            solutions. If `n` is set to 1, the solver returns all solutions
-            that achieve the distinct optimal value. More than one solution
-            may be returned if there are multiple solutions with the same
-            optimal value. Similarly, if `n` is set to n, the solver returns
-            all solutions that achieve the n-highest possible values.
-
-    Args:
-        items (np.ndarray[Item]): Items that can be included in the knapsack.
-        capacity (int): Maximum weight capacity of the knapsack.
-        n (int, optional): The n-best solutions to return. If set to 1, the
-            solver returns all solutions that achieve the distinct optimal
-            value. If set to n, the solver returns the solutions that achieve
-            the n-highest possible values. Defaults to 1.
-
-    Returns:
-        np.ndarray[Arrangement]: The optimal arrangements of items in the
+    Returns
+    -------
+        list[Arrangement]: The optimal arrangements of items in the
             knapsack.
+
+    Examples
+    --------
+    Solve a knapsack problem using the branch-and-bound algorithm
+
+    >>> from pykp import Item
+    >>> from pykp import solvers
+    >>>
+    >>> items = [
+    ...     Item(value=10, weight=5),
+    ...     Item(value=15, weight=10),
+    ...     Item(value=5, weight=5),
+    >>> ]
+    >>> capacity = 15
+    >>> solvers.branch_and_bound(items, capacity)
+    [(v: 25, w: 15, s: 6)]
+
+    Alternatively, construct an instance of the ``Knapsack`` class and call the
+    ``solve`` method with "branch_and_bound" as the ``method`` argument
+
+    >>> from pykp import Item
+    >>> from pykp import Knapsack
+    >>>
+    >>> items = [
+    ...     Item(value=10, weight=5),
+    ...     Item(value=15, weight=10),
+    ...     Item(value=5, weight=5),
+    ... ]
+    >>> capacity = 15
+    >>> instance = Knapsack(items=items, capacity=capacity)
+    >>> instance.solve(method="branch_and_bound")
+    >>> instance.optimal_nodes
+    [(v: 25, w: 15, s: 6)]
+
+    If there are multiple solutions with the same optimal value, all will be
+    returned.
+
+    >>> from pykp import Item
+    >>> from pykp import Knapsack
+    >>>
+    >>> items = [
+    ...     Item(value=10, weight=5),
+    ...     Item(value=15, weight=10),
+    ...     Item(value=4, weight=2),
+    ...     Item(value=6, weight=3),
+    ... ]
+    >>> capacity = 15
+    >>> instance = Knapsack(items=items, capacity=capacity)
+    >>> instance.solve(method="branch_and_bound")
+    >>> instance.optimal_nodes
+    [(v: 25, w: 15, s: 9), (v: 25, w: 15, s: 7)]
+
+    Use the optional ``n`` argument to return the n-best solutions found by
+    the solver.
+
+    >>> from pykp import Item
+    >>> from pykp import Knapsack
+    >>> from pykp import solvers
+    >>>
+    >>> items = [
+    ...     Item(value=10, weight=5),
+    ...     Item(value=15, weight=10),
+    ...     Item(value=4, weight=2),
+    ...     Item(value=6, weight=3),
+    ... ]
+    >>> capacity = 15
+    >>> solvers.branch_and_bound(items, capacity, n=3)
+    [(v: 25, w: 15, s: 9), (v: 25, w: 15, s: 7), (v: 21, w: 13, s: 3)]
+
+    .. note::
+        The ``n`` argument is on solution values, not the number of
+        solutions. If ``n`` is set to 1, the solver returns all solutions
+        that achieve the distinct optimal value. More than one solution
+        may be returned if there are multiple solutions with the same
+        optimal value. Similarly, if ``n`` is set to `n`, the solver returns
+        all solutions that achieve the `n`-highest possible values.
     """
     if len(items) == 0:
         return np.array([Arrangement(items=items, state=np.array([]))])
@@ -335,57 +397,69 @@ def branch_and_bound(
         )
         for node in nodes
     ]
-    result = np.array(result)
 
     return result
 
 
-def mzn_gecode(items: np.ndarray[Item], capacity: int) -> Arrangement:
-    """
-    Provides an implementation of the MiniZinc and Gecode solver for
-    solving the knapsack problem. You should have MiniZinc 2.5.0 (or higher)
-    installed on your system to use this solver. Note that this solver is not
-    robust to multiple solutions, and will report only the first optimal
-    solution found. If knowing all optimal solutions is important, consider
-    using the branch-and-bound solver.
+def mzn_gecode(items: list[Item], capacity: int) -> Arrangement:
+    """Solves the knapsack problem using the MiniZinc Gecode solver.
 
-    Example:
-        To solve a knapsack problem instance using the MiniZinc Gecode solver,
-        first create a list of items and then call the solver with the items
-        and capacity::
+    Parameters
+    ----------
+    items : list[Item]
+        Array of items to consider for the knapsack.
+    capacity : int
+        Maximum weight capacity of the knapsack.
 
-            from pykp import Item, Solvers
+    Returns
+    -------
+    Arrangement
+        The optimal arrangement of items in the knapsack.
 
-            items = [
-                Item(value=10, weight=5),
-                Item(value=15, weight=10),
-                Item(value=7, weight=3),
-            ]
-            capacity = 15
-            optimal_node = solvers.mzn_gecode(items, capacity)
-            print(optimal_node)
+    Examples
+    --------
+    Solve a knapsack problem instance using MiniZinc and Gecode:
 
-        Alternatively, construct an instance of the `Knapsack` class and call
-        the `solve` method with "mzn_gecode" as the `method` argument::
+    >>> from pykp import Item, solvers
+    >>> items = np.array(
+    ...     [
+    ...         Item(value=10, weight=5),
+    ...         Item(value=15, weight=10),
+    ...         Item(value=5, weight=5),
+    ...     ]
+    ... )
+    >>> capacity = 15
+    >>> solvers.mzn_gecode(items, capacity)
+    [(v: 25, w: 15, s: 6)]
 
-            from pykp import Item, Knapsack
+    Alternatively, construct an instance of the ``Knapsack`` class and call the
+    ``solve`` method with "mzn_geocode" as the ``method`` argument
 
-            items = [
-                Item(value=10, weight=5),
-                Item(value=15, weight=10),
-                Item(value=7, weight=3),
-            ]
-            capacity = 15
-            instance = Knapsack(items=items, capacity=capacity)
-            instance.solve(method="mzn_gecode")
-            print(instance.optimal_nodes)
+    >>> from pykp import Item
+    >>> from pykp import Knapsack
+    >>>
+    >>> items = [
+    ...     Item(value=10, weight=5),
+    ...     Item(value=15, weight=10),
+    ...     Item(value=5, weight=5),
+    ... ]
+    >>> capacity = 15
+    >>> instance = Knapsack(items=items, capacity=capacity)
+    >>> instance.solve(method="mzn_geocode")
+    >>> instance.optimal_nodes
+    [(v: 25, w: 15, s: 6)]
 
-        Args:
-            items (np.ndarray[Item]): Items that can be included in the
-            knapsack. capacity (int): Maximum weight capacity of the knapsack.
+    .. note::
+        You should have MiniZinc 2.5.0 (or higher) installed on your system to
+        use this solver. Refer to the `MiniZinc documentation
+        <https://docs.minizinc.dev/en/stable/installation.html>`_
+        for installation instructions.
 
-        Returns:
-            Arrangement: The optimal arrangement of items in the knapsack.
+    .. note::
+        The MiniZinc Gecode solver is not robust to multiple solutions, and
+        will report only the first optimal solution found. If knowing all
+        optimal solutions is important, consider using the branch-and-bound
+        solver.
     """
     nest_asyncio.apply()
     model = Model()
@@ -419,25 +493,45 @@ def mzn_gecode(items: np.ndarray[Item], capacity: int) -> Arrangement:
     return Arrangement(items=items, state=np.array(result["x"]))
 
 
-def greedy(items: np.ndarray[Item], capacity: int) -> Arrangement:
+def greedy(items: list[Item], capacity: int) -> Arrangement:
+    """Appy the greedy algorithm to a knapsack problem instance.
+
+    Parameters
+    ----------
+    items : np.ndarray[Item]
+        Array of items to consider for the knapsack.
+    capacity : int
+        Maximum weight capacity of the knapsack.
+
+    Returns
+    -------
+    Arrangement
+        The greedy arrangement of items in the knapsack.
+
+    Examples
+    --------
+    Solve a knapsack problem using the greedy algorithm:
+
+    >>> from pykp import Item
+    >>> from pykp import solvers
+    >>> items = np.array(
+    ...     [
+    ...         Item(value=100, weight=50),
+    ...         Item(value=200, weight=100),
+    ...         Item(value=400, weight=300),
+    ...     ]
+    ... )
+    >>> capacity = 300
+    >>> solvers.greedy(items, capacity)
+    (v: 300, w: 150, s: 6)
+
+    .. note::
+        The greedy algorithm is not guaranteed to find the optimal solution
+        to the knapsack problem. It is a heuristic algorithm that selects
+        the best item at each step based on the value-to-weight ratio,
+        until no more items can be added to the knapsack.
     """
-    Provides an implementation of the greedy algorithm for solving the
-    knapsack problem.
-
-    Example:
-        Solve a knapsack problem using the greedy algorithm::
-
-            import numpy as np
-            from pykp import Item, solvers
-
-            items = np.array([
-                    Item(weight = 10, value = 60),
-                    Item(weight = 20, value = 100),
-                    Item(weight = 30, value = 120),
-            ])
-            capacity = 50
-            arrangement = solvers.greedy(items, capacity
-    """
+    items = np.array(items)
     state = np.zeros(len(items))
     weight = 0
     balance = capacity
@@ -452,7 +546,7 @@ def greedy(items: np.ndarray[Item], capacity: int) -> Arrangement:
         best_item = max(
             remaining_items, key=lambda item: item.value / item.weight
         )
-        state[np.where(items == best_item)[0][0]] = 1
+        state[items.tolist().index(best_item)] = 1
         balance -= best_item.weight
         weight += best_item.weight
 
@@ -460,16 +554,22 @@ def greedy(items: np.ndarray[Item], capacity: int) -> Arrangement:
 
 
 def _is_subset_feasible(subset: list[Item], capacity) -> bool:
-    """
-    Private method to determine whether subset of items is feasible
-    (below capacity limit).
+    """Determine whether subset of items is feasible.
 
-    Args:
-        subset (list[Item]): Subset of items.
-        capacity (int): Capacity of the knapsack.
+    A subset of items is considered feasible if the total weight of the
+    items is less than or equal to the capacity of the knapsack.
 
-    Returns:
-        bool: True if the node is terminal, otherwise False.
+    Parameters
+    ----------
+    subset : list[Item]
+        Subset of items.
+    capacity : int
+        Capacity of the knapsack.
+
+    Returns
+    -------
+    bool
+        Whether the node is feasible.
     """
     weight = sum([i.weight for i in subset])
     balance = capacity - weight
@@ -481,16 +581,26 @@ def _is_subset_feasible(subset: list[Item], capacity) -> bool:
 def _is_subset_terminal(
     subset: list[Item], items: list[Item], capacity
 ) -> bool:
-    """
-    Private method to determine whether subset of items is a terminal node.
+    """Determine whether subset of items is terminal.
 
-    Args:
-        subset (list[Item]): Subset of items.
-        items (list[Item]): All items in the knapsack.
-        capacity (int): Capacity of the knapsack.
+    A subset of items is considered terminal if the total weight of the
+    items is less than or equal to the capacity of the knapsack and no
+    remaining items can be added to the knapsack without exceeding the
+    capacity.
 
-    Returns:
-        bool: True if the node is terminal, otherwise False.
+    Parameters
+    ----------
+    subset : list[Item]
+        Subset of items.
+    items : list[Item]
+        All items in the knapsack.
+    capacity : int
+        Capacity of the knapsack.
+
+    Returns
+    -------
+    bool
+        Whether the node is terminal
     """
     weight = sum([i.weight for i in subset])
     balance = capacity - weight
@@ -505,60 +615,89 @@ def _is_subset_terminal(
 
 def brute_force(
     items: list[Item], capacity: int
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """
-    Finds the optimal solution to the knapsack problem using brute force.
-    Also generates all possible, feasible, and terminal nodes in the
-    knapsack problem.
+) -> Tuple[list, list, list, list]:
+    """Solves the knapsack problem using brute force.
 
-    Example:
-        To solve a knapsack problem instance using the brute-force
-        algorithm, first create a list of items and then call the solver
-        with the items and capacity::
+    Parameters
+    ----------
+    items : list[Item]
+        List of items to consider for the knapsack.
+    capacity : int
+        Maximum weight capacity of the knapsack.
 
-            from pykp import Item, solvers
+    Returns
+    -------
+    list
+        Optimal nodes in the knapsack problem.
+    list
+        Terminal nodes in the knapsack problem.
+    list
+        Feasible nodes in the knapsack problem.
+    list
+        All nodes in the knapsack problem.
 
-            items = [
-                Item(value=10, weight=5),
-                Item(value=15, weight=10),
-                Item(value=7, weight=3),
-            ]
-            capacity = 15
-            (optimal, terminal, feasible, all) = solvers.brute_force(
-                items, capacity
-            )
-            print(optimal)
+    Examples
+    --------
+    To solve a knapsack problem instance using the brute-force
+    algorithm, first create a list of items and then call the solver
+    with the items and capacity.
 
-        Alternatively, construct an instance of the `Knapsack` class and
-        call the `solve` method with "brute_force" as the `method`
-        argument::
+    >>> from pykp import Item, solvers
+    >>>
+    >>> items = [
+    ...     Item(value=10, weight=5),
+    ...     Item(value=15, weight=10),
+    ...     Item(value=5, weight=5),
+    ... ]
+    >>> capacity = 15
+    >>> (optimal, terminal, feasible, all) = solvers.brute_force(
+    ...     items, capacity
+    ... )
+    >>> print(optimal)
+    [(v: 25, w: 15, s: 6)]
 
-            from pykp import Item, Knapsack
+    Alternatively, construct an instance of the `Knapsack` class and
+    call the `solve` method with "brute_force" as the `method`
+    argument. When called in this way, the solver will populate the
+    `optimal_nodes`, `terminal_nodes`, `feasible_nodes`, and `nodes`
+    attributes of the `Knapsack` instance.
 
-            items = [
-                Item(value=10, weight=5),
-                Item(value=15, weight=10),
-                Item(value=7, weight=3),
-            ]
-            capacity = 15
-            instance = Knapsack(items=items, capacity=capacity)
+    >>> from pykp import Item, Knapsack
+    >>>
+    >>> items = [
+    ...     Item(value=10, weight=5),
+    ...     Item(value=15, weight=10),
+    ...     Item(value=5, weight=5),
+    ... ]
+    >>> capacity = 15
+    >>> instance = Knapsack(items=items, capacity=capacity)
+    >>>
+    >>> instance.solve(method="brute_force")
+    >>> instace.optimal_nodes
+    [(v: 25, w: 15, s: 6)]
+    >>> instance.terminal_nodes
+    [(v: 25, w: 15, s: 6), (v: 20, w: 15, s: 3), (v: 15, w: 10, s: 5)]
+    >>> instance.feasible_nodes
+    [(v: 0, w: 0, s: 0),
+    (v: 5, w: 5, s: 1),
+    (v: 10, w: 5, s: 4),
+    (v: 15, w: 10, s: 2),
+    (v: 15, w: 10, s: 5),
+    (v: 20, w: 15, s: 3),
+    (v: 25, w: 15, s: 6)]
+    >>> instance.nodes
+    [(v: 10, w: 5, s: 4),
+    (v: 15, w: 10, s: 2),
+    (v: 5, w: 5, s: 1),
+    (v: 25, w: 15, s: 6),
+    (v: 15, w: 10, s: 5),
+    (v: 20, w: 15, s: 3),
+    (v: 30, w: 20, s: 7),
+    (v: 0, w: 0, s: 0)]
 
-            instance.solve(method="branch_and_bound")
-
-            print(f"Optimal: {instance.optimal_nodes}")
-            print(f"Terminal: {len(instance.terminal_nodes)}")
-            print(f"Feasible: {len(instance.feasible_nodes)}")
-            print(f"All nodes: {len(instance.nodes)}")
-
-    Args:
-        items (list[Item]): Items that can be included in the knapsack.
-        capacity (int): Capacity of the knapsack.
-
-    Returns:
-        np.ndarray: Optimal nodes in the knapsack problem.
-        np.ndarray: Terminal nodes in the knapsack problem.
-        np.ndarray: Feasible nodes in the knapsack problem.
-        np.ndarray: All nodes in the knapsack problem.
+    .. note::
+        The brute-force algorithm is computationally expensive and should be
+        used with caution for large problem instances.
     """
     nodes = np.array([])
     feasible_nodes = np.array([])
@@ -617,4 +756,9 @@ def brute_force(
             if arrangement.value == terminal_nodes[0].value
         ]
     )
-    return optimal_nodes, terminal_nodes, feasible_nodes, nodes
+    return (
+        list(optimal_nodes),
+        list(terminal_nodes),
+        list(feasible_nodes),
+        list(nodes),
+    )
