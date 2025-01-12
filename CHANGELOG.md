@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v3.1.3 (2025-01-12)
+
+### Bug Fixes
+
+* fix(phase_transition): dimensions back to front.
+
+The final `phase_transition` array was being reshaped in a manner
+that was inconsistent with the way in which  resolution was passed
+to the function. The expected outcome should be to reshape the
+phase transition in such a way that nc varies along the x-axis
+(column-wise) and np along the y-axis (row-wise). ([`e8fbcfc`](https://github.com/HRSAndrabi/pykp/commit/e8fbcfc8ce83be33787b64a17321e637b3ba562d))
+
+
 ## v3.1.2 (2025-01-12)
 
 ### Bug Fixes
