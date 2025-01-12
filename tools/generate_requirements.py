@@ -2,15 +2,8 @@
 """Generate requirements/*.txt files from pyproject.toml."""
 
 import sys
+import tomllib as toml
 from pathlib import Path
-
-try:  # standard module since Python 3.11
-    import tomllib as toml
-except ImportError:
-    try:  # available for older Python via pip
-        import tomli as toml
-    except ImportError:
-        sys.exit("Please install `tomli` first: `{mamba, pip} install tomli`")
 
 script_pth = Path(__file__)
 repo_dir = script_pth.parent.parent
@@ -23,6 +16,7 @@ header = [
 
 
 def generate_requirement_file(name, req_list, *, extra_list=None):
+    """Generate a requirements file."""
     req_fname = repo_dir / "requirements" / f"{name}.txt"
 
     # remove once scikit-umfpack issues are resolved
@@ -41,6 +35,7 @@ def generate_requirement_file(name, req_list, *, extra_list=None):
 
 
 def main():
+    """Generate requirements/*.txt files from pyproject.toml."""
     pyproject = toml.loads((repo_dir / "pyproject.toml").read_text())
 
     default = generate_requirement_file(
