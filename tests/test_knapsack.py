@@ -1,4 +1,4 @@
-import pathlib
+import pathlib  # noqa: D100
 
 import numpy as np
 import pytest
@@ -8,6 +8,7 @@ from pykp import Item, Knapsack
 
 @pytest.fixture
 def knapsack() -> Knapsack:
+    """Return a knapsack instance with a set of items and capacity."""
     items = [
         Item(value=7, weight=3),
         Item(value=10, weight=5),
@@ -19,6 +20,7 @@ def knapsack() -> Knapsack:
 
 
 def test_initialisation(knapsack: Knapsack):
+    """Test the initialisation of a knapsack instance."""
     assert knapsack.capacity == 23
     assert np.array_equal(knapsack.state, np.zeros(len(knapsack.items)))
     assert knapsack.value == 0
@@ -27,6 +29,7 @@ def test_initialisation(knapsack: Knapsack):
 
 
 def test_invalid_initialisation():
+    """Test the initialisation of a knapsack instance with invalid inputs."""
     with pytest.raises(ValueError):
         Knapsack(items=np.array([]), capacity=10)
 
@@ -38,6 +41,7 @@ def test_invalid_initialisation():
 
 
 def test_add_item(knapsack: Knapsack):
+    """Test adding an item to the knapsack."""
     knapsack.empty()
     knapsack.add(knapsack.items[0])
     assert knapsack.value == 7
@@ -47,6 +51,7 @@ def test_add_item(knapsack: Knapsack):
 
 
 def test_remove_item(knapsack: Knapsack):
+    """Test removing an item from the knapsack."""
     knapsack.empty()
     knapsack.add(knapsack.items[0])
     knapsack.remove(knapsack.items[0])
@@ -56,6 +61,7 @@ def test_remove_item(knapsack: Knapsack):
 
 
 def test_set_state(knapsack: Knapsack):
+    """Test setting the state of the knapsack."""
     knapsack.state = [1, 0, 1, 0]
     print(knapsack.items)
     assert knapsack.value == 22
@@ -65,6 +71,7 @@ def test_set_state(knapsack: Knapsack):
 
 
 def test_empty(knapsack: Knapsack):
+    """Test emptying the knapsack."""
     knapsack.state = [1, 0, 1, 0]
     knapsack.empty()
     assert knapsack.value == 0
@@ -73,6 +80,7 @@ def test_empty(knapsack: Knapsack):
 
 
 def test_load_from_json(tmp_path: pathlib.Path, knapsack: Knapsack):
+    """Test loading a knapsack instance from a JSON file."""
     path = tmp_path / "test_knapsack.json"
     knapsack.write_to_json(str(path))
     new_knapsack = Knapsack(

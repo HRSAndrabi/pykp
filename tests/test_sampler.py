@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock  # noqa: D100
 
 import numpy as np
 import pytest
@@ -7,10 +7,7 @@ from pykp.sampler import Sampler
 
 
 def test_sampler_init_with_defaults():
-    """
-    Test that the Sampler object initialises correctly with default
-    distributions.
-    """
+    """Test Sampler initialisation with default distributions."""
     sampler = Sampler(num_items=5, normalised_capacity=0.5)
     assert sampler.num_items == 5
     assert sampler.normalised_capacity == 0.5
@@ -26,9 +23,7 @@ def test_sampler_init_with_defaults():
 
 
 def test_sampler_init_with_custom_distributions():
-    """
-    Test that the Sampler object can be initialised with custom distributions.
-    """
+    """Test Sampler initialisation with custom distributions."""
     custom_weight_dist = (
         np.random.default_rng().normal,
         {"loc": 10, "scale": 5},
@@ -55,10 +50,7 @@ def test_sampler_init_with_custom_distributions():
 
 
 def test_sampler_sample_returns_knapsack():
-    """
-    Test that the sample method returns a Knapsack instance containing the
-    expected number of items.
-    """
+    """Test that the `sample` method returns a Knapsack instance."""
     sampler = Sampler(num_items=5, normalised_capacity=0.8)
     knapsack = sampler.sample()
 
@@ -70,10 +62,7 @@ def test_sampler_sample_returns_knapsack():
 
 
 def test_sampler_sample_capacity_calculation():
-    """
-    Test that the knapsack capacity is calculated as
-    int(normalised_capacity * sum_weights).
-    """
+    """Test that the capacity of the knapsack is calculated correctly."""
     sampler = Sampler(num_items=4, normalised_capacity=0.5)
 
     # Mock the distributions to return a predictable weights array.
@@ -88,11 +77,7 @@ def test_sampler_sample_capacity_calculation():
 
 @pytest.mark.parametrize("normalised_capacity", [0.0, 0.1, 0.9, 1.5])
 def test_sampler_different_normalised_capacities(normalised_capacity):
-    """
-    Test different normalised capacities to ensure capacity is computed
-    appropriately. Also checks that the code doesn't break for zero or
-    capacities > 1.
-    """
+    """Test that the capacity of the knapsack is calculated correctly."""
     sampler = Sampler(num_items=3, normalised_capacity=normalised_capacity)
     knapsack = sampler.sample()
     total_weight = sum(item.weight for item in knapsack.items)
