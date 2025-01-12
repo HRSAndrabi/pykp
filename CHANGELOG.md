@@ -1,6 +1,29 @@
 # CHANGELOG
 
 
+## v3.1.1 (2025-01-12)
+
+### Bug Fixes
+
+* fix: broken installation link. ([`020b86d`](https://github.com/HRSAndrabi/pykp/commit/020b86d8833f8bf08e239fd0f50270bbf3793e1d))
+
+* fix: remove anytree dependency. ([`328e98b`](https://github.com/HRSAndrabi/pykp/commit/328e98bea9914167246dddad1dc306acc251974d))
+
+### Chores
+
+* chore: remove unused imports. ([`0251b89`](https://github.com/HRSAndrabi/pykp/commit/0251b89633b440d0d6757f24be5cc077cb26b895))
+
+### Code Style
+
+* style: consistent logo. ([`6bb266a`](https://github.com/HRSAndrabi/pykp/commit/6bb266a1156be2572ef855d7d811ce33b1808ca0))
+
+### Documentation
+
+* docs: update README.md. ([`62f7406`](https://github.com/HRSAndrabi/pykp/commit/62f74062de9ad239694585216c612858a5e3ed7a))
+
+* docs: add matplotlib to dependencies. ([`a5d62d1`](https://github.com/HRSAndrabi/pykp/commit/a5d62d1b6d7b0c2741c779441acd7f218062b562))
+
+
 ## v3.1.0 (2025-01-12)
 
 ### Bug Fixes
