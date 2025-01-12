@@ -14,7 +14,7 @@ PyKP documentation
    Contributing <contributing/index>
 
 **Useful links**:
-`Installation </installation/>`_ |
+`Installation </installation/index.html>`_ |
 `Source Repository <https://github.com/HRSAndrabi/pykp>`_ |
 `Issue Tracker <https://github.com/HRSAndrabi/pykp/issues>`_ 
 
