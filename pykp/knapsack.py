@@ -576,7 +576,7 @@ class Knapsack:
             >>> fig, ax = knapsack.plot_network()
             >>> plt.show()
         """
-        if not self._nodes.size == 2 ** len(self._items):
+        if not len(self.nodes) == 2 ** len(self.items):
             self.solve_all_nodes()
 
         kp_network = kp_network = nx.DiGraph()
