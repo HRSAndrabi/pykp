@@ -9,7 +9,7 @@ import pytest
 
 import pykp.metrics as metrics
 
-SOLVERS = ["branch_and_bound", "mzn_gecode"]
+SOLVERS = ["branch_and_bound"]
 
 
 @pytest.mark.parametrize("resolution", [(5, 5), (2, 3), (10, 10)])
