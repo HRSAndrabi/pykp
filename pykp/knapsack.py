@@ -488,24 +488,22 @@ class Knapsack:
 
         Examples
         --------
-        .. plot::
-
-            >>> import random
-            >>> from pykp import Item, Knapsack
-            >>> import matplotlib.pyplot as plt
-            >>>
-            >>> random.seed(42)
-            >>> weights = [random.randint(1, 100) for _ in range(12)]
-            >>> values = [random.randint(1, 100) for _ in range(12)]
-            >>> items = [Item(v, w) for v, w in zip(values, weights)]
-            >>> capacity = sum(weights) / 2
-            >>> knapsack = Knapsack(items=items, capacity=capacity)
-            >>> knapsack.solve(method="brute_force")
-            [(v: 372, w: 300, s: 4000)]
-            >>> fig, ax = knapsack.plot_terminal_nodes_histogram()
-            >>> plt.show()
+        >>> import random
+        >>> from pykp import Item, Knapsack
+        >>> import matplotlib.pyplot as plt
+        >>>
+        >>> random.seed(42)
+        >>> weights = [random.randint(1, 100) for _ in range(12)]
+        >>> values = [random.randint(1, 100) for _ in range(12)]
+        >>> items = [Item(v, w) for v, w in zip(values, weights)]
+        >>> capacity = sum(weights) / 2
+        >>> knapsack = Knapsack(items=items, capacity=capacity)
+        >>> knapsack.solve(method="brute_force")
+        [(v: 372, w: 300, s: 4000)]
+        >>> fig, ax = knapsack.plot_terminal_nodes_histogram()
+        >>> plt.show()
         """
-        if not self._nodes.size == 2 ** len(self._items):
+        if not len(self.nodes) == 2 ** len(self.items):
             self.solve(method="brute_force")
 
         if not ax:
@@ -558,22 +556,23 @@ class Knapsack:
 
         Examples
         --------
-        .. plot::
+        >>> import random
+        >>> from pykp import Item, Knapsack
+        >>> import matplotlib.pyplot as plt
+        >>>
+        >>> random.seed(42)
+        >>> weights = [random.randint(1, 100) for _ in range(5)]
+        >>> values = [random.randint(1, 100) for _ in range(5)]
+        >>> items = [Item(v, w) for v, w in zip(values, weights)]
+        >>> capacity = sum(weights) / 2
+        >>> knapsack = Knapsack(items=items, capacity=capacity)
+        >>> knapsack.solve(method="brute_force")
+        [(v: 142, w: 114, s: 28)]
+        >>> fig, ax = knapsack.plot_network()
+        >>> plt.show()
 
-            >>> import random
-            >>> from pykp import Item, Knapsack
-            >>> import matplotlib.pyplot as plt
-            >>>
-            >>> random.seed(42)
-            >>> weights = [random.randint(1, 100) for _ in range(5)]
-            >>> values = [random.randint(1, 100) for _ in range(5)]
-            >>> items = [Item(v, w) for v, w in zip(values, weights)]
-            >>> capacity = sum(weights) / 2
-            >>> knapsack = Knapsack(items=items, capacity=capacity)
-            >>> knapsack.solve(method="brute_force")
-            [(v: 142, w: 114, s: 28)]
-            >>> fig, ax = knapsack.plot_network()
-            >>> plt.show()
+        .. image:: /_static/plots/network.png
+            :alt: Knapsack network representation
         """
         if not len(self.nodes) == 2 ** len(self.items):
             self.solve_all_nodes()
@@ -605,7 +604,7 @@ class Knapsack:
         if ax is None:
             fig, ax = plt.subplots(
                 figsize=(4 * len(self._items) / 10, 4 * len(self._items) / 10),
-                dpi=1000,
+                dpi=200,
                 nrows=1,
                 ncols=1,
                 constrained_layout=True,
