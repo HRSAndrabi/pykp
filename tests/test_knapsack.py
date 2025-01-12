@@ -1,4 +1,6 @@
-import pathlib  # noqa: D100
+"""Tests for pykp.knapsack module."""
+
+import pathlib
 
 import numpy as np
 import pytest

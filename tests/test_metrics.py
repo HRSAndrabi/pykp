@@ -1,4 +1,4 @@
-"""Test the metrics module."""
+"""Tests for pykp.metrics module."""
 
 import os
 from unittest.mock import patch

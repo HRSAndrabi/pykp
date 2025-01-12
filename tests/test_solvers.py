@@ -1,4 +1,6 @@
-import json  # noqa: D100
+"""Tests for pykp.solvers module."""
+
+import json
 
 import numpy as np
 import pytest

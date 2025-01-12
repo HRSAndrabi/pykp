@@ -1,4 +1,6 @@
-from unittest.mock import MagicMock  # noqa: D100
+"""Tests for pykp.sampler module."""
+
+from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
