@@ -536,8 +536,7 @@ class Knapsack:
 
     def plot_network(
         self,
-        fig=None,
-        ax=plt.Axes,
+        ax: plt.Axes = None,
     ) -> tuple[plt.Figure, plt.Axes]:
         """
         Visualises a graph representation of the knapsack problem.
