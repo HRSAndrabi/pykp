@@ -16,7 +16,6 @@ from sphinx.application import Sphinx
 MOCK_MODULES = [
     "pandas",
     "networkx",
-    "anytree",
     "nest_asyncio",
     "minizinc",
 ]
