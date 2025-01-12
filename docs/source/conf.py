@@ -1,15 +1,21 @@
+import math  # noqa: D100
 import os
 import sys
 from typing import Any, Dict
 from unittest.mock import MagicMock
 
+import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.sphinxext.plot_directive
 from sphinx.application import Sphinx
+
+# -----------------------------------------------------------------------------
+# General configuration
+# -----------------------------------------------------------------------------
 
 MOCK_MODULES = [
     "pandas",
     "networkx",
-    "matplotlib",
-    "matplotlib.pyplot",
     "anytree",
     "nest_asyncio",
     "minizinc",
@@ -30,20 +36,33 @@ extensions = [
     "sphinx.ext.coverage",
     "sphinx.ext.intersphinx",
     "numpydoc",
-    # "sphinx_sitemap",
     "sphinx.ext.autosectionlabel",
     "sphinx_design",
     "sphinx_copybutton",
     "sphinx_favicon",
+    "matplotlib.sphinxext.plot_directive",
 ]
 
-autosummary_generate = True  # Turn on sphinx.ext.autosummary
+# Turn on sphinx.ext.autosummary
+autosummary_generate = True
+
+# Group entries by type
 autodoc_member_order = "groupwise"
+
+# Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
-# Napoleon settings
-napoleon_google_docstring = True
-napoleon_numpy_docstring = False
+# Apply the .. plot:: directive to examples
+numpydoc_use_plots = True
+
+# The name of the Pygments (syntax highlighting) style to use.
+pygments_style = "sphinx"
+
+# -----------------------------------------------------------------------------
+# Napoleon configuration
+# -----------------------------------------------------------------------------
+napoleon_google_docstring = False
+napoleon_numpy_docstring = True
 napoleon_include_init_with_doc = False
 napoleon_include_private_with_doc = False
 napoleon_include_special_with_doc = True
@@ -57,15 +76,43 @@ napoleon_preprocess_types = False
 napoleon_type_aliases = None
 napoleon_attr_annotations = True
 
-templates_path = ["_templates"]
-exclude_patterns = []
+# -----------------------------------------------------------------------------
+# Matplotlib plot_directive options
+# -----------------------------------------------------------------------------
+plot_include_source = True
+plot_formats = [("png", 96)]
+plot_html_show_formats = False
+plot_html_show_source_link = False
+
+phi = (math.sqrt(5) + 1) / 2
+
+font_size = 13 * 72 / 96.0  # 13 px
+
+plot_rcparams = {
+    "font.size": font_size,
+    "axes.titlesize": font_size,
+    "axes.labelsize": font_size,
+    "xtick.labelsize": font_size,
+    "ytick.labelsize": font_size,
+    "legend.fontsize": font_size,
+    "figure.figsize": (3 * phi, 3),
+    "figure.subplot.bottom": 0.2,
+    "figure.subplot.left": 0.2,
+    "figure.subplot.right": 0.9,
+    "figure.subplot.top": 0.85,
+    "figure.subplot.wspace": 0.4,
+    "text.usetex": False,
+}
+
+# Do some matplotlib config in case users have a matplotlibrc that will break
+# things
+matplotlib.use("agg")
+plt.ioff()
 
 
-pygments_style = "sphinx"
-
-# -- Options for HTML output -------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
-
+# -----------------------------------------------------------------------------
+# HTML output
+# -----------------------------------------------------------------------------
 html_static_path = ["_static"]
 html_favicon = "_static/logo.svg"
 html_js_files = ["pypi-icon.js"]
@@ -137,24 +184,31 @@ html_theme_options = {
 }
 
 
+# Set up the "Edit on GitHub" link
 def setup_to_main(
     app: Sphinx, pagename: str, templatename: str, context, doctree
 ) -> None:
-    """
+    """Ensure that the "edit this page" link points to the main branch.
+
     Add a function that jinja can access for returning an "edit this page" link
     pointing to `main`.
     """
 
     def to_main(link: str) -> str:
-        """
+        """Ensure that the "edit this page" link points to the main branch.
+
         Transform "edit on github" links and make sure they always point to the
         main branch.
 
-        Args:
-            link: the link to the github edit interface
+        Parameters
+        ----------
+        link : str
+            the link to the github edit interface.
 
-        Returns:
-            the link to the tip of the main branch for the same file
+        Returns
+        -------
+        str
+            The link to the tip of the main branch for the same file.
         """
         links = link.split("/")
         idx = links.index("edit")
@@ -168,10 +222,15 @@ def setup_to_main(
 def setup(app: Sphinx) -> Dict[str, Any]:
     """Add custom configuration to sphinx app.
 
-    Args:
-        app: the Sphinx application
-    Returns:
-        the 2 parallel parameters set to ``True``.
+    Parameters
+    ----------
+    app : Sphinx
+        The Sphinx application.
+
+    Returns
+    -------
+    Dict
+        The 2 parallel parameters set to ``True``.
     """
     app.connect("html-page-context", setup_to_main)
 
