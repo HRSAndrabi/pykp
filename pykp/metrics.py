@@ -140,7 +140,7 @@ def _simulate_cell_solvability(
             num_items=num_items, norm_c=norm_c_draw, norm_p=norm_p_draw
         )
         result = solver(items=items, capacity=capacity)
-        if isinstance(result, np.ndarray):
+        if isinstance(result, list):
             optimal_node = result[0]
         else:
             optimal_node = result
