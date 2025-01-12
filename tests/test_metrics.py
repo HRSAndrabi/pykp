@@ -97,3 +97,34 @@ def test_phase_transition_values_in_range():
     assert np.all(solvability_matrix >= 0.0) and np.all(
         solvability_matrix <= 1.0
     ), "Solvability values are not all within [0, 1]."
+
+
+@pytest.mark.parametrize("seed", [1, 2, 3])
+def test_phase_transition_reproducibility(seed):
+    """Test that the phase transition is reproducible."""
+    resolution = (2, 2)
+    num_items = 5
+    samples = 5
+    grid, solvability_matrix = metrics.phase_transition(
+        num_items=num_items,
+        samples=samples,
+        solver="branch_and_bound",
+        resolution=resolution,
+        path=None,
+        seed=seed,
+    )
+
+    grid2, solvability_matrix2 = metrics.phase_transition(
+        num_items=num_items,
+        samples=samples,
+        solver="branch_and_bound",
+        resolution=resolution,
+        path=None,
+        seed=seed,
+    )
+
+    assert np.all(grid[0] == grid2[0]), "Inconsistent grid."
+    assert np.all(grid[0] == grid2[0]), "Inconsistent grid."
+    assert np.all(solvability_matrix == solvability_matrix2), (
+        "Inconsistent solvability matrix."
+    )
