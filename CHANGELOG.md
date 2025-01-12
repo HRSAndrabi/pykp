@@ -1,6 +1,23 @@
 # CHANGELOG
 
 
+## v3.1.2 (2025-01-12)
+
+### Bug Fixes
+
+* fix: not converting type to list. ([`85d783a`](https://github.com/HRSAndrabi/pykp/commit/85d783a6e89ee4c4693fd3cfbf741e6c773d741c))
+
+### Documentation
+
+* docs: add test module docstrings. ([`c99e6e3`](https://github.com/HRSAndrabi/pykp/commit/c99e6e3153617c497ba9ce9302b7d8195e100063))
+
+### Testing
+
+* test: remove mzn_gecode test. ([`eee83d8`](https://github.com/HRSAndrabi/pykp/commit/eee83d848b0e9abf0c5c1b03d75fea02b0bbdd66))
+
+* test(metrics.phase_transition): write tests. ([`71a8016`](https://github.com/HRSAndrabi/pykp/commit/71a80165cfb2fc5b50d025078c5598dc752e178b))
+
+
 ## v3.1.1 (2025-01-12)
 
 ### Bug Fixes
