@@ -1,5 +1,7 @@
-"""
-This module contains various metrics for evaluating knapsack problem instances.
+"""Metrics for evaluating knapsack instance complexity.
+
+This module provides metrics to evaluate the complexity and phase transition
+properties of knapsack problem instances.
 """
 
 import itertools
@@ -21,14 +23,23 @@ def _initialise_grid(
     resolution: tuple[int, int],
 ) -> tuple[np.ndarray, np.ndarray]:
     """
-    Initialise a grid of normalised capacities and profits to sample from.
+    Create a 2D grid of normalised capacities and profits.
 
-    Args:
-        resolution (tuple[int, int]): The resolution of the grid.
+    This function sets up a mesh grid along the x-axis for normalised capacity
+    and the y-axis for normalised profit.
 
-    Returns:
-        tuple[np.ndarry, np.ndarray]: The grid of normalised capacities and
-            profits.
+    Parameters
+    ----------
+    resolution : tuple[int, int]
+        The desired resolution of the grid in the form (num_capacities,
+        num_profits).
+
+    Returns
+    -------
+    grid : tuple[np.ndarray, np.ndarray]
+        The mesh grid arrays representing normalised capacities and profits.
+        The first array corresponds to normalised capacities, and the second
+        to normalised profits.
     """
     norm_c_step_size = 1 / resolution[0]
     norm_p_step_size = 1 / resolution[1]
@@ -45,16 +56,30 @@ def _sample_instance(
     num_items: int, norm_c: float, norm_p: float
 ) -> tuple[list[Item], float, float]:
     """
-    Sample an instance of the knapsack problem.
+    Sample a knapsack instance based on normalised capacity and profit targets.
 
-    Args:
-        num_items (int): The number of items in the instance.
-        norm_c (float): The normalised capacity of the knapsack.
-        norm_p (float): The normalised target profit of the knapsack.
+    A set of `num_items` is generated with uniform random weights and values.
+    The capacity is defined as the sum of all weights multiplied by `norm_c`,
+    and the target profit is defined as the sum of all values multiplied by
+    `norm_p`.
 
-    Returns:
-        tuple[list[Item], float, float]: A tuple containing the items,
-            capacity, and target profit of the instance.
+    Parameters
+    ----------
+    num_items : int
+        Number of items to generate.
+    norm_c : float
+        Normalised capacity factor to scale the total weight.
+    norm_p : float
+        Normalised profit factor to scale the total value.
+
+    Returns
+    -------
+    items : list[Item]
+        The generated knapsack items with random weights and values.
+    capacity : float
+        The scaled capacity for the knapsack.
+    target_profit : float
+        The scaled target profit.
     """
     weights = np.random.uniform(0, 1, num_items)
     profits = np.random.uniform(0, 1, num_items)
@@ -76,21 +101,35 @@ def _simulate_cell_solvability(
     solver: Callable,
     progress: tqdm,
 ) -> float:
-    """
-    Simulate the solvability of a cell in the phase transition grid.
+    """Estimate the solvability of a grid cell.
 
-    Args:
-        norm_c_range (tuple[float, float]): The normalised capacity range of
-            the cell.
-        norm_p_range (tuple[float, float]): The normalised target profit range
-            of the cell.
-        num_items (int): The number of items in the instance.
-        samples (int): The number of samples to take.
-        solver (Callable): The solver to use.
-        progress (tqdm): tqdm progress bar to increment.
+    An instance is generated based on a random draw  within `norm_c_range` and
+    `norm_p_range`. The instance is solved to check if the optimal solution
+    meets or exceeds the target profit threshold. This process is repeated
+    `samples` times to estimate the solvability of the cell.
 
-    Returns:
-        float: The proportion of instances that are solvable.
+    Parameters
+    ----------
+    norm_c_range : tuple[float, float]
+        Lower and upper bound for the normalised capacity within the grid cell.
+    norm_p_range : tuple[float, float]
+        Lower and upper bound for the normalised profit within the grid cell.
+    num_items : int
+        Number of items to generate for each sample.
+    samples : int
+        Number of sampled instances in the given cell.
+    solver : Callable
+        A solver function that takes items and capacity as arguments and
+        returns an optimal node or array of optimal nodes.
+    progress : tqdm
+        Progress bar for tracking iterations.
+
+    Returns
+    -------
+    float
+        The fraction of instances in the cell for which the solver found
+        a solution that meets or exceeds the target profit.
+
     """
     score = 0
     for _ in range(samples):
@@ -113,15 +152,23 @@ def _simulate_cell_solvability(
 
 
 def _save_phase_transition(
-    phase_transition: np.ndarray, grid: np.ndarray, path: str
+    phase_transition: np.ndarray,
+    grid: tuple[np.ndarray, np.ndarray],
+    path: str,
 ):
-    """
-    Save the phase transition to a CSV file.
+    """Save the phase transition matrix to a CSV file.
 
-    Args:
-        phase_transition (np.ndarray): The phase transition grid.
-        grid (np.ndarray): The grid of normalised capacities and profits.
-        path (str): The path to save the CSV file.
+    Parameters
+    ----------
+    phase_transition : np.ndarray
+        A 2D array representing the solvability at each grid cell.
+    grid : tuple[np.ndarray, np.ndarray]
+        The mesh grid of normalised capacities and profits. The first element
+        should correspond to normalised capacities, and the second to
+        normalised profits.
+    path : str
+        The path (including filename) for the output CSV file.
+
     """
     df = pd.DataFrame(
         {
@@ -142,49 +189,107 @@ def phase_transition(
     resolution: tuple[int, int] = (41, 41),
     path: str = None,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """
-    Provides an implementation of the phase transition of the knapsack
-    problem, based on Yadav, Nitin, et al. (2018).
+    """Compute the phase transition matrix for knapsack instances.
 
-    Example:
-        Compute the phase transition of the knapsack problem::
+    In computational problems, a phase transition refers to a phenomenon where
+    the probability of finding a solution changes abruptly as some parameter
+    crosses a critical threshold. This concept draws inspiration from physics,
+    where phase transitions (e.g., water freezing) occur at critical
+    thresholds. Such transitions have also been shown to arise in NP-complete
+    problems, where the  likelihood of finding a solution changes
+    abruptly as a key parameter crosses a critical value.
 
-            from pykp.metrics import phase_transition
+    For the knapsack problem, this phase transition manifests in terms of
+    the relationship between the normalised capacity (`c`) and normalised
+    profit (`p`) of an instance. The phase transition has been shown to occur
+    when the ratio `r = c / p` is near 1. Instances with 0 < r < 1 are less
+    expensive to solve as compred to instances with r ≈ 1.
 
-            grid, solvability_matrix = phase_transition(
-                num_items=10,
-                samples=100,
-                resolution=(20, 20),
-            )
+    This function provide an implementation of the phase transition
+    of the knapsack problem, based on Yadav, Nitin, et al. (2018).
 
-        Save the phase transition to a CSV file by specifying an optional
-        `path` argument ::
+    Parameters
+    ----------
+    num_items : int
+        Number of items in each generated knapsack instance.
+    samples : int, optional
+        Number of instances to evaluate in each cell of the grid. Default is
+        100.
 
-            phase_transition(
-                num_items=10,
-                samples=100,
-                resolution=(20, 20),
-                path="phase_transition.csv",
-            )
+    Returns
+    -------
+        grid : tuple of np.ndarray
+            The mesh grid for normalszed capacities (x-axis) and profits
+            (y-axis).
+        phase_transition : np.ndarray
+            A 2D matrix of solvability (ranging from 0.0 to 1.0) corresponding
+            to each cell in `grid`.
 
-    Args:
-        num_items (int): Number of items in the knapsack.
-        samples (int, optional): Number of knapsack samples to produce for each
-            grid cell. Defaults to 100.
-        solver (str, optional): Solver to use. Defaults to "branch_and_bound".
-        resolution (tuple[int, int], optional): Resolution of the normalised
-            capacity-normalised profit grid. The first number corresponds to
-            the resolution of normalised capacity, and the second to the
-            resolution of normalised profit. Defaults to (41, 41).
-        path (str, optional): Path to save the phase transition to. Defaults
-            to None.
+    Other Parameters
+    ----------------
+    solver : str, optional
+    Which solver to use for evaluating each instance. Default is
+    "branch_and_bound".
+    resolution: tuple[int, int], optional
+        Resolution of the normalised capacity-normalised profit grid.
+        The first element corresponds to the resolution of normalised
+        capacity, and the second to the resolution of normalised profit.
+        Defaults to (41, 41).
+    path (str, optional): Path to save the phase transition to. Defaults
+        to None.
 
-    Returns:
-        tuple[np.ndarray, np.ndarray]: The grid of normalised capacities and
-        profits, and the phase transition. The x-axis corresponds to the
-        normalised capacity, and the y-axis to the normalised profit.
+    Examples
+    --------
+    >>> from pykp.metrics import phase_transition
+    >>> grid, solvability_matrix = phase_transition(
+    >>>     num_items=12,
+    >>>     samples=1000,
+    >>>     solver="branch_and_bound",
+    >>>     resolution = (20, 20),
+    >>> )
+    >>> grid[0].shape, grid[1].shape, solvability_matrix.shape
+    ((20, 20), (20, 20), (20, 20))
 
-    References:
+    >>> # Visualise the phase transition matrix
+    >>> import matplotlib.pyplot as plt
+    >>> fig, axes = plt.subplots(
+    ...     nrows=1,
+    ...     ncols=1,
+    ...     dpi=200,
+    ...     figsize=(4, 3),
+    ...     tight_layout=True,
+    ... )
+    >>> image = axes.imshow(
+    ...     phase_transition,
+    ...     cmap="RdYlGn",
+    ...     interpolation="nearest",
+    ...     aspect="auto",
+    ...     extent=(0, 1, 0, 1),
+    ... )
+    >>> axes.set(xlabel="nc", ylabel="np")
+    >>> cbar = fig.colorbar(image, ax=axes)
+    >>> cbar.ax.set_ylabel("solvability"
+    >>> plt.show()
+
+    .. image:: /_static/plots/phase_transition.png
+        :alt: Phase transition matrix
+
+    >>> # Optionally save results to file:
+    >>> phase_transition(
+    ...     num_items=10, samples=50, resolution=(5, 5), path="output.csv"
+    ... )
+
+    Notes
+    -----
+    The phase transition is typically applied with reference to the decision
+    variant of the knapsack problem. To apply the phase transition to the
+    optimisation variant, the target profit should be set to the optimal
+    solution value of the instance. One can then compute the normalised
+    profit based on the optimal solution, and observe where the instance
+    lies in the phase transition matrix.
+
+    References
+    ----------
 
         .. [1] Yadav, Nitin, et al. "Phase transition in the knapsack problem."
            arXiv preprint arXiv:1806.10244 (2018).
@@ -232,50 +337,41 @@ def sahni_k(
     arrangement: Arrangement,
     capacity: int,
 ) -> int:
-    """
-    Provides an implementation of the Sahni-K metric for evaluating
-    arrangements of items in the knapsack problem. The Sahni-k metric
-    is a measure of complexity based on the approximation algorithm proposed by
-    Sahni et al. (1975), [1]_ and shown to predict human performance on the
-    0/1 knapsack problem [2]_. The metric is defined as the smallest subset of
-    `k` items that must be selected so that applying the greedy algorithm to
-    the remaining items yields an optimal solution.
+    """Compute the Sahni-k metric for a given knapsack arrangement.
+
+    The Sahni-k metric [1]_ [2]_ is defined as the smallest number of items
+    (k) whose inclusion in the solution is necessary for the greedy algorithm
+    (applied to the remaining items) to yield an optimal solution.
 
     If `k` equals zero, the Sahni-k algorithm coincides with the greedy
     algorithm. If k is equal to the number of items in the solution, the
     algorithm is similar to a brute-force search through the entire search
     space.
 
-    Example:
-        To calculate the Sahni-k of the optimal solution to a knapsack problem
-        instance, first solve the instance and then call the metric on the
-        optimal arrangement::
+    Parameters
+    ----------
+    arrangement : Arrangement
+        A knapsack arrangement (subset of items) for which to compute Sahni-k.
+    capacity : int
+        The capacity constraint of the knapsack.
 
-            from pyinstance import Knapsack
-            from pyinstance import Item
-            import pyinstance.metrics as metrics
-
-            items = [
-                Item(value=10, weight=5),
-                Item(value=15, weight=10),
-                Item(value=7, weight=3),
-            ]
-            capacity = 15
-            instance = Knapsack(items=items, capacity=capacity)
-            instance.solve()
-
-            sahni_k = metrics.sahni_k(instance.optimal_nodes[0], capacity)
-            print(sahni_k)
-
-    Parameters:
-        arrangement (Arrangement): The arrangement for which to calculate
-            Sahni-k.
-        capacity (int): The capacity of the knapsack.
-
-    Returns:
+    Returns
+    -------
         int: Sahni-k value.
 
-    References:
+    Examples
+    --------
+    >>> from pykp import Arrangement
+    >>> from pykp import Item
+    >>> from pykp import metrics
+    >>>
+    >>> items = [Item(10, 5), Item(20, 8), Item(15, 7)]
+    >>> arr = Arrangement(items=items, state=[1, 0, 1])
+    >>> metrics.sahni_k(arr, capacity=15)
+    2
+
+    References
+    ----------
 
         .. [1] Sahni, Sartaj. "Approximate algorithms for the 0/1 knapsack
            problem." Journal of the ACM (JACM) 22.1 (1975): 115-124.
