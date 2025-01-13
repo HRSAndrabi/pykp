@@ -13,12 +13,12 @@ def test_sampler_init_with_defaults():
     sampler = Sampler(num_items=5, normalised_capacity=0.5)
     assert sampler.num_items == 5
     assert sampler.normalised_capacity == 0.5
-    assert callable(sampler.weight_dist)
+    assert sampler.weight_dist == "uniform"
     assert isinstance(sampler.weight_dist_kwargs, dict)
     assert "low" in sampler.weight_dist_kwargs
     assert "high" in sampler.weight_dist_kwargs
 
-    assert callable(sampler.value_dist)
+    assert sampler.value_dist == "uniform"
     assert isinstance(sampler.value_dist_kwargs, dict)
     assert "low" in sampler.value_dist_kwargs
     assert "high" in sampler.value_dist_kwargs
@@ -27,24 +27,28 @@ def test_sampler_init_with_defaults():
 def test_sampler_init_with_custom_distributions():
     """Test Sampler initialisation with custom distributions."""
     custom_weight_dist = (
-        np.random.default_rng().normal,
+        "normal",
         {"loc": 10, "scale": 5},
     )
     custom_value_dist = (
-        np.random.default_rng().normal,
+        "normal",
         {"loc": 20, "scale": 2},
     )
+    num_items = 10
+    nc = 0.5
 
     sampler = Sampler(
-        num_items=10,
-        normalised_capacity=0.3,
-        weight_dist=custom_weight_dist,
-        value_dist=custom_value_dist,
+        num_items=num_items,
+        normalised_capacity=nc,
+        weight_dist=custom_weight_dist[0],
+        weight_dist_kwargs=custom_weight_dist[1],
+        value_dist=custom_value_dist[0],
+        value_dist_kwargs=custom_value_dist[1],
     )
 
-    assert sampler.num_items == 10
-    assert sampler.normalised_capacity == 0.3
-    # Check references to the distributions
+    assert sampler.num_items == num_items
+    assert sampler.normalised_capacity == nc
+
     assert sampler.weight_dist == custom_weight_dist[0]
     assert sampler.weight_dist_kwargs == custom_weight_dist[1]
     assert sampler.value_dist == custom_value_dist[0]
@@ -65,16 +69,18 @@ def test_sampler_sample_returns_knapsack():
 
 def test_sampler_sample_capacity_calculation():
     """Test that the capacity of the knapsack is calculated correctly."""
-    sampler = Sampler(num_items=4, normalised_capacity=0.5)
-
-    # Mock the distributions to return a predictable weights array.
-    # For example, all weights = 2 => sum_weights = 8 => capacity = 4
-    # (with normalised_capacity = 0.5).
-    sampler.weight_dist = MagicMock(return_value=np.array([2, 2, 2, 2]))
-    sampler.value_dist = MagicMock(return_value=np.array([5, 5, 5, 5]))
-
+    sampler = Sampler(
+        num_items=10,
+        normalised_capacity=0.5,
+        weight_dist="integers",
+        weight_dist_kwargs={"low": 1, "high": 2},
+        value_dist="integers",
+        value_dist_kwargs={"low": 1, "high": 2},
+    )
     knapsack = sampler.sample()
-    assert knapsack.capacity == int(0.5 * 8)  # Should be 4
+    knapsack.items
+
+    assert knapsack.capacity == int(0.5 * 10)  # Should be 4
 
 
 @pytest.mark.parametrize("normalised_capacity", [0.0, 0.1, 0.9, 1.5])
@@ -87,3 +93,21 @@ def test_sampler_different_normalised_capacities(normalised_capacity):
 
     assert np.isclose(knapsack.capacity, expected_capacity)
     assert len(knapsack.items) == 3
+
+
+@pytest.mark.parametrize("seed", [1, 2, 3, 4, 5])
+def test_sample_reporducible(seed: int):
+    """Test that the samples are reproducible."""
+    sampler = Sampler(num_items=5, normalised_capacity=0.8)
+
+    knapsack = sampler.sample(seed=seed)
+    knapsack2 = sampler.sample(seed=seed)
+    values = [item.value for item in knapsack.items]
+    values2 = [item.value for item in knapsack2.items]
+    weights = [item.weight for item in knapsack.items]
+    weights2 = [item.weight for item in knapsack2.items]
+
+    assert knapsack.capacity == knapsack2.capacity
+    assert np.array_equal(values, values2)
+    assert np.array_equal(weights, weights2)
+    assert np.array_equal(knapsack.state, knapsack2.state)
