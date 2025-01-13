@@ -401,6 +401,66 @@ def branch_and_bound(
     return result
 
 
+def _branch_and_bound_decision_variant(
+    items: list[Item], capacity: float, target: float
+) -> bool:
+    """Solves the knapsack decision variant using branch-and-bound.
+
+    Parameters
+    ----------
+    items : list[Item]
+        Items that can be included in the knapsack.
+    capacity : int
+        Maximum weight capacity of the knapsack.
+    target : float
+        The target value to achieve.
+
+    Returns
+    -------
+    bool
+        Whether the target value can be achieved.
+    """
+    if len(items) == 0:
+        return False
+
+    items = np.array(
+        sorted(items, key=lambda item: item.value / item.weight, reverse=True)
+    )
+    upper_bound = _calculate_upper_bound(
+        items=items,
+        capacity=capacity,
+        included_items=np.array([]),
+        excluded_items=np.array([]),
+    )
+    root = Node(
+        priority=-sum([item.value for item in items]),
+        items=items,
+        value=0,
+        weight=0,
+        included_items=np.array([]),
+        excluded_items=np.array([]),
+        upper_bound=upper_bound,
+    )
+    queue = PriorityQueue()
+    queue.put(root)
+    incumbent = 0
+
+    while not queue.empty():
+        if incumbent >= target:
+            return True
+        next = queue.get()
+        children = _expand_node(next, capacity, incumbent)
+        for child in children:
+            if child.upper_bound < incumbent:
+                continue
+
+            queue.put(child)
+            if child.value >= incumbent and _is_leaf_node(child, capacity):
+                incumbent = child.value
+
+    return False
+
+
 def mzn_gecode(items: list[Item], capacity: int) -> Arrangement:
     """Solves the knapsack problem using the MiniZinc Gecode solver.
 
