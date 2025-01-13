@@ -1,6 +1,18 @@
 # CHANGELOG
 
 
+## v3.5.0 (2025-01-13)
+
+### Features
+
+* feat(phase_transition): outcome argument only accepts str.
+
+pykp.metrics.phase_transition accepts an outcome argument that is
+one of "solvability", "time", or "both", and produces the
+corresponding phase transition matrices. Updated docs to reflect
+these changes. ([`11c2a35`](https://github.com/HRSAndrabi/pykp/commit/11c2a35b474e67d6d58b2f9ebcf16e4a351cf6dc))
+
+
 ## v3.4.0 (2025-01-13)
 
 ### Documentation
