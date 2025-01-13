@@ -323,7 +323,7 @@ def phase_transition(
         case "branch_and_bound":
             solver = solvers._branch_and_bound_decision_variant
         case "mzn_gecode":
-            solver = solvers.mzn_gecode
+            solver = solvers._mzn_gecode_decision_variant
         case _:
             raise ValueError(f"`method` must be one of: {SOLVERS}.")
 
