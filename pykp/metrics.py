@@ -5,7 +5,8 @@ properties of knapsack problem instances.
 """
 
 import itertools
-from typing import Callable
+import time
+from typing import Callable, Literal
 
 import numpy as np
 import pandas as pd
@@ -98,6 +99,7 @@ def _sample_instance(
 def _simulate_cell_solvability(
     norm_c_range: tuple[float, float],
     norm_p_range: tuple[float, float],
+    outcome: Literal["solvability", "time"],
     num_items: int,
     samples: int,
     solver: Callable,
@@ -117,6 +119,8 @@ def _simulate_cell_solvability(
         Lower and upper bound for the normalised capacity within the grid cell.
     norm_p_range : tuple[float, float]
         Lower and upper bound for the normalised profit within the grid cell.
+    outcome : Literal["solvability", "time"], optional
+        The outcome to measure in each cell.
     num_items : int
         Number of items to generate for each sample.
     samples : int
@@ -147,13 +151,14 @@ def _simulate_cell_solvability(
             norm_p=norm_p_draw,
             rng=rng,
         )
-        result = solver(items=items, capacity=capacity)
-        if isinstance(result, list):
-            optimal_node = result[0]
+        start = time.perf_counter()
+        result = solver(items=items, capacity=capacity, target=target_profit)
+        end = time.perf_counter()
+
+        if outcome == "time":
+            score += end - start
         else:
-            optimal_node = result
-        if optimal_node.value >= target_profit:
-            score += 1
+            score += int(result)
         progress.update(1)
 
     return score / samples
@@ -193,6 +198,7 @@ def _save_phase_transition(
 def phase_transition(
     num_items: int,
     samples: int = 100,
+    outcome: Literal["solvability", "time"] = "solvability",
     solver: str = "branch_and_bound",
     resolution: tuple[int, int] = (41, 41),
     seed: int | None = None,
@@ -224,6 +230,12 @@ def phase_transition(
     samples : int, optional
         Number of instances to evaluate in each cell of the grid. Default is
         100.
+    outcome : Literal["solvability", "time"], optional
+        The outcome to measure in each cell. One of "solvability" or "time".
+        If "solvability", the phase transition matrix will represent the
+        the proprotion of isntances that are satisfiable in each cell. If
+        "time", the phase transition matrix will represent the average time
+        taken to solve isntances in each cell. Default is "solvability".
 
     Returns
     -------
@@ -238,8 +250,8 @@ def phase_transition(
     Other Parameters
     ----------------
     solver : str, optional
-    Which solver to use for evaluating each instance. Default is
-    "branch_and_bound".
+        Which solver to use for evaluating each instance. Default is
+        "branch_and_bound".
     resolution: tuple[int, int], optional
         Resolution of the normalised capacity-normalised profit grid.
         The first element corresponds to the resolution of normalised
@@ -309,7 +321,7 @@ def phase_transition(
     """
     match solver:
         case "branch_and_bound":
-            solver = solvers.branch_and_bound
+            solver = solvers._branch_and_bound_decision_variant
         case "mzn_gecode":
             solver = solvers.mzn_gecode
         case _:
@@ -330,6 +342,7 @@ def phase_transition(
             solvability = _simulate_cell_solvability(
                 norm_c_range=norm_c_range,
                 norm_p_range=norm_p_range,
+                outcome=outcome,
                 num_items=num_items,
                 samples=samples,
                 solver=solver,
