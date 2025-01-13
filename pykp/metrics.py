@@ -99,7 +99,6 @@ def _sample_instance(
 def _simulate_cell_solvability(
     norm_c_range: tuple[float, float],
     norm_p_range: tuple[float, float],
-    outcome: Literal["solvability", "time"],
     num_items: int,
     samples: int,
     solver: Callable,
@@ -119,8 +118,6 @@ def _simulate_cell_solvability(
         Lower and upper bound for the normalised capacity within the grid cell.
     norm_p_range : tuple[float, float]
         Lower and upper bound for the normalised profit within the grid cell.
-    outcome : Literal["solvability", "time"], optional
-        The outcome to measure in each cell.
     num_items : int
         Number of items to generate for each sample.
     samples : int
@@ -140,7 +137,8 @@ def _simulate_cell_solvability(
         a solution that meets or exceeds the target profit.
 
     """
-    score = 0
+    total_time = 0
+    total_solved = 0
     for _ in range(samples):
         norm_c_draw = rng.uniform(norm_c_range[0], norm_c_range[1])
         norm_p_draw = rng.uniform(norm_p_range[0], norm_p_range[1])
@@ -155,17 +153,17 @@ def _simulate_cell_solvability(
         result = solver(items=items, capacity=capacity, target=target_profit)
         end = time.perf_counter()
 
-        if outcome == "time":
-            score += end - start
-        else:
-            score += int(result)
+        total_time += end - start
+        total_solved += int(result)
         progress.update(1)
 
-    return score / samples
+    return (total_solved / samples, total_time / samples)
 
 
 def _save_phase_transition(
-    phase_transition: np.ndarray,
+    solvability: np.ndarray,
+    time: np.ndarray,
+    outcome: str,
     grid: tuple[np.ndarray, np.ndarray],
     path: str,
 ):
@@ -179,26 +177,35 @@ def _save_phase_transition(
         The mesh grid of normalised capacities and profits. The first element
         should correspond to normalised capacities, and the second to
         normalised profits.
+    outcome : str
+        The outcome to save to the CSV file. One of "solvability", "time", or
+        "both".
     path : str
         The path (including filename) for the output CSV file.
 
     """
-    df = pd.DataFrame(
-        {
-            "nc_lower": grid[0].flatten(),
-            "nc_upper": grid[0].flatten() + 1 / len(grid[0][0]),
-            "np_lower": grid[1].flatten(),
-            "np_upper": grid[1].flatten() + 1 / len(grid[1][0]),
-            "solvability": phase_transition.flatten(),
-        },
-    )
+    data = {
+        "nc_lower": grid[0].flatten(),
+        "nc_upper": grid[0].flatten() + 1 / len(grid[0][0]),
+        "np_lower": grid[1].flatten(),
+        "np_upper": grid[1].flatten() + 1 / len(grid[1][0]),
+    }
+
+    if outcome == "solvability":
+        data["solvability"] = solvability.flatten()
+    elif outcome == "time":
+        data["time"] = time.flatten()
+    else:
+        data["solvability"] = solvability.flatten()
+        data["time"] = time.flatten()
+    df = pd.DataFrame(data)
     df.to_csv(path, index=False, float_format="%.6f")
 
 
 def phase_transition(
     num_items: int,
     samples: int = 100,
-    outcome: Literal["solvability", "time"] = "solvability",
+    outcome: str = "both",
     solver: str = "branch_and_bound",
     resolution: tuple[int, int] = (41, 41),
     seed: int | None = None,
@@ -230,12 +237,15 @@ def phase_transition(
     samples : int, optional
         Number of instances to evaluate in each cell of the grid. Default is
         100.
-    outcome : Literal["solvability", "time"], optional
-        The outcome to measure in each cell. One of "solvability" or "time".
-        If "solvability", the phase transition matrix will represent the
-        the proprotion of isntances that are satisfiable in each cell. If
-        "time", the phase transition matrix will represent the average time
-        taken to solve isntances in each cell. Default is "solvability".
+    outcome : str, optional
+        The outcome to measure in each cell. One or of "solvability" "time"
+        or "both". If "solvability" is specified, the phase transition matrix
+        represents the proprotion of instances that are satisfiable in each
+        cell. If "time" is specified, the phase transition matrix represents
+        the average time taken to solve instances in each cell. If "both" is
+        specified, the returned phase transition is a tuple with the
+        the solvability matrix as the first element, and the time matrix as the
+        second element. Default is "both".
 
     Returns
     -------
@@ -244,8 +254,11 @@ def phase_transition(
             profits. The first matrix corresponds to normalised capacities,
             and the second to normalised profits.
         phase_transition : np.ndarray
-            A 2D matrix of solvability (ranging from 0.0 to 1.0) corresponding
-            to each cell in `grid`.
+            If ``outcome="solvability"``, a 2D matrix where each cell
+            represents the proportion of instances that are satisfiable. If
+            ``outcome="time"``, a 2D matrix where each cell represents the
+            average time taken to solve instances. If ``outcome="both``, a
+            tuple containing both matrices.
 
     Other Parameters
     ----------------
@@ -266,16 +279,18 @@ def phase_transition(
     Examples
     --------
     >>> from pykp.metrics import phase_transition
-    >>> grid, solvability_matrix = phase_transition(
+    >>> grid, (solvability, time) = phase_transition(
     >>>     num_items=12,
     >>>     samples=1000,
+    >>>     outcome="both",
     >>>     solver="branch_and_bound",
     >>>     resolution = (20, 20),
     >>> )
-    >>> grid[0].shape, grid[1].shape, solvability_matrix.shape
-    ((20, 20), (20, 20), (20, 20))
+    >>> grid[0].shape, grid[1].shape, solvability.shape, time.shape
+    ((20, 20), (20, 20), (20, 20), (20, 20))
 
-    >>> # Visualise the phase transition matrix
+    Visualise the phase transition matrices using matplotlib:
+
     >>> import matplotlib.pyplot as plt
     >>> fig, axes = plt.subplots(
     ...     nrows=1,
@@ -296,8 +311,31 @@ def phase_transition(
     >>> cbar.ax.set_ylabel("solvability"
     >>> plt.show()
 
-    .. image:: /_static/plots/phase_transition.png
-        :alt: Phase transition matrix
+    .. image:: /_static/plots/phase_transition_solvability.png
+        :alt: Phase transition solvability matrix
+
+    >>> import matplotlib.pyplot as plt
+    >>> fig, axes = plt.subplots(
+    ...     nrows=1,
+    ...     ncols=1,
+    ...     dpi=200,
+    ...     figsize=(4, 3),
+    ...     tight_layout=True,
+    ... )
+    >>> image = axes.imshow(
+    ...     phase_transition,
+    ...     cmap="RdYlGn",
+    ...     interpolation="nearest",
+    ...     aspect="auto",
+    ...     extent=(0, 1, 0, 1),
+    ... )
+    >>> axes.set(xlabel="nc", ylabel="np")
+    >>> cbar = fig.colorbar(image, ax=axes)
+    >>> cbar.ax.set_ylabel("solvability"
+    >>> plt.show()
+
+    .. image:: /_static/plots/phase_transition_time.png
+        :alt: Phase transition time matrix
 
     >>> # Optionally save results to file:
     >>> phase_transition(
@@ -319,6 +357,11 @@ def phase_transition(
         .. [1] Yadav, Nitin, et al. "Phase transition in the knapsack problem."
            arXiv preprint arXiv:1806.10244 (2018).
     """
+    if outcome not in ["solvability", "time", "both"]:
+        raise ValueError(
+            "`outcome` must one of 'solvability', 'time', or 'both'."
+        )
+
     match solver:
         case "branch_and_bound":
             solver = solvers._branch_and_bound_decision_variant
@@ -336,27 +379,44 @@ def phase_transition(
     )
     rng = np.random.default_rng(seed)
 
-    phase_transition = []
+    phase_transition_solvability = []
+    phase_transition_time = []
     with tqdm(total=samples * len(points)) as progress:
         for norm_c_range, norm_p_range in points:
-            solvability = _simulate_cell_solvability(
+            solvability, time = _simulate_cell_solvability(
                 norm_c_range=norm_c_range,
                 norm_p_range=norm_p_range,
-                outcome=outcome,
                 num_items=num_items,
                 samples=samples,
                 solver=solver,
                 progress=progress,
                 rng=rng,
             )
-            phase_transition.append(solvability)
+            phase_transition_solvability.append(solvability)
+            phase_transition_time.append(time)
 
-    phase_transition = np.array(phase_transition).reshape(resolution)
+    phase_transition_solvability = np.array(
+        phase_transition_solvability
+    ).reshape(resolution)
+    phase_transition_time = np.array(phase_transition_time).reshape(resolution)
 
     if path:
-        _save_phase_transition(phase_transition, grid, path)
+        _save_phase_transition(
+            solvability=phase_transition_solvability,
+            time=phase_transition_time,
+            outcome=outcome,
+            grid=grid,
+            path=path,
+        )
 
-    return grid, phase_transition
+    if outcome == "solvability":
+        result = phase_transition_solvability
+    elif outcome == "time":
+        result = phase_transition_time
+    else:
+        result = (phase_transition_solvability, phase_transition_time)
+
+    return grid, result
 
 
 def sahni_k(
