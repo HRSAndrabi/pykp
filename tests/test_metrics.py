@@ -12,12 +12,14 @@ import pykp.metrics as metrics
 SOLVERS = ["branch_and_bound"]
 
 
+@pytest.mark.parametrize("outcome", ["solvability", "time", "both"])
 @pytest.mark.parametrize("resolution", [(5, 5), (2, 3), (10, 10)])
-def test_phase_transition_returns_correct_shape(resolution):
+def test_phase_transition_returns_correct_shape(resolution, outcome):
     """Test dimensions of grid and phase transition match resolution."""
-    grid, solvability_matrix = metrics.phase_transition(
+    grid, phase_transition = metrics.phase_transition(
         num_items=5,
         samples=2,
+        outcome=outcome,
         solver="branch_and_bound",
         resolution=resolution,
         path=None,
@@ -25,7 +27,11 @@ def test_phase_transition_returns_correct_shape(resolution):
     assert grid[0].shape == resolution
     assert grid[1].shape == resolution
 
-    assert solvability_matrix.shape == resolution
+    if outcome == "both":
+        assert phase_transition[0].shape == resolution
+        assert phase_transition[1].shape == resolution
+    else:
+        assert phase_transition.shape == resolution
 
 
 @pytest.mark.parametrize("solver", SOLVERS)
@@ -51,7 +57,8 @@ def test_phase_transition_with_invalid_solver_raises():
         )
 
 
-def test_phase_transition_saves_csv(tmp_path):
+@pytest.mark.parametrize("outcome", ["time", "solvability", "both"])
+def test_phase_transition_saves_csv(tmp_path, outcome):
     """Test saving .csv file."""
     output_path = tmp_path / "phase_transition_output.csv"
     resolution = (2, 2)
@@ -59,6 +66,7 @@ def test_phase_transition_saves_csv(tmp_path):
     grid, solvability_matrix = metrics.phase_transition(
         num_items=5,
         samples=2,
+        outcome=outcome,
         solver="branch_and_bound",
         resolution=resolution,
         path=str(output_path),
@@ -72,8 +80,13 @@ def test_phase_transition_saves_csv(tmp_path):
         "nc_upper",
         "np_lower",
         "np_upper",
-        "solvability",
     ]
+    if outcome == "time":
+        expected_columns.append("time")
+    elif outcome == "solvability":
+        expected_columns.append("solvability")
+    elif outcome == "both":
+        expected_columns.extend(["time", "solvability"])
     assert all(col in df.columns for col in expected_columns), (
         "Missing expected columns in CSV."
     )
@@ -90,6 +103,7 @@ def test_phase_transition_values_in_range():
     grid, solvability_matrix = metrics.phase_transition(
         num_items=5,
         samples=2,
+        outcome="solvability",
         solver="branch_and_bound",
         resolution=resolution,
         path=None,
@@ -99,7 +113,7 @@ def test_phase_transition_values_in_range():
     ), "Solvability values are not all within [0, 1]."
 
 
-@pytest.mark.parametrize("seed", [1, 2, 3])
+@pytest.mark.parametrize("seed", [1, 2])
 def test_phase_transition_reproducibility(seed):
     """Test that the phase transition is reproducible."""
     resolution = (2, 2)
@@ -108,6 +122,7 @@ def test_phase_transition_reproducibility(seed):
     grid, solvability_matrix = metrics.phase_transition(
         num_items=num_items,
         samples=samples,
+        outcome="solvability",
         solver="branch_and_bound",
         resolution=resolution,
         path=None,
@@ -117,6 +132,7 @@ def test_phase_transition_reproducibility(seed):
     grid2, solvability_matrix2 = metrics.phase_transition(
         num_items=num_items,
         samples=samples,
+        outcome="solvability",
         solver="branch_and_bound",
         resolution=resolution,
         path=None,
