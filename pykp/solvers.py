@@ -461,14 +461,14 @@ def _branch_and_bound_decision_variant(
     return False
 
 
-def mzn_gecode(items: list[Item], capacity: int) -> Arrangement:
+def mzn_gecode(items: list[Item], capacity: float) -> Arrangement:
     """Solves the knapsack problem using the MiniZinc Gecode solver.
 
     Parameters
     ----------
     items : list[Item]
         Array of items to consider for the knapsack.
-    capacity : int
+    capacity : float
         Maximum weight capacity of the knapsack.
 
     Returns
@@ -551,6 +551,57 @@ def mzn_gecode(items: list[Item], capacity: int) -> Arrangement:
     result = instance.solve()
 
     return Arrangement(items=items, state=np.array(result["x"]))
+
+
+def _mzn_gecode_decision_variant(
+    items: list[Item], capacity: float, target: float
+) -> Arrangement:
+    """Solves the knapsack decision variant using MiniZinc and Gecode.
+
+    Parameters
+    ----------
+    items : list[Item]
+        Array of items to consider for the knapsack.
+    capacity : float
+        Maximum weight capacity of the knapsack.
+    target : float
+        The target value to achieve.
+
+    Returns
+    -------
+    Arrangement
+        The optimal arrangement of items in the knapsack.
+    """
+    nest_asyncio.apply()
+    model = Model()
+    model.add_string(
+        """
+        int: n;
+        float: capacity;
+        float: target;
+        array[1..n] of float: size;
+        array[1..n] of float: profit;
+
+        array[1..n] of var 0..1: x;
+
+        constraint sum(i in 1..n)(size[i]*x[i]) <= capacity;
+        constraint sum(i in 1..n)(profit[i]*x[i]) >= target;
+
+        solve satisfy;
+        """
+    )
+    gecode = Solver.lookup("gecode")
+
+    instance = Instance(gecode, model)
+    instance["n"] = len(items)
+    instance["capacity"] = capacity
+    instance["profit"] = [item.value for item in items]
+    instance["size"] = [item.weight for item in items]
+    instance["target"] = target
+
+    result = instance.solve()
+
+    return result.status.has_solution()
 
 
 def greedy(items: list[Item], capacity: int) -> Arrangement:
