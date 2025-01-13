@@ -245,7 +245,7 @@ def _is_leaf_node(node: Node, capacity: int) -> bool:
 
 def branch_and_bound(
     items: list[Item],
-    capacity: int,
+    capacity: float,
     n=1,
 ) -> list[Arrangement]:
     """Solves the knapsack problem using the branch-and-bound algorithm.
@@ -254,7 +254,7 @@ def branch_and_bound(
     ----------
     items: list[Item]
         Items that can be included in the knapsack.
-    capacity: int
+    capacity: float
         Maximum weight capacity of the knapsack.
 
     Other Parameters
