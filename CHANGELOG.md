@@ -1,6 +1,30 @@
 # CHANGELOG
 
 
+## v3.4.0 (2025-01-13)
+
+### Documentation
+
+* docs: fix incorrect int type hint. ([`aa7efe2`](https://github.com/HRSAndrabi/pykp/commit/aa7efe2b64633ae6c82d0abe466344d64ea3592a))
+
+### Features
+
+* feat(phase_transition): allow time-based matrix.
+
+Added an optional argument `outcome`, to specify whether the
+returned phase transition matrix should be stated in terms of
+solvability or time.
+
+Integrate `solvers._branch_and_bound_decision_variant()` solver to
+give relevant estimations of time, and faster compute performance. ([`f3b1051`](https://github.com/HRSAndrabi/pykp/commit/f3b1051ca63fbf0ed74dc28a471a42dfed78f448))
+
+### Performance Improvements
+
+* perf: add mzn decision variant solver. ([`a93cfee`](https://github.com/HRSAndrabi/pykp/commit/a93cfeefc8bcea5d610516196b348c567f5dad75))
+
+* perf: add branch-and-bound decision solver. ([`423fde4`](https://github.com/HRSAndrabi/pykp/commit/423fde4a24086b3a2c21d737349d82818c3fde56))
+
+
 ## v3.3.0 (2025-01-13)
 
 ### Features
