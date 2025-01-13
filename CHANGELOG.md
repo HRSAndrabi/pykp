@@ -1,6 +1,20 @@
 # CHANGELOG
 
 
+## v3.3.0 (2025-01-13)
+
+### Features
+
+* feat(sampler): make reproducible.
+
+`pykp.sampler.Sampler.sample()` now accepts a `seed` argument which
+ensures samples are reproducible. Stop storing already-bound
+generator methods in the constructor. Instead, store the
+distribution name and kwargs, which are initialised in a seperate
+private method. This allows a new `rng` with a provided `seed`
+to bne generated in teh `sample` method. ([`a051c54`](https://github.com/HRSAndrabi/pykp/commit/a051c5482f78b76fe1684f9f347fac68f0e67169))
+
+
 ## v3.2.0 (2025-01-12)
 
 ### Chores
