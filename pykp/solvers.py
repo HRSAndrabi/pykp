@@ -443,20 +443,14 @@ def _branch_and_bound_decision_variant(
     )
     queue = PriorityQueue()
     queue.put(root)
-    incumbent = 0
 
     while not queue.empty():
-        if incumbent >= target:
-            return True
         next = queue.get()
-        children = _expand_node(next, capacity, incumbent)
+        children = _expand_node(next, capacity, target)
         for child in children:
-            if child.upper_bound < incumbent:
-                continue
-
             queue.put(child)
-            if child.value >= incumbent and _is_leaf_node(child, capacity):
-                incumbent = child.value
+            if child.value >= target:
+                return True
 
     return False
 

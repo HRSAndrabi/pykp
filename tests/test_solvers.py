@@ -5,7 +5,7 @@ import json
 import numpy as np
 import pytest
 
-from pykp import Item, solvers
+from pykp import Item, Sampler, solvers
 
 HEURISTIC_SOLVERS = ["greedy"]
 OPTIMAL_SOLVERS = [
@@ -133,3 +133,20 @@ def test_correct_optimal_found(solver, case):
         solution = solution[0]
 
     assert np.isclose(solution.value, case["optimal_value"])
+
+
+@pytest.mark.parametrize("num_items", [5, 10, 15, 20])
+@pytest.mark.parametrize("seed", [1, 2, 3, 4])
+def test_branch_and_bound_decision_variant(num_items, seed):
+    """Test that the branch-and-bound (decision) algorithm is correct."""
+    sampler = Sampler(num_items=num_items, normalised_capacity=0.5)
+    instance = sampler.sample(seed=seed)
+    instance.solve()
+    optimal = instance.optimal_nodes[0].value
+
+    assert solvers._branch_and_bound_decision_variant(
+        instance.items, instance.capacity, optimal
+    )
+    assert not solvers._branch_and_bound_decision_variant(
+        instance.items, instance.capacity, optimal + 0.001
+    )
