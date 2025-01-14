@@ -84,12 +84,31 @@ def test_sampler_sample_capacity_calculation():
 
 
 @pytest.mark.parametrize("normalised_capacity", [0.0, 0.1, 0.9, 1.5])
-def test_sampler_different_normalised_capacities(normalised_capacity):
+def test_sampler_normalised_capacities(normalised_capacity):
     """Test that the capacity of the knapsack is calculated correctly."""
     sampler = Sampler(num_items=3, normalised_capacity=normalised_capacity)
     knapsack = sampler.sample()
     total_weight = sum(item.weight for item in knapsack.items)
     expected_capacity = normalised_capacity * total_weight
+
+    assert np.isclose(knapsack.capacity, expected_capacity)
+    assert len(knapsack.items) == 3
+
+
+@pytest.mark.parametrize("normalised_capacity", [0.0, 0.1, 0.9, 1.5])
+def test_sampler_integer_normalised_capacities(normalised_capacity):
+    """Test that the capacity of the knapsack is calculated correctly."""
+    sampler = Sampler(
+        num_items=3,
+        normalised_capacity=normalised_capacity,
+        value_dist="integers",
+        value_dist_kwargs={"low": 1, "high": 500},
+        weight_dist="integers",
+        weight_dist_kwargs={"low": 1, "high": 500},
+    )
+    knapsack = sampler.sample()
+    total_weight = sum(item.weight for item in knapsack.items)
+    expected_capacity = np.floor(normalised_capacity * total_weight)
 
     assert np.isclose(knapsack.capacity, expected_capacity)
     assert len(knapsack.items) == 3

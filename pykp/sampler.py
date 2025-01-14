@@ -194,8 +194,13 @@ class Sampler:
         )
 
         sum_weights = np.sum([item.weight for item in items])
+        capacity = self.normalised_capacity * sum_weights
+
+        if self.weight_dist == "integers":
+            capacity = np.floor(capacity).astype(int)
+
         kp = Knapsack(
             items=items,
-            capacity=self.normalised_capacity * sum_weights,
+            capacity=capacity,
         )
         return kp
