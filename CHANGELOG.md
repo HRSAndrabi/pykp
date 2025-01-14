@@ -1,6 +1,21 @@
 # CHANGELOG
 
 
+## v3.5.1 (2025-01-14)
+
+### Bug Fixes
+
+* fix: decision variant algorithm not pruning effectively.
+
+Branch and bound decision variant algorithm was pruning based on
+a stored `incumbent` value, which was incrementally updated with
+each seen node. It is mor efficient to prune based on the target
+value.
+
+This issue was causing the solver to take the most
+time to solve unsatisfiable instances. ([`d9d96ca`](https://github.com/HRSAndrabi/pykp/commit/d9d96cabab32b0f846472d5cdabec06f2c129779))
+
+
 ## v3.5.0 (2025-01-13)
 
 ### Features
