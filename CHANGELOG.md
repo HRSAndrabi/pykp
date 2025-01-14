@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v3.5.2 (2025-01-14)
+
+### Bug Fixes
+
+* fix: int capacity if ='integers' ([`c7ac7b9`](https://github.com/HRSAndrabi/pykp/commit/c7ac7b97ff7559cca8b365b1573e8052861a7a7a))
+
+### Documentation
+
+* docs: update phase transition plot. ([`455763e`](https://github.com/HRSAndrabi/pykp/commit/455763e5a72309ec45b69ccfac64e4820d8a762f))
+
+
 ## v3.5.1 (2025-01-14)
 
 ### Bug Fixes
