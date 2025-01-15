@@ -83,8 +83,8 @@ def test_sampler_sample_capacity_calculation():
     assert knapsack.capacity == int(0.5 * 10)  # Should be 4
 
 
-@pytest.mark.parametrize("normalised_capacity", [0.0, 0.1, 0.9, 1.5])
-def test_sampler_normalised_capacities(normalised_capacity):
+@pytest.mark.parametrize("normalised_capacity", [0.01, 0.1, 0.9, 1])
+def test_sampler_float_normalised_capacities(normalised_capacity):
     """Test that the capacity of the knapsack is calculated correctly."""
     sampler = Sampler(num_items=3, normalised_capacity=normalised_capacity)
     knapsack = sampler.sample()
@@ -95,7 +95,22 @@ def test_sampler_normalised_capacities(normalised_capacity):
     assert len(knapsack.items) == 3
 
 
-@pytest.mark.parametrize("normalised_capacity", [0.0, 0.1, 0.9, 1.5])
+@pytest.mark.parametrize(
+    "normalised_capacity", [(0.1, 0.9), (0.2, 0.8), (0.3, 0.7), (0.4, 0.6)]
+)
+def test_sampler_tuple_normalised_capacities(normalised_capacity):
+    """Test that the capacity of the knapsack is calculated correctly."""
+    sampler = Sampler(num_items=3, normalised_capacity=normalised_capacity)
+    knapsack = sampler.sample()
+    total_weight = sum(item.weight for item in knapsack.items)
+    lower_bound = normalised_capacity[0] * total_weight
+    upper_bound = normalised_capacity[1] * total_weight
+
+    assert knapsack.capacity >= lower_bound, "Capacity is below lower bound"
+    assert knapsack.capacity <= upper_bound, "Capacity is above upper bound"
+
+
+@pytest.mark.parametrize("normalised_capacity", [0.01, 0.1, 0.9, 1])
 def test_sampler_integer_normalised_capacities(normalised_capacity):
     """Test that the capacity of the knapsack is calculated correctly."""
     sampler = Sampler(
@@ -111,13 +126,21 @@ def test_sampler_integer_normalised_capacities(normalised_capacity):
     expected_capacity = np.floor(normalised_capacity * total_weight)
 
     assert np.isclose(knapsack.capacity, expected_capacity)
-    assert len(knapsack.items) == 3
 
 
+@pytest.mark.parametrize(
+    "normalised_capacity",
+    [0.01, 0.1, 0.9, 1, (0.1, 0.9), (0.2, 0.8), (0.3, 0.7), (0.4, 0.6)],
+)
+@pytest.mark.parametrize("num_items", [5, 10, 15, 20])
 @pytest.mark.parametrize("seed", [1, 2, 3, 4, 5])
-def test_sample_reporducible(seed: int):
+def test_sample_reporducible(
+    seed: int, num_items: int, normalised_capacity: float | tuple[float, float]
+):
     """Test that the samples are reproducible."""
-    sampler = Sampler(num_items=5, normalised_capacity=0.8)
+    sampler = Sampler(
+        num_items=num_items, normalised_capacity=normalised_capacity
+    )
 
     knapsack = sampler.sample(seed=seed)
     knapsack2 = sampler.sample(seed=seed)
@@ -132,10 +155,11 @@ def test_sample_reporducible(seed: int):
     assert np.array_equal(knapsack.state, knapsack2.state)
 
 
-def test_non_unit_inverval_nc_raises_error():
+@pytest.mark.parametrize(
+    "normalised_capacity",
+    [-0.1, 0, 1.1, (0, 1), (-0.1, 1), (0.5, 1.1)],
+)
+def test_non_unit_inverval_nc_raises_error(normalised_capacity):
     """Test that non-unit interval normalised capacities raise an error."""
     with pytest.raises(ValueError):
-        Sampler(num_items=5, normalised_capacity=1.1)
-
-    with pytest.raises(ValueError):
-        Sampler(num_items=5, normalised_capacity=-0.1)
+        Sampler(num_items=5, normalised_capacity=normalised_capacity)

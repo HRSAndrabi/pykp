@@ -44,9 +44,11 @@ class Sampler:
     ----------
     num_items : int
         Number of items to include in each sampled knapsack instance.
-    normalised_capacity : float
+    normalised_capacity : float | tuple[float, float]
         Normalised capacity of the knapsack, defined as the sum of item weights
-        divided by the capacity constraint.
+        divided by the capacity constraint. Must be in the interval (0, 1). If
+        a tuple is provided, the capacity will be sampled uniformly from the
+        specified interval.
 
     Other Parameters
     ----------------
@@ -87,7 +89,7 @@ class Sampler:
         >>> import numpy as np
         >>> sampler = Sampler(
         ...     num_items=5,
-        ...     normalised_capacity=0.8,
+        ...     normalised_capacity=(0.5, 0.8),
         ...     weight_dist="normal",
         ...     weight_dist_kwargs={"loc": 100, "scale": 10},
         ...     value_dist="normal",
@@ -101,7 +103,7 @@ class Sampler:
     def __init__(
         self,
         num_items: int,
-        normalised_capacity: float,
+        normalised_capacity: float | tuple[float, float],
         weight_dist: str = "uniform",
         value_dist: str = "uniform",
         weight_dist_kwargs: dict | None = None,
@@ -109,10 +111,16 @@ class Sampler:
     ):
         self.num_items = num_items
 
-        if normalised_capacity <= 0 or normalised_capacity > 1:
-            raise ValueError(
-                "`normalised_capacity` must be in the interval (0, 1)."
-            )
+        if isinstance(normalised_capacity, (float, int)):
+            if normalised_capacity <= 0 or normalised_capacity > 1:
+                raise ValueError(
+                    "`normalised_capacity` must be in the interval (0, 1)."
+                )
+        elif isinstance(normalised_capacity, tuple):
+            if normalised_capacity[0] <= 0 or normalised_capacity[1] > 1:
+                raise ValueError(
+                    "`normalised_capacity` must be in the interval (0, 1)."
+                )
         self.normalised_capacity = normalised_capacity
 
         if weight_dist != "uniform" and weight_dist_kwargs is None:
@@ -199,7 +207,16 @@ class Sampler:
         )
 
         sum_weights = np.sum([item.weight for item in items])
-        capacity = self.normalised_capacity * sum_weights
+        if isinstance(self.normalised_capacity, tuple):
+            capacity = (
+                rng.uniform(
+                    low=self.normalised_capacity[0],
+                    high=self.normalised_capacity[1],
+                )
+                * sum_weights
+            )
+        else:
+            capacity = self.normalised_capacity * sum_weights
 
         if self.weight_dist == "integers":
             capacity = np.floor(capacity).astype(int)
