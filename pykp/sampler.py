@@ -108,6 +108,11 @@ class Sampler:
         value_dist_kwargs: dict | None = None,
     ):
         self.num_items = num_items
+
+        if normalised_capacity <= 0 or normalised_capacity > 1:
+            raise ValueError(
+                "`normalised_capacity` must be in the interval (0, 1)."
+            )
         self.normalised_capacity = normalised_capacity
 
         if weight_dist != "uniform" and weight_dist_kwargs is None:
