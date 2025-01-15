@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v3.6.0 (2025-01-15)
+
+### Features
+
+* feat(sampler): allow tuples for nc. ([`539cee1`](https://github.com/HRSAndrabi/pykp/commit/539cee18dc881729ca8b404e4652cbcfb30abf87))
+
+### Testing
+
+* test(sampler): raise erorr on nc<=0, nc>1. ([`49769de`](https://github.com/HRSAndrabi/pykp/commit/49769de70da9b52b770e4c680326ea09e705303d))
+
+
 ## v3.5.2 (2025-01-14)
 
 ### Bug Fixes
