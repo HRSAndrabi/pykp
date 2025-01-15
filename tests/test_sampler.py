@@ -130,3 +130,12 @@ def test_sample_reporducible(seed: int):
     assert np.array_equal(values, values2)
     assert np.array_equal(weights, weights2)
     assert np.array_equal(knapsack.state, knapsack2.state)
+
+
+def test_non_unit_inverval_nc_raises_error():
+    """Test that non-unit interval normalised capacities raise an error."""
+    with pytest.raises(ValueError):
+        Sampler(num_items=5, normalised_capacity=1.1)
+
+    with pytest.raises(ValueError):
+        Sampler(num_items=5, normalised_capacity=-0.1)
