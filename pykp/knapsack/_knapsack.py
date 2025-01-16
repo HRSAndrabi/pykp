@@ -33,10 +33,10 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 
-from .arrangement import Arrangement
-from .item import Item
-from .metrics import sahni_k
-from .solvers import branch_and_bound, brute_force, minizinc
+import pykp.solvers as solvers
+from pykp.knapsack._arrangement import Arrangement
+from pykp.knapsack._item import Item
+from pykp.metrics._sahni_k import sahni_k
 
 SOLVERS = ["branch_and_bound", "minizinc"]
 
@@ -63,6 +63,46 @@ class Knapsack:
         Path to the JSON specification file containing an array of items
         (`value`, `weight`) and the knapsack capacity. Only used if
         `load_from_json` is True. Default is None.
+
+    Attributes
+    ----------
+    items : list of Item
+        The items in the knapsack.
+    capacity : float
+        The capacity constraint of the knapsack.
+    state : list of int
+        A binary array indicating the inclusion/exclusion of items in the
+        knapsack.
+    value : float
+        The total value of items currently in the knapsack.
+    weight : float
+        The total weight of items currently in the knapsack.
+    is_feasible : bool
+        Whether the knapsack is within its weight capacity.
+    is_at_capacity : bool
+        Whether the knapsack is at full capacity.
+    optimal_nodes : list of Arrangement
+        An array of optimal nodes in the knapsack. Optimal nodes are
+        arrangements of items that maximise the total value of items in the
+        knapsack, subject to the weight constraint. Optimal nodes are a subset
+        of `terminal_nodes`. This attribute is populated after calling the
+        `solve` method.
+    terminal_nodes : list of Arrangement
+        An array of terminal nodes in the knapsack. Terminal nodes are
+        arrangements of items that are under the weight constraint, and at full
+        capacity (no more items can be added without exceeding the capacity
+        constraint). Terminal nodes are a subset of `feasible_nodes`. This
+        attribute is populated after calling the `initialise_graph` method.
+    feasible_nodes : list of Arrangement
+        An array of feasible nodes in the knapsack. Feasible nodes are
+        arrangements of items that are under the weight constraint. This
+        attribute is populated after calling the `initialise_graph` method.
+    nodes : list of Arrangement
+        An array of all nodes in the knapsack. This attribute is populated
+        after calling the `initialise_graph` method.
+    graph : networkx.DiGraph
+        A graph representation of the knapsack problem. This attribute is
+        populated after calling the `initialise_graph` method.
 
     Examples
     --------
@@ -105,11 +145,6 @@ class Knapsack:
     ...     )
     Value: 10 Weight: 10 State: [1.0 0.0 0.0]
     Value: 10 Weight: 10 State: [0.0 1.0 0.0]
-
-    See Also
-    --------
-    pykp.item : Represents an item with value and weight attributes.
-    pykp.solvers : Module containing solvers for the knapsack problem.
     """
 
     def __init__(
@@ -152,28 +187,18 @@ class Knapsack:
 
     @property
     def items(self) -> list[Item]:
-        """The items in the knapsack."""
         return list(self._items)
 
     @property
     def capacity(self) -> float:
-        """The capacity constraint of the knapsack."""
         return self._capacity
 
     @property
     def state(self) -> list[int]:
-        """The binary array indicating the inclusion/exclusion of items."""
         return list(self._state)
 
     @state.setter
     def state(self, state: Union[list, np.ndarray]):
-        """Set the knapsack state using the provided binary array.
-
-        Parameters
-        ----------
-            state (list or np.ndarry): Binary array indicating the
-                inclusion/exclusion of items in the knapsack.
-        """
         if isinstance(state, list):
             state = np.array(state)
         self._state = state
@@ -181,62 +206,34 @@ class Knapsack:
 
     @property
     def value(self) -> float:
-        """The total value of items currently in the knapsack."""
         return self._value
 
     @property
     def weight(self) -> float:
-        """The total weight of items currently in the knapsack."""
         return self._weight
 
     @property
     def is_feasible(self) -> bool:
-        """Whether the knapsack is within its weight capacity."""
         return self._is_feasible
 
     @property
     def is_at_capacity(self) -> bool:
-        """Whether the knapsack is at full capacity.
-
-        A knapsack is at full capacity when placing in any item
-        from the current set of excluded items would cause the sum of
-        weights to exceed the capacity constraint.
-        """
         return self._is_at_capacity
 
     @property
     def optimal_nodes(self) -> list[Arrangement]:
-        """An array of optimal nodes in the knapsack.
-
-        Optimal nodes are arrangements of items that maximise the total value
-        of items in the knapsack, subject to the weight constraint.
-        Optimal nodes are a subset of ``terminal_nodes``.
-        """
         return list(self._optimal_nodes)
 
     @property
     def terminal_nodes(self) -> list[Arrangement]:
-        """An array of terminal nodes in the knapsack.
-
-        Terminal nodes are arrangements of items that are under the weight
-        constraint, and at full capacity (no more items can be added without
-        exceeding the capacity constraint). Terminal nodes are a subset of
-        ``feasible_nodes``.
-        """
         return list(self._terminal_nodes)
 
     @property
     def feasible_nodes(self) -> list[Arrangement]:
-        """An array of feasible nodes in the knapsack.
-
-        Feasible nodes are arrangements of items that are under the weight
-        constraint.
-        """
         return list(self._feasible_nodes)
 
     @property
     def nodes(self) -> list[Arrangement]:
-        """An array of all nodes in the knapsack."""
         return list(self._nodes)
 
     def solve(
@@ -287,12 +284,12 @@ class Knapsack:
             raise ValueError(f"`method` must be one of: {SOLVERS}.")
 
         if method == "branch_and_bound":
-            solution = branch_and_bound(
+            solution = solvers.branch_and_bound(
                 items=self._items, capacity=self._capacity
             )
 
         if method == "minizinc":
-            solution = minizinc(
+            solution = solvers.minizinc(
                 items=self._items,
                 capacity=self._capacity,
                 solver=minizinc_solver,
@@ -486,7 +483,9 @@ class Knapsack:
                 stacklevel=2,
             )
 
-        solution = brute_force(items=self._items, capacity=self._capacity)
+        solution = solvers.brute_force(
+            items=self._items, capacity=self._capacity
+        )
         self._optimal_nodes = solution.value["optimal"]
         self._terminal_nodes = solution.value["terminal"]
         self._feasible_nodes = solution.value["feasible"]

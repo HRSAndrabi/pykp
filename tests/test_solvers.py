@@ -5,7 +5,8 @@ import json
 import numpy as np
 import pytest
 
-from pykp import Item, Sampler, solvers
+import pykp.solvers as solvers
+from pykp.knapsack import Item, Sampler
 
 HEURISTIC_SOLVERS = ["greedy"]
 OPTIMAL_SOLVERS = [
