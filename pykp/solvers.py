@@ -546,8 +546,10 @@ def _branch_and_bound_decision_variant(
     )
 
 
-def mzn_gecode(items: list[Item], capacity: float) -> Solution:
-    """Solves the knapsack problem using the MiniZinc Gecode solver.
+def minizinc(
+    items: list[Item], capacity: float, solver: str = "coinbc"
+) -> Solution:
+    """Solves the knapsack problem using the MiniZinc.
 
     Parameters
     ----------
@@ -555,6 +557,8 @@ def mzn_gecode(items: list[Item], capacity: float) -> Solution:
         Array of items to consider for the knapsack.
     capacity : float
         Maximum weight capacity of the knapsack.
+    solver: str, optional
+        MiniZinc solver to use. Default is "coinbc".
 
     Returns
     -------
@@ -563,7 +567,8 @@ def mzn_gecode(items: list[Item], capacity: float) -> Solution:
 
     Examples
     --------
-    Solve a knapsack problem instance using MiniZinc and Gecode:
+    Solve a knapsack problem instance using MiniZinc and the COIN-OR
+    Branch-and-Cut solver:
 
     >>> from pykp import Item, solvers
     >>> items = np.array(
@@ -574,11 +579,11 @@ def mzn_gecode(items: list[Item], capacity: float) -> Solution:
     ...     ]
     ... )
     >>> capacity = 15
-    >>> solvers.mzn_gecode(items, capacity)
+    >>> solvers.minizinc(items, capacity, solver="coinbc")
     [(v: 25, w: 15, s: 6)]
 
     Alternatively, construct an instance of the ``Knapsack`` class and call the
-    ``solve`` method with "mzn_geocode" as the ``method`` argument
+    ``solve`` method with "minizinc" as the ``method`` argument
 
     >>> from pykp import Item
     >>> from pykp import Knapsack
@@ -590,7 +595,7 @@ def mzn_gecode(items: list[Item], capacity: float) -> Solution:
     ... ]
     >>> capacity = 15
     >>> instance = Knapsack(items=items, capacity=capacity)
-    >>> instance.solve(method="mzn_geocode")
+    >>> instance.solve(method="minizinc")
     >>> instance.optimal_nodes
     [(v: 25, w: 15, s: 6)]
 
@@ -625,9 +630,9 @@ def mzn_gecode(items: list[Item], capacity: float) -> Solution:
 		solve :: int_search(x, first_fail, indomain_max, complete) maximize P;
 		"""
     )
-    gecode = Solver.lookup("gecode")
+    solver_instance = Solver.lookup(solver)
 
-    instance = Instance(gecode, model)
+    instance = Instance(solver_instance, model)
     instance["n"] = len(items)
     instance["capacity"] = capacity
     instance["profit"] = [item.value for item in items]
@@ -645,8 +650,8 @@ def mzn_gecode(items: list[Item], capacity: float) -> Solution:
     )
 
 
-def _mzn_gecode_decision_variant(
-    items: list[Item], capacity: float, target: float
+def _minizinc_decision_variant(
+    items: list[Item], capacity: float, target: float, solver: str = "coinbc"
 ) -> Solution:
     """Solves the knapsack decision variant using MiniZinc and Gecode.
 
@@ -658,6 +663,8 @@ def _mzn_gecode_decision_variant(
         Maximum weight capacity of the knapsack.
     target : float
         The target value to achieve.
+    solver: str, optional
+        MiniZinc solver to use. Default is "coinbc".
 
     Returns
     -------
@@ -682,9 +689,9 @@ def _mzn_gecode_decision_variant(
         solve satisfy;
         """
     )
-    gecode = Solver.lookup("gecode")
+    solver_instance = Solver.lookup(solver)
 
-    instance = Instance(gecode, model)
+    instance = Instance(solver_instance, model)
     instance["n"] = len(items)
     instance["capacity"] = capacity
     instance["profit"] = [item.value for item in items]

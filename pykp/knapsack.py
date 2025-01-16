@@ -36,9 +36,9 @@ import pandas as pd
 from .arrangement import Arrangement
 from .item import Item
 from .metrics import sahni_k
-from .solvers import branch_and_bound, brute_force, mzn_gecode
+from .solvers import branch_and_bound, brute_force, minizinc
 
-SOLVERS = ["branch_and_bound", "mzn_gecode"]
+SOLVERS = ["branch_and_bound", "minizinc"]
 
 
 class Knapsack:
@@ -241,15 +241,14 @@ class Knapsack:
 
     def solve(
         self,
-        method: Literal[
-            "branch_and_bound", "mzn_gecode", "brute_force"
-        ] = "branch_and_bound",
+        method: Literal["branch_and_bound", "minizinc"] = "branch_and_bound",
+        minizinc_solver: str = "coinbc",
     ):
         """Solves the knapsack problem to find optimal arrangements.
 
         Parameters
         ----------
-        method : {"branch_and_bound", "mzn_gecode", "brute_force"}, optional
+        method : {"branch_and_bound", "minizinc"}, optional
             The algorithm to use for solving. Default is "branch_and_bound".
 
         Returns
@@ -257,6 +256,12 @@ class Knapsack:
         np.ndarray
             An array of `Arrangement` objects representing the optimal
             solutions.
+
+        Other Parameters
+        ----------------
+        minizinc_solver: str, optional
+            If ``method="minizinc"``, this argument specifies which minizinc
+            solver to use. Default is "coinbc".
 
         Raises
         ------
@@ -286,8 +291,12 @@ class Knapsack:
                 items=self._items, capacity=self._capacity
             )
 
-        if method == "mzn_gecode":
-            solution = mzn_gecode(items=self._items, capacity=self._capacity)
+        if method == "minizinc":
+            solution = minizinc(
+                items=self._items,
+                capacity=self._capacity,
+                solver=minizinc_solver,
+            )
 
         self._optimal_nodes = list(solution.value)
 

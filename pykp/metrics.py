@@ -16,7 +16,7 @@ from pykp.item import Item
 from . import solvers
 from .arrangement import Arrangement
 
-SOLVERS = ["branch_and_bound", "mzn_gecode"]
+SOLVERS = ["branch_and_bound", "minizinc"]
 
 
 def _initialise_grid(
@@ -100,7 +100,7 @@ def _simulate_cell_solvability(
     norm_p_range: tuple[float, float],
     num_items: int,
     samples: int,
-    solver: Callable,
+    solver: tuple[Callable, dict],
     rng: np.random.Generator,
     progress: tqdm,
 ) -> float:
@@ -121,9 +121,9 @@ def _simulate_cell_solvability(
         Number of items to generate for each sample.
     samples : int
         Number of sampled instances in the given cell.
-    solver : Callable
-        A solver function that takes items and capacity as arguments and
-        returns an optimal node or array of optimal nodes.
+    solver : tuple[Callable, dict]
+        A tuple of a solver function, and a dictionary of keyword arguments to
+        provide to that function.
     rng : np.random.Generator
         Random number generator for sampling.
     progress : tqdm
@@ -137,6 +137,7 @@ def _simulate_cell_solvability(
 
     """
     total_solved = 0
+    solver, solver_kwargs = solver
     for _ in range(samples):
         norm_c_draw = rng.uniform(norm_c_range[0], norm_c_range[1])
         norm_p_draw = rng.uniform(norm_p_range[0], norm_p_range[1])
@@ -147,7 +148,12 @@ def _simulate_cell_solvability(
             norm_p=norm_p_draw,
             rng=rng,
         )
-        result = solver(items=items, capacity=capacity, target=target_profit)
+        result = solver(
+            items=items,
+            capacity=capacity,
+            target=target_profit,
+            **solver_kwargs,
+        )
 
         total_solved += int(result.value)
         progress.update(1)
@@ -202,6 +208,7 @@ def phase_transition(
     samples: int = 100,
     outcome: str = "both",
     solver: str = "branch_and_bound",
+    minizinc_solver: str = "coinbc",
     resolution: tuple[int, int] = (41, 41),
     seed: int | None = None,
     path: str = None,
@@ -260,6 +267,9 @@ def phase_transition(
     solver : str, optional
         Which solver to use for evaluating each instance. Default is
         "branch_and_bound".
+    minizinc_solver: str, optional
+        If ``solver="minizinc"``, this argument specifies which minizinc solver
+        to use. Default is "coinbc".
     resolution: tuple[int, int], optional
         Resolution of the normalised capacity-normalised profit grid.
         The first element corresponds to the resolution of normalised
@@ -359,9 +369,9 @@ def phase_transition(
 
     match solver:
         case "branch_and_bound":
-            solver = solvers._branch_and_bound_decision_variant
-        case "mzn_gecode":
-            solver = solvers._mzn_gecode_decision_variant
+            solver = (solvers._branch_and_bound_decision_variant, {})
+        case "minizinc":
+            solver = (solvers._minizinc_decision_variant, {"solver": solver})
         case _:
             raise ValueError(f"`method` must be one of: {SOLVERS}.")
 
