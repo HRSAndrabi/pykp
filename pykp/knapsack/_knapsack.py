@@ -817,5 +817,15 @@ class Knapsack:
         return pd.DataFrame(rows, columns=columns, index=index, dtype="object")
 
     def __str__(self):
-        """Return a string representation of the knapsack instance."""
-        return repr(self.summary())
+        return (
+            f"Knapsack(values={
+                [round(item.value.item(), 2) for item in self._items]
+            }, "
+            f"weights={
+                [round(item.weight.item(), 2) for item in self._items]
+            }, "
+            f"capacity={self._capacity})"
+        )
+
+    def __repr__(self):
+        return f"Knapsack(items={self.items}, capacity={self._capacity})"
