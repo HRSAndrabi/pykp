@@ -1,24 +1,6 @@
-"""
-Provides an interface for defining arrangements of items.
-
-Example:
-    Define an arangement of items for the knapsack problem::
-
-        from pykp import Arrangement, Item
-
-        items = [
-            Item(value=10, weight=5),
-            Item(value=20, weight=10),
-            Item(value=30, weight=15),
-        ]
-        state = [0, 1, 1]
-        arrangement = Arrangement(items=items, state=state)
-        print(arrangement)
-"""
-
 import numpy as np
 
-from .item import Item
+from pykp.knapsack._item import Item
 
 
 class Arrangement:
@@ -40,6 +22,17 @@ class Arrangement:
     value: int
         The total value of items in the arrangement.
     weight int:
+        The total weight of items in the arrangement.
+
+    Attributes
+    ----------
+    items: list[Item]
+        The items in the arrangement.
+    state: list[int]
+        The state of the arrangement.
+    value: float
+        The total value of items in the arrangement.
+    weight: float
         The total weight of items in the arrangement.
     """
 
@@ -64,26 +57,18 @@ class Arrangement:
 
     @property
     def items(self) -> list[Item]:
-        """The items in the arrangement."""
         return list(self._items)
 
     @property
     def state(self) -> list[int]:
-        """
-        The state of the arrangement.
-
-        1 indicates the item is in the arrangement, 0 indicates it is not.
-        """
         return list(self._state)
 
     @property
     def value(self) -> float:
-        """The total value of items in the arrangement."""
         return self._value
 
     @property
     def weight(self) -> float:
-        """The total weight of items in the arrangement."""
         return self._weight
 
     def __calculate_value(self):

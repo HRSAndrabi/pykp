@@ -26,10 +26,17 @@ class Item:
 
     Parameters
     ----------
-        value: int
-            The value of the item.
-        weight: int
-            The weight of the item.
+    value: int
+        The value of the item.
+    weight: int
+        The weight of the item.
+
+    Attributes
+    ----------
+    value: int
+        The value of the item.
+    weight: int
+        The weight of the item.
     """
 
     value: int = field(compare=False)

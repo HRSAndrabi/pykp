@@ -30,8 +30,8 @@ Create a sampler with custom distributions:
 
 import numpy as np
 
-from .item import Item
-from .knapsack import Knapsack
+from pykp.knapsack._item import Item
+from pykp.knapsack._knapsack import Knapsack
 
 
 class Sampler:
