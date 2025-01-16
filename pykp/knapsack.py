@@ -298,7 +298,10 @@ class Knapsack:
                 solver=minizinc_solver,
             )
 
-        self._optimal_nodes = list(solution.value)
+        if isinstance(solution.value, list):
+            self._optimal_nodes = solution.value
+        else:
+            self._optimal_nodes = [solution.value]
 
         return self.optimal_nodes
 

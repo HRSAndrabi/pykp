@@ -81,6 +81,15 @@ def test_empty(knapsack: Knapsack):
     assert np.array_equal(knapsack.state, [0, 0, 0, 0])
 
 
+@pytest.mark.parametrize("solver", ["branch_and_bound", "minizinc"])
+def test_solve(knapsack: Knapsack, solver: str):
+    """Test .solve() method returns expected type."""
+    solution = knapsack.solve()
+
+    assert isinstance(solution, list)
+    assert isinstance(knapsack.optimal_nodes, list)
+
+
 def test_load_from_json(tmp_path: pathlib.Path, knapsack: Knapsack):
     """Test loading a knapsack instance from a JSON file."""
     path = tmp_path / "test_knapsack.json"
