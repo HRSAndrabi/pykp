@@ -38,7 +38,7 @@ from .item import Item
 from .metrics import sahni_k
 from .solvers import SolutionType, branch_and_bound, brute_force, mzn_gecode
 
-SOLVERS = ["branch_and_bound", "mzn_gecode", "brute_force"]
+SOLVERS = ["branch_and_bound", "mzn_gecode"]
 
 
 class Knapsack:
