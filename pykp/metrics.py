@@ -5,8 +5,7 @@ properties of knapsack problem instances.
 """
 
 import itertools
-import time
-from typing import Callable, Literal
+from typing import Callable
 
 import numpy as np
 import pandas as pd
@@ -137,7 +136,6 @@ def _simulate_cell_solvability(
         a solution that meets or exceeds the target profit.
 
     """
-    total_time = 0
     total_solved = 0
     for _ in range(samples):
         norm_c_draw = rng.uniform(norm_c_range[0], norm_c_range[1])
@@ -149,15 +147,12 @@ def _simulate_cell_solvability(
             norm_p=norm_p_draw,
             rng=rng,
         )
-        start = time.perf_counter()
         result = solver(items=items, capacity=capacity, target=target_profit)
-        end = time.perf_counter()
 
-        total_time += end - start
-        total_solved += int(result)
+        total_solved += int(result.value)
         progress.update(1)
 
-    return (total_solved / samples, total_time / samples)
+    return (total_solved / samples, result.statistics.time / samples)
 
 
 def _save_phase_transition(
