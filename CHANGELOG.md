@@ -1,6 +1,36 @@
 # CHANGELOG
 
 
+## v3.7.0 (2025-01-16)
+
+### Bug Fixes
+
+* fix(knapsack): unable to parse non-list solution. ([`e8ae313`](https://github.com/HRSAndrabi/pykp/commit/e8ae313f66fcf750efa73850e4ff3ac1a11f95d5))
+
+* fix(phase_transition): use time from solution.statistics. ([`8565b91`](https://github.com/HRSAndrabi/pykp/commit/8565b9131ead0c3d54fee24eebd508d7015c6e43))
+
+* fix: remove brute_force from solver list. ([`59eb947`](https://github.com/HRSAndrabi/pykp/commit/59eb947e341ee63479624592951247e5d63a801e))
+
+### Chores
+
+* chore: clean up unused import. ([`96012cb`](https://github.com/HRSAndrabi/pykp/commit/96012cbd99d765a259b65af8c8d18641ba8b2156))
+
+### Features
+
+* feat: change mzn_gecode to generic minizinc call. ([`b3d9989`](https://github.com/HRSAndrabi/pykp/commit/b3d99893eb31dc1d226d0128577197fe418e92f3))
+
+* feat: add solver `Solution` class.
+
+Add `Solution` class to provide consistent interface for solutions
+returned by solvers.
+
+Refactored `pykp.Knapsack` to make use of the new return types.
+Also moved `brute_force` solver to own method, `initialise_graph`
+which now populates the `self.graph` attribute along with the
+orginal `self.optimal_nodes`, `self.terminal_nodes`,
+`self.feasible_nodes`, `self.nodes` attributes. ([`99bdd15`](https://github.com/HRSAndrabi/pykp/commit/99bdd15de1296fbbac462efd915d426d96e41095))
+
+
 ## v3.6.0 (2025-01-15)
 
 ### Features
