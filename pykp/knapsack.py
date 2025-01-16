@@ -36,7 +36,7 @@ import pandas as pd
 from .arrangement import Arrangement
 from .item import Item
 from .metrics import sahni_k
-from .solvers import SolutionType, branch_and_bound, brute_force, mzn_gecode
+from .solvers import branch_and_bound, brute_force, mzn_gecode
 
 SOLVERS = ["branch_and_bound", "mzn_gecode"]
 
