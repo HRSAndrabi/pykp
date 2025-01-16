@@ -35,14 +35,14 @@ def solver(request):
 def test_empty_items(solver):
     """Test the case where there are no items."""
     items = np.array([])
-    solutions = solver(items, 0)
-
-    if not isinstance(solutions, np.ndarray):
-        solutions = [solutions]
-
-    assert len(solutions) == 1
-    assert solutions[0].value == 0
-    assert solutions[0].weight == 0
+    solution = solver(items, 0)
+    if isinstance(solution.value, list):
+        assert len(solution.value) == 1
+        assert solution.value[0].value == 0
+        assert solution.value[0].weight == 0
+    else:
+        assert solution.value.value == 0
+        assert solution.value.weight == 0
 
 
 @pytest.mark.parametrize("solver", ALL_SOLVERS, indirect=True)
@@ -50,14 +50,14 @@ def test_single_item_fits(solver):
     """Test a single item that fits in the knapsack."""
     items = np.array([Item(value=10, weight=5)])
     capacity = 10
-    solutions = solver(items, capacity)
-
-    if not isinstance(solutions, list):
-        solutions = [solutions]
-
-    assert len(solutions) == 1
-    assert solutions[0].value == 10
-    assert solutions[0].weight == 5
+    solution = solver(items, capacity)
+    if isinstance(solution.value, list):
+        assert len(solution.value) == 1
+        assert solution.value[0].value == 10
+        assert solution.value[0].weight == 5
+    else:
+        assert solution.value.value == 10
+        assert solution.value.weight == 5
 
 
 @pytest.mark.parametrize("solver", ALL_SOLVERS, indirect=True)
@@ -65,14 +65,14 @@ def test_single_item_does_not_fit(solver):
     """Test a single item that does not fit in the knapsack."""
     items = np.array([Item(value=10, weight=15)])
     capacity = 10
-    solutions = solver(items, capacity)
-
-    if not isinstance(solutions, list):
-        solutions = [solutions]
-
-    assert len(solutions) == 1
-    assert solutions[0].value == 0
-    assert solutions[0].weight == 0
+    solution = solver(items, capacity)
+    if isinstance(solution.value, list):
+        assert len(solution.value) == 1
+        assert solution.value[0].value == 0
+        assert solution.value[0].weight == 0
+    else:
+        assert solution.value.value == 0
+        assert solution.value.weight == 0
 
 
 @pytest.mark.parametrize("solver", ALL_SOLVERS, indirect=True)
@@ -86,14 +86,14 @@ def test_all_items_fit(solver):
         ]
     )
     capacity = 15
-    solutions = solver(items, capacity)
-
-    if not isinstance(solutions, list):
-        solutions = [solutions]
-
-    assert len(solutions) == 1
-    assert solutions[0].value == 60
-    assert solutions[0].weight == 15
+    solution = solver(items, capacity)
+    if isinstance(solution.value, list):
+        assert len(solution.value) == 1
+        assert solution.value[0].value == 60
+        assert solution.value[0].weight == 15
+    else:
+        assert solution.value.value == 60
+        assert solution.value.weight == 15
 
 
 @pytest.mark.parametrize("solver", ALL_SOLVERS, indirect=True)
@@ -107,15 +107,16 @@ def test_all_items_do_not_fit(solver):
         ]
     )
     capacity = 10
-    solutions = solver(items, capacity)
-
-    if not isinstance(solutions, list):
-        solutions = [solutions]
-
-    assert len(solutions) == 1
-    assert solutions[0].value == 0
-    assert solutions[0].weight == 0
-    assert np.array_equal(solutions[0].state, np.zeros(len(items)))
+    solution = solver(items, capacity)
+    if isinstance(solution.value, list):
+        assert len(solution.value) == 1
+        assert solution.value[0].value == 0
+        assert solution.value[0].weight == 0
+        assert np.array_equal(solution.value[0].state, np.zeros(len(items)))
+    else:
+        assert solution.value.value == 0
+        assert solution.value.weight == 0
+        assert np.array_equal(solution.value.state, np.zeros(len(items)))
 
 
 @pytest.mark.parametrize("solver", OPTIMAL_SOLVERS, indirect=True)
@@ -129,10 +130,10 @@ def test_correct_optimal_found(solver, case):
         ]
     )
     solution = solver(np.array(items), case["capacity"])
-    if isinstance(solution, list):
-        solution = solution[0]
-
-    assert np.isclose(solution.value, case["optimal_value"])
+    if isinstance(solution.value, list):
+        assert np.isclose(solution.value[0].value, case["optimal_value"])
+    else:
+        assert np.isclose(solution.value[0].value, case["optimal_value"])
 
 
 @pytest.mark.parametrize("num_items", [5, 10, 15, 20])
@@ -144,9 +145,11 @@ def test_branch_and_bound_decision_variant(num_items, seed):
     instance.solve()
     optimal = instance.optimal_nodes[0].value
 
-    assert solvers._branch_and_bound_decision_variant(
+    satisfiable = solvers._branch_and_bound_decision_variant(
         instance.items, instance.capacity, optimal
     )
-    assert not solvers._branch_and_bound_decision_variant(
+    unsatisfiable = solvers._branch_and_bound_decision_variant(
         instance.items, instance.capacity, optimal + 0.001
     )
+    assert satisfiable.value
+    assert not unsatisfiable.value

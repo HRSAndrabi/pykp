@@ -36,7 +36,7 @@ import pandas as pd
 from .arrangement import Arrangement
 from .item import Item
 from .metrics import sahni_k
-from .solvers import branch_and_bound, brute_force, mzn_gecode
+from .solvers import SolutionType, branch_and_bound, brute_force, mzn_gecode
 
 SOLVERS = ["branch_and_bound", "mzn_gecode", "brute_force"]
 
@@ -144,6 +144,7 @@ class Knapsack:
         self._is_feasible = True
         self._is_at_capacity = False
 
+        self.graph = None
         self._nodes = np.array([])
         self._feasible_nodes = np.array([])
         self._terminal_nodes = np.array([])
@@ -281,27 +282,14 @@ class Knapsack:
             raise ValueError(f"`method` must be one of: {SOLVERS}.")
 
         if method == "branch_and_bound":
-            self._optimal_nodes = branch_and_bound(
+            solution = branch_and_bound(
                 items=self._items, capacity=self._capacity
             )
 
         if method == "mzn_gecode":
-            result = mzn_gecode(items=self._items, capacity=self._capacity)
-            self._optimal_nodes = list(result)
+            solution = mzn_gecode(items=self._items, capacity=self._capacity)
 
-        if method == "brute_force":
-            if len(self._items) > 15:
-                warn(
-                    message="Brute force is infeasible for large instances.",
-                    category=RuntimeWarning,
-                    stacklevel=2,
-                )
-            (
-                self._optimal_nodes,
-                self._terminal_nodes,
-                self._feasible_nodes,
-                self._nodes,
-            ) = brute_force(items=self._items, capacity=self._capacity)
+        self._optimal_nodes = list(solution.value)
 
         return self.optimal_nodes
 
@@ -458,6 +446,66 @@ class Knapsack:
         mask = np.ma.make_mask(self._state, shrink=False)
         return sum([item.weight for item in self._items[mask]])
 
+    def initialise_graph(self):
+        """Construct a graph representation of the knapsack problem.
+
+        Each node in the graph represents a unique arrangement of items inside
+        the knapsack. An edge represents an elementary operation of adding or
+        removing a single item from the knapsack. Edges connect nodes whose
+        differs by exactly one item.
+
+        Returns
+        -------
+        networkx.DiGraph
+            The graph representation of the knapsack problem.
+
+        Examples
+        --------
+        >>> from pykp import Knapsack, Item
+        >>> items = [Item(10, 5), Item(15, 10), Item(7, 3)]
+        >>> knapsack = Knapsack(items=items, capacity=15)
+        >>> knapsack.initialise_graph()
+        <networkx.classes.digraph.DiGraph object at 0x...>
+        """
+        if len(self._items) > 15:
+            warn(
+                message="Brute force is infeasible for large instances.",
+                category=RuntimeWarning,
+                stacklevel=2,
+            )
+
+        solution = brute_force(items=self._items, capacity=self._capacity)
+        self._optimal_nodes = solution.value["optimal"]
+        self._terminal_nodes = solution.value["terminal"]
+        self._feasible_nodes = solution.value["feasible"]
+        self._nodes = solution.value["all"]
+
+        graph = graph = nx.DiGraph()
+        for arrangement in self._nodes:
+            neighbours = [
+                alt_arrangement
+                for alt_arrangement in self._nodes
+                if np.sum(
+                    np.abs(
+                        np.subtract(alt_arrangement.state, arrangement.state)
+                    )
+                )
+                == 1
+            ]
+
+            graph.add_node(
+                arrangement,
+            )
+            graph.add_edges_from(
+                [
+                    (arrangement, alt_arrangement)
+                    for alt_arrangement in neighbours
+                ]
+            )
+
+        self.graph = graph
+        return graph
+
     def plot_terminal_nodes_histogram(
         self, ax: plt.Axes = None
     ) -> tuple[plt.Figure, plt.Axes]:
@@ -503,8 +551,8 @@ class Knapsack:
         .. image:: /_static/plots/terminal_nodes_hist.png
             :alt: Histogram of terminal node values
         """
-        if not len(self.nodes) == 2 ** len(self.items):
-            self.solve(method="brute_force")
+        if not self.graph:
+            self.initialise_graph()
 
         if not ax:
             fig, ax = plt.subplots(nrows=1, ncols=1, constrained_layout=True)
@@ -574,32 +622,8 @@ class Knapsack:
         .. image:: /_static/plots/network.png
             :alt: Knapsack network representation
         """
-        if not len(self.nodes) == 2 ** len(self.items):
-            self.solve_all_nodes()
-
-        kp_network = kp_network = nx.DiGraph()
-
-        for arrangement in self._nodes:
-            neighbours = [
-                alt_arrangement
-                for alt_arrangement in self._nodes
-                if np.sum(
-                    np.abs(
-                        np.subtract(alt_arrangement.state, arrangement.state)
-                    )
-                )
-                == 1
-            ]
-
-            kp_network.add_node(
-                arrangement,
-            )
-            kp_network.add_edges_from(
-                [
-                    (arrangement, alt_arrangement)
-                    for alt_arrangement in neighbours
-                ]
-            )
+        if not self.graph:
+            self.initialise_graph()
 
         if ax is None:
             fig, ax = plt.subplots(
@@ -612,10 +636,10 @@ class Knapsack:
 
         node_colors = [
             self.__get_node_color(arrangement)
-            for arrangement in kp_network.nodes
+            for arrangement in self.graph.nodes
         ]
         nx.draw_spring(
-            kp_network,
+            self.graph,
             ax=ax,
             node_color=node_colors,
             node_size=2,

@@ -38,10 +38,12 @@ Example:
 
 import itertools
 import operator
+import time
 from collections import defaultdict
 from dataclasses import dataclass, field
+from enum import Enum
 from queue import PriorityQueue
-from typing import Tuple
+from typing import Literal, Tuple
 
 import nest_asyncio
 import numpy as np
@@ -49,6 +51,57 @@ from minizinc import Instance, Model, Solver
 
 from .arrangement import Arrangement
 from .item import Item
+
+
+class SolutionType(Enum):
+    """Types of solutions that can be returned by a solver."""
+
+    MAXIMISE = "maximise"
+    APPROXIMATE = "approximate"
+    SATISFY = "satisfy"
+    MAXIMISE_TOP_N = "maximise_top_n"
+    TRAVERSAL = "traversal"
+
+
+@dataclass(frozen=True)
+class SolutionStatistics:
+    """Statistics about the solution returned by a solver.
+
+    Parameters
+    ----------
+    time : float
+        Time taken by the solver to find the solution.
+    n_solutions : int
+        Number of solutions found by the solver.
+    """
+
+    time: float
+    n_solutions: int
+
+
+@dataclass(frozen=True)
+class Solution:
+    """Represents a solution returned by a solver.
+
+    Parameters
+    ----------
+    value: bool | Arrangement | list[Arrangement]
+        The arrangement of items in the solution.
+    type: SolutionType
+        The type of the solution.
+    statistics: SolutionStatistics
+        Statistics about the algorithm to obtain the solution.
+    """
+
+    value: bool | Arrangement | list[Arrangement]
+    type: Literal[
+        SolutionType.MAXIMISE,
+        SolutionType.MAXIMISE_TOP_N,
+        SolutionType.APPROXIMATE,
+        SolutionType.SATISFY,
+        SolutionType.TRAVERSAL,
+    ]
+    statistics: SolutionStatistics
 
 
 @dataclass(order=True, frozen=True)
@@ -247,7 +300,7 @@ def branch_and_bound(
     items: list[Item],
     capacity: float,
     n=1,
-) -> list[Arrangement]:
+) -> Solution:
     """Solves the knapsack problem using the branch-and-bound algorithm.
 
     Parameters
@@ -267,8 +320,10 @@ def branch_and_bound(
 
     Returns
     -------
-        list[Arrangement]: The optimal arrangements of items in the
-            knapsack.
+    Solution
+        If ``n = 1``, the optimal arrangements of items in the
+        knapsack. If ``n > 1``, all arrangements that yield the ``n`` highest
+        possible values in the knapsack.
 
     Examples
     --------
@@ -346,8 +401,20 @@ def branch_and_bound(
         optimal value. Similarly, if ``n`` is set to `n`, the solver returns
         all solutions that achieve the `n`-highest possible values.
     """
+    time_start = time.perf_counter()
+
+    if n == 1:
+        type = SolutionType.MAXIMISE
+    else:
+        type = SolutionType.MAXIMISE_TOP_N
+
     if len(items) == 0:
-        return np.array([Arrangement(items=items, state=np.array([]))])
+        statistcs = SolutionStatistics(time=0, n_solutions=0)
+        return Solution(
+            value=[Arrangement(items=items, state=np.array([]))],
+            type=type,
+            statistics=statistcs,
+        )
 
     items = np.array(
         sorted(items, key=lambda item: item.value / item.weight, reverse=True)
@@ -397,13 +464,19 @@ def branch_and_bound(
         )
         for node in nodes
     ]
+    time_end = time.perf_counter()
 
-    return result
+    statistics = SolutionStatistics(
+        time=time_end - time_start,
+        n_solutions=len(result),
+    )
+
+    return Solution(value=result, type=type, statistics=statistics)
 
 
 def _branch_and_bound_decision_variant(
     items: list[Item], capacity: float, target: float
-) -> bool:
+) -> Solution:
     """Solves the knapsack decision variant using branch-and-bound.
 
     Parameters
@@ -417,9 +490,11 @@ def _branch_and_bound_decision_variant(
 
     Returns
     -------
-    bool
+    Solution
         Whether the target value can be achieved.
     """
+    time_start = time.perf_counter()
+
     if len(items) == 0:
         return False
 
@@ -450,12 +525,28 @@ def _branch_and_bound_decision_variant(
         for child in children:
             queue.put(child)
             if child.value >= target:
-                return True
+                time_end = time.perf_counter()
+                return Solution(
+                    value=True,
+                    type=SolutionType.SATISFY,
+                    statistics=SolutionStatistics(
+                        time=time_end - time_start,
+                        n_solutions=1,
+                    ),
+                )
 
-    return False
+    time_end = time.perf_counter()
+    return Solution(
+        value=False,
+        type=SolutionType.SATISFY,
+        statistics=SolutionStatistics(
+            time=time_end - time_start,
+            n_solutions=0,
+        ),
+    )
 
 
-def mzn_gecode(items: list[Item], capacity: float) -> Arrangement:
+def mzn_gecode(items: list[Item], capacity: float) -> Solution:
     """Solves the knapsack problem using the MiniZinc Gecode solver.
 
     Parameters
@@ -467,7 +558,7 @@ def mzn_gecode(items: list[Item], capacity: float) -> Arrangement:
 
     Returns
     -------
-    Arrangement
+    Solution
         The optimal arrangement of items in the knapsack.
 
     Examples
@@ -543,13 +634,20 @@ def mzn_gecode(items: list[Item], capacity: float) -> Arrangement:
     instance["size"] = [item.weight for item in items]
 
     result = instance.solve()
+    statistics = SolutionStatistics(
+        time=result.statistics["solveTime"], n_solutions=1
+    )
 
-    return Arrangement(items=items, state=np.array(result["x"]))
+    return Solution(
+        value=Arrangement(items=items, state=np.array(result["x"])),
+        type=SolutionType.MAXIMISE,
+        statistics=statistics,
+    )
 
 
 def _mzn_gecode_decision_variant(
     items: list[Item], capacity: float, target: float
-) -> Arrangement:
+) -> Solution:
     """Solves the knapsack decision variant using MiniZinc and Gecode.
 
     Parameters
@@ -563,8 +661,8 @@ def _mzn_gecode_decision_variant(
 
     Returns
     -------
-    Arrangement
-        The optimal arrangement of items in the knapsack.
+    Solution
+        Whether the target value can be achieved.
     """
     nest_asyncio.apply()
     model = Model()
@@ -594,11 +692,18 @@ def _mzn_gecode_decision_variant(
     instance["target"] = target
 
     result = instance.solve()
+    statistics = SolutionStatistics(
+        time=result.statistics["solveTime"], n_solutions=1
+    )
 
-    return result.status.has_solution()
+    return Solution(
+        value=result.status.has_solution(),
+        type=SolutionType.SATISFY,
+        statistics=statistics,
+    )
 
 
-def greedy(items: list[Item], capacity: int) -> Arrangement:
+def greedy(items: list[Item], capacity: int) -> Solution:
     """Appy the greedy algorithm to a knapsack problem instance.
 
     Parameters
@@ -610,7 +715,7 @@ def greedy(items: list[Item], capacity: int) -> Arrangement:
 
     Returns
     -------
-    Arrangement
+    Solution
         The greedy arrangement of items in the knapsack.
 
     Examples
@@ -636,6 +741,7 @@ def greedy(items: list[Item], capacity: int) -> Arrangement:
         the best item at each step based on the value-to-weight ratio,
         until no more items can be added to the knapsack.
     """
+    time_start = time.perf_counter()
     items = np.array(items)
     state = np.zeros(len(items))
     weight = 0
@@ -655,7 +761,13 @@ def greedy(items: list[Item], capacity: int) -> Arrangement:
         balance -= best_item.weight
         weight += best_item.weight
 
-    return Arrangement(items=items, state=state)
+    time_end = time.perf_counter()
+    statistics = SolutionStatistics(time=time_end - time_start, n_solutions=1)
+    return Solution(
+        value=Arrangement(items=items, state=state),
+        type=SolutionType.APPROXIMATE,
+        statistics=statistics,
+    )
 
 
 def _is_subset_feasible(subset: list[Item], capacity) -> bool:
@@ -718,9 +830,7 @@ def _is_subset_terminal(
     return True
 
 
-def brute_force(
-    items: list[Item], capacity: int
-) -> Tuple[list, list, list, list]:
+def brute_force(items: list[Item], capacity: int) -> Solution:
     """Solves the knapsack problem using brute force.
 
     Parameters
@@ -732,14 +842,11 @@ def brute_force(
 
     Returns
     -------
-    list
-        Optimal nodes in the knapsack problem.
-    list
-        Terminal nodes in the knapsack problem.
-    list
-        Feasible nodes in the knapsack problem.
-    list
-        All nodes in the knapsack problem.
+    Solution
+        ``Solution.value`` is a dictionary that provides various subsets
+        of nodes in the graph representation of the provided knapsack instance.
+        These subsets are: "optimal_nodes", "terminal_nodes", "feasible_nodes",
+        and "all".
 
     Examples
     --------
@@ -755,17 +862,12 @@ def brute_force(
     ...     Item(value=5, weight=5),
     ... ]
     >>> capacity = 15
-    >>> (optimal, terminal, feasible, all) = solvers.brute_force(
-    ...     items, capacity
-    ... )
-    >>> print(optimal)
+    >>> solution = solvers.brute_force(items, capacity)
+    >>> print(solution["optimal"])
     [(v: 25, w: 15, s: 6)]
 
     Alternatively, construct an instance of the `Knapsack` class and
-    call the `solve` method with "brute_force" as the `method`
-    argument. When called in this way, the solver will populate the
-    `optimal_nodes`, `terminal_nodes`, `feasible_nodes`, and `nodes`
-    attributes of the `Knapsack` instance.
+    call the `initialise_graph()` method.
 
     >>> from pykp import Item, Knapsack
     >>>
@@ -777,7 +879,7 @@ def brute_force(
     >>> capacity = 15
     >>> instance = Knapsack(items=items, capacity=capacity)
     >>>
-    >>> instance.solve(method="brute_force")
+    >>> instance.initialise_graph()
     >>> instace.optimal_nodes
     [(v: 25, w: 15, s: 6)]
     >>> instance.terminal_nodes
@@ -804,6 +906,8 @@ def brute_force(
         The brute-force algorithm is computationally expensive and should be
         used with caution for large problem instances.
     """
+    time_start = time.perf_counter()
+
     nodes = np.array([])
     feasible_nodes = np.array([])
     terminal_nodes = np.array([])
@@ -861,9 +965,16 @@ def brute_force(
             if arrangement.value == terminal_nodes[0].value
         ]
     )
-    return (
-        list(optimal_nodes),
-        list(terminal_nodes),
-        list(feasible_nodes),
-        list(nodes),
+    time_end = time.perf_counter()
+    value = {
+        "optimal": optimal_nodes,
+        "terminal": terminal_nodes,
+        "feasible": feasible_nodes,
+        "all": nodes,
+    }
+    statistics = SolutionStatistics(
+        time=time_end - time_start, n_solutions=len(nodes)
+    )
+    return Solution(
+        value=value, type=SolutionType.TRAVERSAL, statistics=statistics
     )
