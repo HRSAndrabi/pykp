@@ -192,6 +192,21 @@ class Sampler:
         -------
         Knapsack
             A `Knapsack` object containing the sampled items and capacity
+
+        Examples
+        --------
+        Sample a random knapsack instance:
+            >>> from pykp.sampler import Sampler
+            >>> sampler = Sampler(num_items=5, normalised_capacity=0.6)
+            >>> sampler.sample()
+            Knapsack(items=[...], capacity=...)
+
+        Sample a random knapsack instance with a seed:
+            >>> sampler = Sampler(num_items=5, normalised_capacity=0.6)
+            >>> sampler.sample(seed=42)
+            Knapsack(items=[...], capacity=1.2434165854867072)
+            >>> sampler.sample(seed=42)
+            Knapsack(items=[...], capacity=1.2434165854867072) # same result
         """
         rng = np.random.default_rng(seed)
 
