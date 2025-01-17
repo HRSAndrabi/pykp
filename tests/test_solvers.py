@@ -6,7 +6,8 @@ import numpy as np
 import pytest
 
 import pykp.solvers as solvers
-from pykp.knapsack import Item, Sampler
+from pykp.knapsack import Item
+from pykp.sampling import Sampler
 
 HEURISTIC_SOLVERS = ["greedy"]
 OPTIMAL_SOLVERS = [
