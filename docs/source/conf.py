@@ -52,7 +52,7 @@ autodoc_member_order = "groupwise"
 templates_path = ["_templates"]
 
 # Apply the .. plot:: directive to examples
-numpydoc_use_plots = True
+numpydoc_use_plots = False
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
