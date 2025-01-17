@@ -8,5 +8,6 @@ This reference manual details functions, modules, and objects included in PyKP, 
    :recursive:
    
    pykp.knapsack
+   pykp.sampling
    pykp.solvers
    pykp.metrics

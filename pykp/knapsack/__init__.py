@@ -15,12 +15,10 @@ Classes
    Arrangement - Represents the arrangement of items in the knapsack.
    Item - Represents an item to be packed in the knapsack.
    Knapsack - Represents the knapsack problem.
-   Sampler - Generates random knapsack instances.
 """
 
 from ._arrangement import Arrangement
 from ._item import Item
 from ._knapsack import Knapsack
-from ._sampler import Sampler
 
-__all__ = ["Arrangement", "Item", "Knapsack", "Sampler"]
+__all__ = ["Arrangement", "Item", "Knapsack"]
