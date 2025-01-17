@@ -620,19 +620,12 @@ class Knapsack:
 
         Examples
         --------
-        >>> import random
-        >>> from pykp import Item, Knapsack
+        >>> from pykp.knapsack import Sampler
         >>> import matplotlib.pyplot as plt
         >>>
-        >>> random.seed(42)
-        >>> weights = [random.randint(1, 100) for _ in range(5)]
-        >>> values = [random.randint(1, 100) for _ in range(5)]
-        >>> items = [Item(v, w) for v, w in zip(values, weights)]
-        >>> capacity = sum(weights) / 2
-        >>> knapsack = Knapsack(items=items, capacity=capacity)
-        >>> knapsack.solve(method="brute_force")
-        [(v: 142, w: 114, s: 28)]
-        >>> fig, ax = knapsack.plot_graph()
+        >>> sampler = Sampler(num_items=6, normalised_capacity=0.6)
+        >>> sample = sampler.sample(seed=42)
+        >>> sample.plot_graph()
         >>> plt.show()
 
         .. image:: /_static/plots/graph.png
