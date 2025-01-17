@@ -1,6 +1,61 @@
 # CHANGELOG
 
 
+## v4.0.0 (2025-01-17)
+
+### Breaking
+
+* refactor(knapsack): rename plot_terminal_nodes_histogram.
+
+Renamed `pykp.knapsack.Knapsack.plot_termnal_nodes_histogram` method
+to `plot_terminal_node_hist`. Added cleaner example.
+
+BREAKING CHANGE: Renamed `plot_terminal_nodes_histogram` method to
+`plot_terminal_node_hist`. ([`512f9ae`](https://github.com/HRSAndrabi/pykp/commit/512f9ae2f0d743962a8bfcef83edc3c91de403f9))
+
+* feat(plot_graph): added colour-map and legend args.
+
+Changed name from `plot_network` to `plot_graph`. Added optional
+arguments for `colour_map` and `show_legend`.
+
+BREAKING CHANGE: `pykp.knapsack.Knapsack.plot_network` method is
+renamed to `pykp.knapsack.Knapsack.plot_graph`. ([`2aeb9c7`](https://github.com/HRSAndrabi/pykp/commit/2aeb9c7fadc5a2523b9614f99b51ea6084f3c233))
+
+* refactor: modular directory structure.
+
+Migrated to a new directory structure that allows individual
+functions/classes to be located inside their own private modules.
+
+Removed `sphinx.ext.napoleon` because it was causing unpredictable
+conflicts with `numpydoc`.
+
+Updated autosummary templates to match scipy style.
+
+BREAKING CHANGE: namespaces have moved around, which will break
+existing import statements. `Item`, `Arrangement`, `Knapsack`, and
+`Sampler` are now all imported from the `pykp.knapsack` namespace. ([`031c0ad`](https://github.com/HRSAndrabi/pykp/commit/031c0ad3abaf04ccb48afbf860cdbbc7923c4deb))
+
+### Chores
+
+* chore(knapsack): improve __str__ and __repr__. ([`63f14e4`](https://github.com/HRSAndrabi/pykp/commit/63f14e46504ad542deea695007b52adf1c31c676))
+
+### Documentation
+
+* docs: numpdoc_use_plots = False. ([`2783db4`](https://github.com/HRSAndrabi/pykp/commit/2783db4ed077c82ebcd1357b4f8a9aea2012a45d))
+
+* docs: fix incorrect examples. ([`4bcd5be`](https://github.com/HRSAndrabi/pykp/commit/4bcd5be41ac9cef3019de2d800f430751c093611))
+
+* docs(Sampler): add  example. ([`301acfc`](https://github.com/HRSAndrabi/pykp/commit/301acfc8cdc5267b0ad3d6023b180d6a34c3d8ab))
+
+### Refactoring
+
+* refactor: moved Sampler to pykp.sampling. ([`e9c3661`](https://github.com/HRSAndrabi/pykp/commit/e9c3661f9f9f155498f1bf318b2ed8e83ff510b3))
+
+### Unknown
+
+* tests: update imports for pykp.sampling. ([`535c577`](https://github.com/HRSAndrabi/pykp/commit/535c57737e45a5237777f9d467db6d2ced0c255f))
+
+
 ## v3.7.0 (2025-01-16)
 
 ### Bug Fixes
