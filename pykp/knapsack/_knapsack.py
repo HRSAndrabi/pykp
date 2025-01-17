@@ -28,6 +28,7 @@ import json
 from typing import Literal, Union
 from warnings import warn
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
@@ -578,22 +579,24 @@ class Knapsack:
 
         return fig, ax
 
-    def __get_node_color(self, arrangement):
+    def __get_node_color(self, arrangement: Arrangement, colour_map: dict):
         """Get the colour of a node in the network plot."""
         # Optimal node
         if arrangement.value == self._optimal_nodes[0].value:
-            return "#57ff29"
+            return colour_map["optimal"]
 
         # Feasible nodes
         if arrangement.weight < self._capacity:
-            return "#003CAB"
+            return colour_map["feasible"]
 
         # Infeasible nodes
-        return "#FF2C00"
+        return colour_map["infeasible"]
 
-    def plot_network(
+    def plot_graph(
         self,
         ax: plt.Axes = None,
+        colour_map: dict = None,
+        show_legend: bool = True,
     ) -> tuple[plt.Figure, plt.Axes]:
         """
         Visualises a graph representation of the knapsack problem.
@@ -613,6 +616,15 @@ class Knapsack:
         tuple of (matplotlib.pyplot.Figure, matplotlib.pyplot.Axes)
             The figure and axes of the created or updated plot.
 
+        Other Parameters
+        ----------------
+        colour_map : dict, optional
+            A dictionary mapping node types to colours. A valid colour map
+            must contain keys "optimal", "feasible", and "infeasible". Default
+            is None.
+        show_legend : bool, optional
+            Whether to display a legend on the plot. Default is True.
+
         Examples
         --------
         >>> import random
@@ -627,11 +639,11 @@ class Knapsack:
         >>> knapsack = Knapsack(items=items, capacity=capacity)
         >>> knapsack.solve(method="brute_force")
         [(v: 142, w: 114, s: 28)]
-        >>> fig, ax = knapsack.plot_network()
+        >>> fig, ax = knapsack.plot_graph()
         >>> plt.show()
 
-        .. image:: /_static/plots/network.png
-            :alt: Knapsack network representation
+        .. image:: /_static/plots/graph.png
+            :alt: Knapsack graph representation
         """
         if not self.graph:
             self.initialise_graph()
@@ -645,8 +657,22 @@ class Knapsack:
                 constrained_layout=True,
             )
 
+        if colour_map:
+            for key in ["optimal", "feasible", "infeasible"]:
+                if key not in colour_map:
+                    raise ValueError(
+                        f"Colour map must contain a key '{key}' for "
+                        "{key} nodes."
+                    )
+        else:
+            colour_map = {
+                "optimal": "#57ff29",
+                "feasible": "#003CAB",
+                "infeasible": "#FF2C00",
+            }
+
         node_colors = [
-            self.__get_node_color(arrangement)
+            self.__get_node_color(arrangement, colour_map=colour_map)
             for arrangement in self.graph.nodes
         ]
         nx.draw_spring(
@@ -658,6 +684,26 @@ class Knapsack:
             arrowsize=0.01,
             with_labels=False,
         )
+        if show_legend:
+            fig.legend(
+                handles=[
+                    mpl.lines.Line2D(
+                        [0],
+                        [0],
+                        markerfacecolor=colour_map[key],
+                        label=key,
+                        linestyle="",
+                        marker="o",
+                        markersize=5,
+                        markeredgewidth=0,
+                    )
+                    for key in colour_map.keys()
+                ],
+                frameon=False,
+                loc="lower center",
+                ncol=3,
+                fontsize="8",
+            )
 
         return fig, ax
 
