@@ -625,7 +625,7 @@ class Knapsack:
         >>>
         >>> sampler = Sampler(num_items=6, normalised_capacity=0.6)
         >>> sample = sampler.sample(seed=42)
-        >>> sample.plot_graph()
+        >>> fig, ax = sample.plot_graph()
         >>> plt.show()
 
         .. image:: /_static/plots/graph.png
