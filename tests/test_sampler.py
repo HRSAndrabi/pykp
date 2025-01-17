@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
-from pykp.knapsack import Sampler
+from pykp.sampling import Sampler
 
 
 def test_sampler_init_with_defaults():
