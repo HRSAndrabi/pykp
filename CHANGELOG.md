@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v4.0.1 (2025-01-21)
+
+### Bug Fixes
+
+* fix(knapsack): less clunky saving/loading to .json.
+
+The old method required `item` and `capacity` arguments to be
+specified as `None` when initialising a `Knapsack` instance from
+a config file. The new API makes all arguments `None` by default,
+and then checks if either `path` or `items` and `capacity` are
+specified in `__init__`. ([`96f5faa`](https://github.com/HRSAndrabi/pykp/commit/96f5faa40eee5375b97eda9ebc389769fcafe31c))
+
+
 ## v4.0.0 (2025-01-17)
 
 ### Breaking
