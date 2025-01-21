@@ -50,20 +50,20 @@ class Knapsack:
     solve the knapsack problem using different algorithms, and visualise the
     solution.
 
+    A knapsack instance can be initialised with a list of `Item` objects and a
+    capacity constraint, or by providing a path to a valid JSON specification
+    file.
+
     Parameters
     ----------
-    items : list of Item
+    items : list of Item, optional
         A list of `Item` objects, each representing a candidate for the
         knapsack with associated value and weight.
-    capacity : float
+    capacity : float, optional
         The maximum total weight allowed in the knapsack.
-    load_from_json : bool, optional
-        Whether to load the items and capacity from a JSON file. If set to
-        True, `path_to_spec` must be provided. Default is False.
-    path_to_spec : str, optional
-        Path to the JSON specification file containing an array of items
-        (`value`, `weight`) and the knapsack capacity. Only used if
-        `load_from_json` is True. Default is None.
+    path : str, optional
+        Path to a valid JSON specification file. Both `items` and `capacity`
+        must be provided if `path` is not specified.
 
     Attributes
     ----------
@@ -146,18 +146,35 @@ class Knapsack:
     ...     )
     Value: 10 Weight: 10 State: [1.0 0.0 0.0]
     Value: 10 Weight: 10 State: [0.0 1.0 0.0]
+
+    Save the knapsack instance to a JSON file:
+
+    >>> knapsack.write_to_json("output.json")
+
+    Load a knapsack instance from a JSON file:
+
+    >>> knapsack = Knapsack(path="output.json")
     """
 
     def __init__(
         self,
-        items: list[Item],
-        capacity: float,
-        load_from_json: bool = False,
-        path_to_spec: str = None,
+        items: list[Item] = None,
+        capacity: float = None,
+        path: str = None,
     ):
-        if load_from_json:
-            self.load_from_json(path_to_spec)
-            return
+        if path == None and (items is None or capacity is None):
+            raise ValueError(
+                "Either `items` and `capacity` must be provided, or `path`."
+            )
+
+        if path != None:
+            with open(path) as f:
+                spec = json.load(f)
+                items = [
+                    Item(item["value"], item["weight"])
+                    for item in spec["items"]
+                ]
+                capacity = int(spec["capacity"])
 
         if len(items) == 0:
             raise ValueError("`items` must have length greater than 0.")
@@ -696,8 +713,7 @@ class Knapsack:
     def write_to_json(self, path: str):
         """Write the knapsack configuration to a JSON file.
 
-        The output file can be used to load the knapsack instance at a later
-        time using the `load_from_json` method.
+        The output file can be used to initialise the knapsack instance.
 
         Parameters
         ----------
@@ -714,45 +730,15 @@ class Knapsack:
             "capacity": self._capacity,
             "items": [
                 {
-                    "id": i,
                     "value": item.value,
                     "weight": item.weight,
                 }
-                for i, item in enumerate(self._items)
+                for item in self._items
             ],
         }
 
         with open(path, "w") as f:
             json.dump(instance_spec, f, indent=4, default=int)
-
-    def load_from_json(self, path: str):
-        """Load a knapsack configuration from a JSON file.
-
-        Parameters
-        ----------
-        path : str
-            The file path of the JSON specification.
-
-        Examples
-        --------
-        >>> knapsack = Knapsack(
-        ...     items=[],
-        ...     capacity=0,
-        ...     load_from_json=True,
-        ...     path_to_spec="knapsack_config.json",
-        ... )
-        """
-        with open(path) as f:
-            spec = json.load(f)
-            self.__init__(
-                items=np.array(
-                    [
-                        Item(item["value"], item["weight"])
-                        for item in spec["items"]
-                    ]
-                ),
-                capacity=int(spec["capacity"]),
-            )
 
     def summary(self):
         """Return a DataFrame summarising the knapsack instance.
