@@ -760,13 +760,13 @@ class Knapsack:
 
         header = [
             f"C = {self._capacity}",
-            f"nC = {
-                round(
-                    self._capacity
-                    / np.sum([item.weight for item in self._items]),
-                    2,
-                )
-            }",
+            # f"nC = {
+            #     round(
+            #         self._capacity
+            #         / np.sum([item.weight for item in self._items]),
+            #         2,
+            #     )
+            # }",
             f"nTerminal = {n_terminal}",
             f"nOptimal = {n_optimal}",
         ]
