@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v4.0.2 (2025-01-24)
+
+### Bug Fixes
+
+* fix: unmatched string literal. ([`7d5937a`](https://github.com/HRSAndrabi/pykp/commit/7d5937adff87f665fb4b0a364f1ea57e127fb3a3))
+
+### Documentation
+
+* docs: fix outdate Google Style reference. ([`15eac64`](https://github.com/HRSAndrabi/pykp/commit/15eac64dd6ddb14c4706f406a6ab9b4ecd2555b5))
+
+
 ## v4.0.1 (2025-01-21)
 
 ### Bug Fixes
