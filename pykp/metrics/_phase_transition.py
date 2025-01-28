@@ -43,8 +43,52 @@ def _initialise_grid(
     return grid
 
 
+def _sample_dist(rng, dist_name, dist_kwargs, size):
+    """Call desired distribution from the rng.
+
+    Parameters
+    ----------
+    rng : np.random.Generator
+    dist_name : str
+        The name of the distribution to sample from.
+    dist_kwargs : dict
+        Additional kwargs to pass to the distribution.
+    size : int
+        Number of items to sample.
+
+    Raises
+    ------
+    ValueError
+        If the distribution name is not recognised.
+
+    Returns
+    -------
+    np.ndarray
+        Sampled array of shape (size,).
+    """
+    if isinstance(dist_name, str):
+        # If it’s a recognized distribution name, call via getattr.
+        # E.g. rng.uniform(**dist_kwargs, size=size)
+        dist_func = getattr(rng, dist_name, None)
+        if dist_func is None:
+            raise ValueError(f"Unknown distribution name: {dist_name}")
+        return dist_func(**{**dist_kwargs, "size": size})
+    else:
+        raise TypeError(
+            "`weight_dist` and `value_dist` must be either a string "
+            "or a callable that accepts (rng, size, **kwargs)."
+        )
+
+
 def _sample_instance(
-    num_items: int, norm_c: float, norm_p: float, rng: np.random.Generator
+    num_items: int,
+    norm_c: float,
+    norm_p: float,
+    rng: np.random.Generator,
+    weight_dist: str,
+    value_dist: str,
+    weight_dist_kwargs: dict,
+    value_dist_kwargs: dict,
 ) -> tuple[list[Item], float, float]:
     """
     Sample a knapsack instance based on normalised capacity and profit targets.
@@ -64,6 +108,16 @@ def _sample_instance(
         Normalised profit factor to scale the total value.
     rng : np.random.Generator
         Random number generator for sampling.
+    weight_dist : str
+        Name of the distribution to sample item weights from.
+    weight_dist_kwargs : dict
+        Additional keyword arguments to pass to the weight distribution
+        function.
+    value_dist : str
+        Name of the distribution to sample item values from.
+    value_dist_kwargs : dict
+        Additional keyword arguments to pass to the value distribution
+        function.
 
     Returns
     -------
@@ -74,8 +128,8 @@ def _sample_instance(
     target_profit : float
         The scaled target profit.
     """
-    weights = rng.uniform(0.001, 1, num_items)
-    profits = rng.uniform(0.001, 1, num_items)
+    weights = _sample_dist(rng, weight_dist, weight_dist_kwargs, num_items)
+    profits = _sample_dist(rng, value_dist, value_dist_kwargs, num_items)
 
     capacity = sum(weights) * norm_c
     target_profit = sum(profits) * norm_p
@@ -93,6 +147,10 @@ def _simulate_cell_solvability(
     samples: int,
     solver: tuple[Callable, dict],
     rng: np.random.Generator,
+    weight_dist: str,
+    value_dist: str,
+    weight_dist_kwargs: dict,
+    value_dist_kwargs: dict,
     progress: tqdm,
 ) -> float:
     """Estimate the solvability of a grid cell.
@@ -117,6 +175,16 @@ def _simulate_cell_solvability(
         provide to that function.
     rng : np.random.Generator
         Random number generator for sampling.
+    weight_dist : str
+        Name of the distribution to sample item weights from.
+    weight_dist_kwargs : dict
+        Additional keyword arguments to pass to the weight distribution
+        function.
+    value_dist : str
+        Name of the distribution to sample item values from.
+    value_dist_kwargs : dict
+        Additional keyword arguments to pass to the value distribution
+        function.
     progress : tqdm
         Progress bar for tracking iterations.
 
@@ -138,6 +206,10 @@ def _simulate_cell_solvability(
             norm_c=norm_c_draw,
             norm_p=norm_p_draw,
             rng=rng,
+            weight_dist=weight_dist,
+            value_dist=value_dist,
+            weight_dist_kwargs=weight_dist_kwargs,
+            value_dist_kwargs=value_dist_kwargs,
         )
         result = solver(
             items=items,
@@ -203,6 +275,10 @@ def phase_transition(
     resolution: tuple[int, int] = (41, 41),
     seed: int | None = None,
     path: str = None,
+    weight_dist: str = "uniform",
+    value_dist: str = "uniform",
+    weight_dist_kwargs: dict | None = None,
+    value_dist_kwargs: dict | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Compute the phase transition matrix for knapsack instances.
 
@@ -266,6 +342,18 @@ def phase_transition(
         The first element corresponds to the resolution of normalised
         profit, and the second to the resolution of normalised capacity.
         Defaults to (41, 41).
+    weight_dist : str, optional
+        Name of the distribution to sample item weights from. Defaults to
+        uniform distribution over the half-open interval [0.001, 1).
+    weight_dist_kwargs : dict, optional
+        Additional keyword arguments to pass to the weight distribution
+        function. Defaults to None.
+    value_dist : str, optional
+        Name of the distribution to sample item values from. Defaults to
+        uniform distribution over the half-open interval [0.001, 1).
+    value_dist_kwargs : dict, optional
+        Additional keyword arguments to pass to the value distribution
+        function. Defaults to None.
     seed : int | None, optional
         Seed for sampling. Defaults to None.
     path str, optional:
@@ -369,6 +457,22 @@ def phase_transition(
         case _:
             raise ValueError(f"`method` must be one of: {SOLVERS}.")
 
+    if weight_dist != "uniform" and weight_dist_kwargs is None:
+        raise ValueError(
+            "`weight_dist_kwargs` must be provided "
+            "if `weight_dist` is specified."
+        )
+    if value_dist != "uniform" and value_dist_kwargs is None:
+        raise ValueError(
+            "`value_dist_kwargs` must be provided "
+            "if `value_dist` is specified."
+        )
+    weight_dist_kwargs = weight_dist_kwargs or {
+        "low": 0.001,
+        "high": 1,
+    }
+    value_dist_kwargs = value_dist_kwargs or {"low": 0.001, "high": 1}
+
     grid = _initialise_grid(resolution)
     points = list(
         zip(
@@ -388,8 +492,12 @@ def phase_transition(
                 num_items=num_items,
                 samples=samples,
                 solver=solver,
-                progress=progress,
                 rng=rng,
+                weight_dist=weight_dist,
+                value_dist=value_dist,
+                weight_dist_kwargs=weight_dist_kwargs,
+                value_dist_kwargs=value_dist_kwargs,
+                progress=progress,
             )
             phase_transition_solvability.append(solvability)
             phase_transition_time.append(time)
