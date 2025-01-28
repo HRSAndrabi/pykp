@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v4.1.0 (2025-01-28)
+
+### Features
+
+* feat: custom distributions for phase transition. ([`8f6629f`](https://github.com/HRSAndrabi/pykp/commit/8f6629f02d66c2615694ed729ea224b3a830cd08))
+
+### Testing
+
+* test: fix broken json loading test. ([`012b4dc`](https://github.com/HRSAndrabi/pykp/commit/012b4dc280ee8bfd7eb892b595a194ad5e140a44))
+
+
 ## v4.0.2 (2025-01-24)
 
 ### Bug Fixes
