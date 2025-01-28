@@ -94,8 +94,6 @@ def test_load_from_json(tmp_path: pathlib.Path, knapsack: Knapsack):
     """Test loading a knapsack instance from a JSON file."""
     path = tmp_path / "test_knapsack.json"
     knapsack.write_to_json(str(path))
-    new_knapsack = Knapsack(
-        items=np.array([]), capacity=0, load_from_json=True, path_to_spec=path
-    )
+    new_knapsack = Knapsack(items=np.array([]), capacity=0, path=path)
     assert new_knapsack.capacity == knapsack.capacity
     assert len(new_knapsack.items) == len(knapsack.items)
