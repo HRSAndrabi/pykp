@@ -263,7 +263,7 @@ def _save_phase_transition(
         data["solvability"] = solvability.flatten()
         data["time"] = time.flatten()
     df = pd.DataFrame(data)
-    df.to_csv(path, index=False, float_format="%.6f")
+    df.to_csv(path, index=False, float_format="%.10f")
 
 
 def phase_transition(
