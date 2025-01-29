@@ -1,6 +1,13 @@
 # CHANGELOG
 
 
+## v4.1.1 (2025-01-29)
+
+### Bug Fixes
+
+* fix: save more phasetransition decimals. ([`e211b7f`](https://github.com/HRSAndrabi/pykp/commit/e211b7f70ef7d1b862f4f4a4af737cec40f8f316))
+
+
 ## v4.1.0 (2025-01-28)
 
 ### Features
