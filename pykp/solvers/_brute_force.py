@@ -94,7 +94,8 @@ def brute_force(items: list[Item], capacity: int) -> Solution:
     algorithm, first create a list of items and then call the solver
     with the items and capacity.
 
-    >>> from pykp import Item, solvers
+    >>> from pykp.knapsack import Item
+    >>> from pykp import solvers
     >>>
     >>> items = [
     ...     Item(value=10, weight=5),
@@ -109,7 +110,7 @@ def brute_force(items: list[Item], capacity: int) -> Solution:
     Alternatively, construct an instance of the `Knapsack` class and
     call the `initialise_graph()` method.
 
-    >>> from pykp import Item, Knapsack
+    >>> from pykp.knapsack import Item, Knapsack
     >>>
     >>> items = [
     ...     Item(value=10, weight=5),

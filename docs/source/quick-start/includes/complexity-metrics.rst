@@ -13,7 +13,8 @@ For a given set of items and capacity constraint, you can calculate the Sahni-k 
 
 .. code-block:: python
 
-	from pykp import Items, metrics
+	from pykp.knapsack import Items
+	from pykp import metrics
 
 	items = [
 	    Item(value=10, weight=5),

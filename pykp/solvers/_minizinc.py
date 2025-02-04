@@ -32,7 +32,8 @@ def minizinc(
     Solve a knapsack problem instance using MiniZinc and the COIN-OR
     Branch-and-Cut solver:
 
-    >>> from pykp import Item, solvers
+    >>> from pykp.knapsack import Item
+    >>> from pykp import solvers
     >>> items = np.array(
     ...     [
     ...         Item(value=10, weight=5),
@@ -47,8 +48,8 @@ def minizinc(
     Alternatively, construct an instance of the ``Knapsack`` class and call the
     ``solve`` method with "minizinc" as the ``method`` argument
 
-    >>> from pykp import Item
-    >>> from pykp import Knapsack
+    >>> from pykp.knapsack import Item
+    >>> from pykp.knapsack import Knapsack
     >>>
     >>> items = [
     ...     Item(value=10, weight=5),

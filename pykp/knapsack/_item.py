@@ -6,7 +6,7 @@ item has a value and a weight associated with it.
 Example:
     Use the Item class to define items for the knapsack problem::
 
-        from pykp import Item
+        from pykp.knapsack import Item
 
         items = [
             Item(value=10, weight=5),

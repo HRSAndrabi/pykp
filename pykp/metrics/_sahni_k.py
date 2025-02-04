@@ -31,8 +31,8 @@ def sahni_k(
 
     Examples
     --------
-    >>> from pykp import Arrangement
-    >>> from pykp import Item
+    >>> from pykp.knapsack import Arrangement
+    >>> from pykp.knapsack import Item
     >>> from pykp import metrics
     >>>
     >>> items = [Item(10, 5), Item(20, 8), Item(15, 7)]

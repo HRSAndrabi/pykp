@@ -30,7 +30,7 @@ def greedy(items: list[Item], capacity: int) -> Solution:
     --------
     Solve a knapsack problem using the greedy algorithm:
 
-    >>> from pykp import Item
+    >>> from pykp.knapsack import Item
     >>> from pykp import solvers
     >>> items = np.array(
     ...     [

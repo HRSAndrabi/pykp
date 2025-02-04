@@ -27,8 +27,8 @@ Here's a quick example to get started with PyKP:
 
 .. code-block:: python
 
-   from pykp import Knapsack
-   from pykp import Item
+   from pykp.knapsack import Knapsack
+   from pykp.knapsack import Item
 
    # Define knapsack items
    items = [

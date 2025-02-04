@@ -235,7 +235,7 @@ def branch_and_bound(
     --------
     Solve a knapsack problem using the branch-and-bound algorithm
 
-    >>> from pykp import Item
+    >>> from pykp.knapsack import Item
     >>> from pykp import solvers
     >>>
     >>> items = [
@@ -250,8 +250,8 @@ def branch_and_bound(
     Alternatively, construct an instance of the ``Knapsack`` class and call the
     ``solve`` method with "branch_and_bound" as the ``method`` argument
 
-    >>> from pykp import Item
-    >>> from pykp import Knapsack
+    >>> from pykp.knapsack import Item
+    >>> from pykp.knapsack import Knapsack
     >>>
     >>> items = [
     ...     Item(value=10, weight=5),
@@ -267,8 +267,8 @@ def branch_and_bound(
     If there are multiple solutions with the same optimal value, all will be
     returned.
 
-    >>> from pykp import Item
-    >>> from pykp import Knapsack
+    >>> from pykp.knapsack import Item
+    >>> from pykp.knapsack import Knapsack
     >>>
     >>> items = [
     ...     Item(value=10, weight=5),
@@ -285,8 +285,8 @@ def branch_and_bound(
     Use the optional ``n`` argument to return the n-best solutions found by
     the solver.
 
-    >>> from pykp import Item
-    >>> from pykp import Knapsack
+    >>> from pykp.knapsack import Item
+    >>> from pykp.knapsack import Knapsack
     >>> from pykp import solvers
     >>>
     >>> items = [

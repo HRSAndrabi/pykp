@@ -10,8 +10,8 @@ Examples
 To define a Knapsack instance, initialise the `Knapsack` class with `Items`
 and a capacity constraint
 
->>> from pykp import Knapsack
->>> from pykp import Item
+>>> from pykp.knapsack import Knapsack
+>>> from pykp.knapsack import Item
 >>> items = [
 ...     Item(value=10, weight=5),
 ...     Item(value=15, weight=10),
@@ -109,8 +109,8 @@ class Knapsack:
     --------
     Create a knapsack instance and solve using default settings:
 
-    >>> from pykp import Knapsack
-    >>> from pykp import Item
+    >>> from pykp.knapsack import Knapsack
+    >>> from pykp.knapsack import Item
     >>> items = [
     ...     Item(value=10, weight=5),
     ...     Item(value=15, weight=10),
@@ -285,8 +285,8 @@ class Knapsack:
 
         Examples
         --------
-        >>> from pykp import Knapsack
-        >>> from pykp import Item
+        >>> from pykp.knapsack import Knapsack
+        >>> from pykp.knapsack import Item
         >>> items = [
         ...     Item(value=10, weight=5),
         ...     Item(value=15, weight=10),
@@ -488,7 +488,7 @@ class Knapsack:
 
         Examples
         --------
-        >>> from pykp import Knapsack, Item
+        >>> from pykp.knapsack import Knapsack, Item
         >>> items = [Item(10, 5), Item(15, 10), Item(7, 3)]
         >>> knapsack = Knapsack(items=items, capacity=15)
         >>> knapsack.initialise_graph()
