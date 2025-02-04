@@ -1,6 +1,20 @@
 # CHANGELOG
 
 
+## v4.1.2 (2025-02-04)
+
+### Bug Fixes
+
+* fix(knapsack): summary incorrect dimensions.
+
+Knapsack.summary() was raising an error due to incorrect dimensions
+of data supplied to the Pandas DataFrame. ([`2ff8008`](https://github.com/HRSAndrabi/pykp/commit/2ff800841c2eb9da9fdc77c03011d0171136586b))
+
+### Documentation
+
+* docs: fix references to old import system. ([`ae92f1c`](https://github.com/HRSAndrabi/pykp/commit/ae92f1cf0425adaec06d9ae6899db8cb0320f730))
+
+
 ## v4.1.1 (2025-01-29)
 
 ### Bug Fixes
