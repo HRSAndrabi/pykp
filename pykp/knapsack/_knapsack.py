@@ -760,13 +760,13 @@ class Knapsack:
 
         header = [
             f"C = {self._capacity}",
-            # f"nC = {
-            #     round(
-            #         self._capacity
-            #         / np.sum([item.weight for item in self._items]),
-            #         2,
-            #     )
-            # }",
+            f"nC = {
+                round(
+                    self._capacity
+                    / np.sum([item.weight for item in self._items]),
+                    2,
+                )
+            }",
             f"nTerminal = {n_terminal}",
             f"nOptimal = {n_optimal}",
         ]
@@ -796,12 +796,11 @@ class Knapsack:
             [item.weight for item in self._items],
             [round(item.value / item.weight, 3) for item in self._items],
         ]
-        rows.extend(
-            [
-                np.where(arrangement.state == 1, "IN", "OUT")
-                for arrangement in self._optimal_nodes
-            ]
-        )
+
+        for arrangement in self._optimal_nodes:
+            rows.append(
+                ["IN" if item == 1 else "OUT" for item in arrangement.state]
+            )
 
         index = ["v", "w", "density"]
         index.extend(
@@ -829,9 +828,11 @@ class Knapsack:
                 )
             )
             rows.append(
-                np.where(best_inferior_solution.state == 1, "IN", "OUT")
+                [
+                    "IN" if item == 1 else "OUT"
+                    for item in best_inferior_solution.state
+                ]
             )
-
         return pd.DataFrame(rows, columns=columns, index=index, dtype="object")
 
     def __str__(self):
