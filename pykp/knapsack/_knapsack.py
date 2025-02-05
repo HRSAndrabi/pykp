@@ -56,14 +56,11 @@ class Knapsack:
 
     Parameters
     ----------
-    items : list of Item, optional
+    items : list of Item
         A list of `Item` objects, each representing a candidate for the
         knapsack with associated value and weight.
-    capacity : float, optional
+    capacity : float
         The maximum total weight allowed in the knapsack.
-    path : str, optional
-        Path to a valid JSON specification file. Both `items` and `capacity`
-        must be provided if `path` is not specified.
 
     Attributes
     ----------
@@ -153,29 +150,14 @@ class Knapsack:
 
     Load a knapsack instance from a JSON file:
 
-    >>> knapsack = Knapsack(path="output.json")
+    >>> knapsack = Knapsack.from_file("output.json")
     """
 
     def __init__(
         self,
-        items: list[Item] = None,
-        capacity: float = None,
-        path: str = None,
+        items: list[Item],
+        capacity: float,
     ):
-        if path == None and (items is None or capacity is None):
-            raise ValueError(
-                "Either `items` and `capacity` must be provided, or `path`."
-            )
-
-        if path != None:
-            with open(path) as f:
-                spec = json.load(f)
-                items = [
-                    Item(item["value"], item["weight"])
-                    for item in spec["items"]
-                ]
-                capacity = int(spec["capacity"])
-
         if len(items) == 0:
             raise ValueError("`items` must have length greater than 0.")
         if not np.all([isinstance(item, Item) for item in items]):
@@ -253,6 +235,37 @@ class Knapsack:
     @property
     def nodes(self) -> list[Arrangement]:
         return list(self._nodes)
+
+    @classmethod
+    def from_file(cls, path: str):
+        """Initialise a knapsack instance from a JSON file.
+
+        Parameters
+        ----------
+        path : str
+            The file path to the JSON file containing the knapsack instance
+            specification.
+
+        Returns
+        -------
+        Knapsack
+            A new instance of the `Knapsack` class initialised
+            from the JSON file.
+
+        Examples
+        --------
+        >>> knapsack = Knapsack.from_file("input.json")
+        """
+        with open(path, "r") as f:
+            instance_spec = json.load(f)
+
+        items = [
+            Item(value=item["value"], weight=item["weight"])
+            for item in instance_spec["items"]
+        ]
+        capacity = instance_spec["capacity"]
+
+        return cls(items=items, capacity=capacity)
 
     def solve(
         self,
