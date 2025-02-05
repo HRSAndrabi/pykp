@@ -1,6 +1,26 @@
 # CHANGELOG
 
 
+## v4.2.0 (2025-02-05)
+
+### Documentation
+
+* docs: clarify phase transition doc. ([`991f61b`](https://github.com/HRSAndrabi/pykp/commit/991f61bc4d5326825a095aace4ea4d935eaa0871))
+
+### Features
+
+* feat(knapsack): implement from_file() class method.
+
+In order to load a knapsack from a JSON file, one had to provide a
+path parameter to the init method. This commiut introduces a
+\`from_file()\` class method, that makes it cleaner to load
+instances from a file. ([`0f032ab`](https://github.com/HRSAndrabi/pykp/commit/0f032abd9bf3aedbcc0ddd3900bcb2bdf21ffe9a))
+
+### Testing
+
+* test: add test for knapsack.summary(). ([`1e29bb8`](https://github.com/HRSAndrabi/pykp/commit/1e29bb8e64960b701e20ba5311ecb8b32ae032a3))
+
+
 ## v4.1.2 (2025-02-04)
 
 ### Bug Fixes
