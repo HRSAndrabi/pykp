@@ -280,7 +280,7 @@ def phase_transition(
     weight_dist_kwargs: dict | None = None,
     value_dist_kwargs: dict | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Compute the phase transition matrix for knapsack instances.
+    r"""Compute the phase transition matrix for knapsack instances.
 
     In computational problems, a phase transition refers to a phenomenon where
     the probability of finding a solution changes abruptly as some parameter
@@ -290,14 +290,30 @@ def phase_transition(
     problems, where the  likelihood of finding a solution changes
     abruptly as a key parameter crosses a critical value.
 
-    For the knapsack problem, this phase transition manifests in terms of
-    the relationship between the normalised capacity (`c`) and normalised
-    profit (`p`) of an instance. The phase transition has been shown to occur
-    when the ratio `r = c / p` is near 1. Instances with 0 < r < 1 are less
-    expensive to solve as compred to instances with r ≈ 1.
+    For an :math:`i` item knapsack instance with capacity :math:`C` and target
+    profit of :math:`T`, this phase transition manifests in terms of the
+    relationship between the normalised capacity (`c`) and normalised profit
+    (`p`) of an instance, [#]_ where
 
-    This function provide an implementation of the phase transition
-    of the knapsack problem, based on Yadav, Nitin, et al. (2018).
+    .. math::
+
+        c = \frac{C}{\sum_{i=1}^{n} w_i}
+        \quad \text{and} \quad
+        p = \frac{T}{\sum_{i=1}^{n} v_i}.
+
+
+    The phase transition matrix is a 2D grid
+    over `c` and `p`, where each cell represents the proportion of instances
+    that are satisfiable at that point in the grid.
+    The phase transition matrix can be used to identify regions of the
+    (`c`, `p`) parameter space where the problem is more or less likely to be
+    satisfiable. The proportion of satisfiable instances in each cell has been
+    shown to be preditive of both human and algorithmic performance on knapsack
+    problem instances.
+
+    A similar phase transaction matrix can be computed for the average time
+    taken to solve instances in each cell, or the number of propagations
+    required to solve each instance.
 
     Parameters
     ----------
@@ -398,7 +414,6 @@ def phase_transition(
     .. image:: /_static/plots/phase_transition_solvability.png
         :alt: Phase transition solvability matrix
 
-    >>> import matplotlib.pyplot as plt
     >>> fig, axes = plt.subplots(
     ...     nrows=1,
     ...     ncols=1,
@@ -408,20 +423,21 @@ def phase_transition(
     ... )
     >>> image = axes.imshow(
     ...     phase_transition,
-    ...     cmap="RdYlGn",
+    ...     cmap="RdYlGn_r",
     ...     interpolation="nearest",
     ...     aspect="auto",
     ...     extent=(0, 1, 0, 1),
     ... )
     >>> axes.set(xlabel="nc", ylabel="np")
     >>> cbar = fig.colorbar(image, ax=axes)
-    >>> cbar.ax.set_ylabel("solvability"
+    >>> cbar.ax.set_ylabel("time"
     >>> plt.show()
 
     .. image:: /_static/plots/phase_transition_time.png
         :alt: Phase transition time matrix
 
-    >>> # Optionally save results to file:
+    Optionally save results to file by specifying a path:
+
     >>> phase_transition(
     ...     num_items=10, samples=50, resolution=(5, 5), path="output.csv"
     ... )
@@ -437,9 +453,8 @@ def phase_transition(
 
     References
     ----------
-
-        .. [1] Yadav, Nitin, et al. "Phase transition in the knapsack problem."
-           arXiv preprint arXiv:1806.10244 (2018).
+    .. [#] Yadav, Nitin, et al. "Phase transition in the knapsack problem."
+        arXiv preprint arXiv:1806.10244 (2018).
     """
     if outcome not in ["solvability", "time", "both"]:
         raise ValueError(

@@ -34,6 +34,7 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.coverage",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.mathjax",
     "numpydoc",
     "sphinx.ext.autosectionlabel",
     "sphinx_design",
