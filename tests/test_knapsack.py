@@ -3,6 +3,7 @@
 import pathlib
 
 import numpy as np
+import pandas as pd
 import pytest
 
 from pykp.knapsack import Item, Knapsack
@@ -97,3 +98,9 @@ def test_load_from_json(tmp_path: pathlib.Path, knapsack: Knapsack):
     new_knapsack = Knapsack.from_file(str(path))
     assert new_knapsack.capacity == knapsack.capacity
     assert len(new_knapsack.items) == len(knapsack.items)
+
+
+def test_summary(knapsack: Knapsack):
+    """Test the summary method."""
+    summary = knapsack.summary()
+    assert isinstance(summary, pd.DataFrame)
