@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v4.3.0 (2025-02-11)
+
+### Features
+
+* feat(solvers): add propagations to SolutionStatistics.
+
+Added propagations filed to solution statistics, which is
+populated for solvers that record propagations (so far only gecode)
+and is otherwise None. ([`c96aef8`](https://github.com/HRSAndrabi/pykp/commit/c96aef844c0e3c19a03970200474ee92ef237e18))
+
+
 ## v4.2.0 (2025-02-05)
 
 ### Documentation
