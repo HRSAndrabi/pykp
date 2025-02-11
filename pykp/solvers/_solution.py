@@ -22,12 +22,16 @@ class SolutionStatistics:
     ----------
     time : float
         Time taken by the solver to find the solution.
+    propagations: int
+        Number of propagations made by the solver. This is only available for
+        solvers that support propagations. Default is None.
     n_solutions : int
         Number of solutions found by the solver.
     """
 
     time: float
     n_solutions: int
+    propagations: int = None
 
 
 @dataclass(frozen=True)

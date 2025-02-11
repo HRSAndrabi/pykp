@@ -102,8 +102,13 @@ def minizinc(
     instance["size"] = [item.weight for item in items]
 
     result = instance.solve()
+    propagations = (
+        result.statistics["propagations"] if solver == "gecode" else None
+    )
     statistics = SolutionStatistics(
-        time=result.statistics["solveTime"], n_solutions=1
+        time=result.statistics["solveTime"],
+        n_solutions=1,
+        propagations=propagations,
     )
 
     return Solution(
@@ -162,8 +167,13 @@ def _minizinc_decision_variant(
     instance["target"] = target
 
     result = instance.solve()
+    propagations = (
+        result.statistics["propagations"] if solver == "gecode" else None
+    )
     statistics = SolutionStatistics(
-        time=result.statistics["solveTime"], n_solutions=1
+        time=result.statistics["solveTime"],
+        n_solutions=1,
+        propagations=propagations,
     )
 
     return Solution(
