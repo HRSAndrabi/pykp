@@ -1,6 +1,21 @@
 # CHANGELOG
 
 
+## v4.3.1 (2025-02-12)
+
+### Bug Fixes
+
+* fix: f-strings in py3.10/3.11 multi-line f-string.
+
+Multi-line f-strings throw syntax errors prior to py3.12. ([`d11fe0b`](https://github.com/HRSAndrabi/pykp/commit/d11fe0b26d43f35c348de3bd2ed6399f276aeaba))
+
+### Build System
+
+* build: support Python version 3.10, 3.11.
+
+Installed tox to test for multiple Python versions." ([`793ffc2`](https://github.com/HRSAndrabi/pykp/commit/793ffc2a94c730d4278f381eb1f66c6c9342a4da))
+
+
 ## v4.3.0 (2025-02-11)
 
 ### Features
