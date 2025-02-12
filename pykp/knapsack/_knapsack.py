@@ -770,16 +770,13 @@ class Knapsack:
         """
         n_terminal = 2 ** len(self._items)
         n_optimal = len(self._optimal_nodes)
-
+        nc = round(
+            self._capacity / np.sum([item.weight for item in self._items]),
+            2,
+        )
         header = [
             f"C = {self._capacity}",
-            f"nC = {
-                round(
-                    self._capacity
-                    / np.sum([item.weight for item in self._items]),
-                    2,
-                )
-            }",
+            f"nC = {nc}",
             f"nTerminal = {n_terminal}",
             f"nOptimal = {n_optimal}",
         ]
@@ -829,14 +826,13 @@ class Knapsack:
             ]
         )
         if best_inferior_solution is not None:
+            k_inferior = sahni_k(best_inferior_solution, self._capacity)
             index.append(
                 ", ".join(
                     [
                         f"best inferior (v = {best_inferior_solution.value}",
                         f"w = {best_inferior_solution.weight}",
-                        f"k = {
-                            sahni_k(best_inferior_solution, self._capacity)
-                        })",
+                        f"k = {k_inferior})",
                     ]
                 )
             )
@@ -849,13 +845,11 @@ class Knapsack:
         return pd.DataFrame(rows, columns=columns, index=index, dtype="object")
 
     def __str__(self):
+        values = [round(item.value.item(), 2) for item in self._items]
+        weights = [round(item.weight.item(), 2) for item in self._items]
         return (
-            f"Knapsack(values={
-                [round(item.value.item(), 2) for item in self._items]
-            }, "
-            f"weights={
-                [round(item.weight.item(), 2) for item in self._items]
-            }, "
+            f"Knapsack(values={values}, "
+            f"weights={weights}, "
             f"capacity={self._capacity})"
         )
 
