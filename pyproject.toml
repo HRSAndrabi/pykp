@@ -11,7 +11,7 @@ authors = [
 ]
 license = { text = "MIT" }
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 keywords = ["knapsack", "optimisation", "sampling", "algorithms"]
 classifiers = [
 	"Intended Audience :: Science/Research",
@@ -39,6 +39,7 @@ test = [
     "pytest",
     "pytest-cov",
     "pytest-timeout",
+	"tox",
 ]
 dev = [
 	"ruff",
@@ -143,3 +144,49 @@ select = ["E501", "D"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"  
+
+[tool.tox]
+# requires = ["tox>=4"]
+env_list = [
+  "py310",
+  "py311",
+  "py312",
+  "py313"
+]
+
+# Python 3.10
+[tool.tox.env.py310]
+description = "Run tests on Python 3.10"
+python = "python3.10"
+package = "editable"
+extras = ["test"]
+commands = [["pytest"]]
+
+# Python 3.11
+[tool.tox.env.py311]
+description = "Run tests on Python 3.11"
+python = "python3.11"
+package = "editable"
+extras = ["test"]
+commands = [["pytest"]]
+
+# Python 3.12
+[tool.tox.env.py312]
+description = "Run tests on Python 3.12"
+python = "python3.12"
+extras = ["test"]
+commands = [["pytest"]]
+
+# Python 3.13
+[tool.tox.env.py313]
+description = "Run tests on Python 3.13"
+python = "python3.13"
+package = "editable"
+extras = ["test"]
+commands = [["pytest"]]
+
+[tool.tox.gh.python]
+"3.10" = ["py310"]
+"3.11" = ["py311"]
+"3.12" = ["py312"]
+"3.13" = ["py313"]
