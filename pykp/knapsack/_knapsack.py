@@ -37,7 +37,6 @@ import pandas as pd
 import pykp.solvers as solvers
 from pykp.knapsack._arrangement import Arrangement
 from pykp.knapsack._item import Item
-from pykp.metrics._sahni_k import sahni_k
 
 SOLVERS = ["branch_and_bound", "minizinc"]
 
@@ -819,20 +818,17 @@ class Knapsack:
                     [
                         f"solution (v = {arrangement.value}",
                         f"w = {arrangement.weight}",
-                        f"k = {sahni_k(arrangement, self._capacity)})",
                     ]
                 )
                 for arrangement in self._optimal_nodes
             ]
         )
         if best_inferior_solution is not None:
-            k_inferior = sahni_k(best_inferior_solution, self._capacity)
             index.append(
                 ", ".join(
                     [
                         f"best inferior (v = {best_inferior_solution.value}",
                         f"w = {best_inferior_solution.weight}",
-                        f"k = {k_inferior})",
                     ]
                 )
             )
