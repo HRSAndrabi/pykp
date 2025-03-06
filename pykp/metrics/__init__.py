@@ -15,7 +15,8 @@ Metrics
    sahni_k - Sahni-k metric for the knapsack problem.
 """
 
+from ._fsr import fsr
 from ._phase_transition import phase_transition
 from ._sahni_k import sahni_k
 
-__all__ = ["phase_transition", "sahni_k"]
+__all__ = ["phase_transition", "sahni_k", "fsr"]

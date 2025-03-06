@@ -8,6 +8,7 @@ import pandas as pd
 import pytest
 
 import pykp.metrics as metrics
+from pykp.knapsack import Item, Knapsack
 
 SOLVERS = ["branch_and_bound"]
 
@@ -144,3 +145,19 @@ def test_phase_transition_reproducibility(seed):
     assert np.all(solvability_matrix == solvability_matrix2), (
         "Inconsistent solvability matrix."
     )
+
+
+@pytest.mark.parametrize("capacity", [1, 2, 3])
+def test_fsr_returns_correct_value(capacity):
+    """Test that the feasibility ratio is calculated correctly."""
+    items = [
+        Item(value=1, weight=1),
+        Item(value=1, weight=1),
+        Item(value=1, weight=1),
+    ]
+    instance = Knapsack(items=items, capacity=capacity)
+    fsr = metrics.fsr(instance)
+    nodes = 2 ** len(items)
+
+    expected_fsr = len(instance.feasible_nodes) / len(instance.nodes)
+    assert fsr == expected_fsr, "Feasibility ratio is incorrect."
