@@ -12,9 +12,13 @@ def fbp(instance: Knapsack) -> float:
 
     .. math::
 
-        FBP = \frac{
-        \text{Number of edges between feasible and infeasible nodes}
-        }{\text{Total number of edges}}
+        FBP = \frac
+        {\sum_{(u, v) \in E} \mathcal{I}_{f(u) \neq f(v)}}
+        {|E|},
+
+    where :math:`E` is the set of edges in the search space, :math:`f(u)` is
+    the feasibility of node :math:`u`, and :math:`\mathcal{I}` is the
+    indicator function.
 
     Parameters
     ----------
