@@ -1,0 +1,62 @@
+from pykp.knapsack import Knapsack
+
+
+def fbp(instance: Knapsack) -> float:
+    r"""Compute the feasibility boundary proportion for a knapsack problem.
+
+    The feasibility boundary proportion is the ratio of the number of edges
+    between feasible and infeasible nodes in the search space to the total
+    number of edges in the search space. This is a generalisation of the
+    ratio of feasible boundary crossings (RFBx) fitness landscape metric. [#]_
+    Feasibility is determined by the capacity constraint of the knapsack.
+
+    .. math::
+
+        FBP = \frac{
+        \text{Number of edges between feasible and infeasible nodes}
+        }{\text{Total number of edges}}
+
+    Parameters
+    ----------
+    instance : Knapsack
+        A knapsack instance to evaluate.
+
+    Returns
+    -------
+    float
+        The feasibility boundary proportion of the knapsack instance.
+
+    Examples
+    --------
+    Compute the feasibility boundary proportion for a knapsack instance:
+
+    >>> from pykp.metrics import fbp
+    >>> from pykp.knapsack import Item
+    >>> from pykp.knapsack import Knapsack
+    >>>
+    >>> items = [
+    ...     Item(value=1, weight=1),
+    ...     Item(value=1, weight=1),
+    ...     Item(value=1, weight=1),
+    ... ]
+    >>> capacity = 1
+    >>> instance = Knapsack(items=items, capacity=capacity)
+    >>> fbp(instance)
+    0.75
+
+    References
+    ----------
+    .. [#] Malan, Katherine M. "Landscape-Aware Constraint Handling Applied to
+        Differential Evolution." International Conference on Theory and
+        Practice of Natural Computing. 2018.
+    """
+    if not instance.graph:
+        instance.initialise_graph()
+
+    infeasible_edges = [
+        (u, v)
+        for u, v in instance.graph.edges()
+        if u.weight > instance.capacity or v.weight > instance.capacity
+    ]
+
+    return len(infeasible_edges) / len(instance.graph.edges())

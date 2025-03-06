@@ -161,3 +161,24 @@ def test_fsr_returns_correct_value(capacity):
 
     expected_fsr = len(instance.feasible_nodes) / len(instance.nodes)
     assert fsr == expected_fsr, "Feasibility ratio is incorrect."
+
+
+@pytest.mark.parametrize("capacity", [1, 2, 3])
+def test_fbp_returns_correct_value(capacity):
+    """Test that feasibility boundary proportion is calculated correctly."""
+    items = [
+        Item(value=1, weight=1),
+        Item(value=1, weight=1),
+        Item(value=1, weight=1),
+    ]
+    instance = Knapsack(items=items, capacity=capacity)
+    fbp = metrics.fbp(instance)
+    edges = 2 ** (len(items) - 1) * len(items)
+
+    infeasible_edges = [
+        (u, v)
+        for u, v in instance.graph.edges()
+        if u.weight > instance.capacity or v.weight > instance.capacity
+    ]
+    expected_fbp = len(infeasible_edges) / edges
+    assert fbp == expected_fbp, "Feasibility boundary proportion is incorrect."
