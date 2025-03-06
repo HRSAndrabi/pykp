@@ -521,7 +521,7 @@ class Knapsack:
         self._feasible_nodes = solution.value["feasible"]
         self._nodes = solution.value["all"]
 
-        graph = graph = nx.DiGraph()
+        graph = graph = nx.Graph()
         for arrangement in self._nodes:
             neighbours = [
                 alt_arrangement
