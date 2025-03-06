@@ -13,6 +13,7 @@ Metrics
 
    phase_transition - Phase transition of the knapsack problem.
    sahni_k - Sahni-k metric for the knapsack problem.
+   fsr - Feasibility ratio of the knapsack problem.
 """
 
 from ._fsr import fsr
