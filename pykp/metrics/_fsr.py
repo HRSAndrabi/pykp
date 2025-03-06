@@ -24,6 +24,24 @@ def fsr(instance: Knapsack) -> float:
     float
         The feasibility ratio of the knapsack instance.
 
+    Examples
+    --------
+    Compute the feasibility ratio for a knapsack instance:
+
+    >>> from pykp.metrics import fsr
+    >>> from pykp.knapsack import Item
+    >>> from pykp.knapsack import Knapsack
+    >>>
+    >>> items = [
+    ...     Item(value=1, weight=1),
+    ...     Item(value=1, weight=1),
+    ...     Item(value=1, weight=1),
+    ... ]
+    >>> capacity = 1
+    >>> instance = Knapsack(items=items, capacity=capacity)
+    >>> fsr(instance)
+    0.5
+
     References
     ----------
     .. [#] Malan, Katherine M. "Landscape-Aware Constraint Handling Applied to
