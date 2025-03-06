@@ -175,10 +175,10 @@ def test_fbp_returns_correct_value(capacity):
     fbp = metrics.fbp(instance)
     edges = 2 ** (len(items) - 1) * len(items)
 
-    infeasible_edges = [
+    feasibility_boundary_crossings = [
         (u, v)
         for u, v in instance.graph.edges()
-        if u.weight > instance.capacity or v.weight > instance.capacity
+        if (u.weight > instance.capacity) != (v.weight > instance.capacity)
     ]
-    expected_fbp = len(infeasible_edges) / edges
+    expected_fbp = len(feasibility_boundary_crossings) / edges
     assert fbp == expected_fbp, "Feasibility boundary proportion is incorrect."

@@ -53,10 +53,10 @@ def fbp(instance: Knapsack) -> float:
     if not instance.graph:
         instance.initialise_graph()
 
-    infeasible_edges = [
+    feasibility_boundary_crossings = [
         (u, v)
         for u, v in instance.graph.edges()
-        if u.weight > instance.capacity or v.weight > instance.capacity
+        if (u.weight > instance.capacity) != (v.weight > instance.capacity)
     ]
 
-    return len(infeasible_edges) / len(instance.graph.edges())
+    return len(feasibility_boundary_crossings) / len(instance.graph.edges())
