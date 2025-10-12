@@ -154,9 +154,11 @@ def brute_force(items: list[Item], capacity: int) -> Solution:
     terminal_nodes = np.array([])
     optimal_nodes = np.array([])
 
+    cost = 0
     for i in range(1, len(items) + 1):
         subsets = list(itertools.combinations(items, i))
         for subset in subsets:
+            cost += 1
             nodes = np.append(
                 nodes,
                 Arrangement(
@@ -214,7 +216,7 @@ def brute_force(items: list[Item], capacity: int) -> Solution:
         "all": nodes,
     }
     statistics = SolutionStatistics(
-        time=time_end - time_start, n_solutions=len(nodes)
+        time=time_end - time_start, n_solutions=len(nodes), cost=cost
     )
     return Solution(
         value=value, type=SolutionType.TRAVERSAL, statistics=statistics

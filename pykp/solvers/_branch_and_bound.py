@@ -315,7 +315,7 @@ def branch_and_bound(
         type = SolutionType.MAXIMISE_TOP_N
 
     if len(items) == 0:
-        statistcs = SolutionStatistics(time=0, n_solutions=0)
+        statistcs = SolutionStatistics(time=0, n_solutions=0, cost=0)
         return Solution(
             value=[Arrangement(items=items, state=np.array([]))],
             type=type,
@@ -346,9 +346,11 @@ def branch_and_bound(
     nodes = []
     n_best_values = [0]
 
+    cost = 0
     while not queue.empty():
         next = queue.get()
         children = _expand_node(next, capacity, incumbent)
+        cost += 1
         for child in children:
             if child.upper_bound < incumbent:
                 continue
@@ -373,8 +375,7 @@ def branch_and_bound(
     time_end = time.perf_counter()
 
     statistics = SolutionStatistics(
-        time=time_end - time_start,
-        n_solutions=len(result),
+        time=time_end - time_start, n_solutions=len(result), cost=cost
     )
 
     return Solution(value=result, type=type, statistics=statistics)
@@ -425,9 +426,11 @@ def _branch_and_bound_decision_variant(
     queue = PriorityQueue()
     queue.put(root)
 
+    cost = 0
     while not queue.empty():
         next = queue.get()
         children = _expand_node(next, capacity, target)
+        cost += 1
         for child in children:
             queue.put(child)
             if child.value >= target:
@@ -438,6 +441,7 @@ def _branch_and_bound_decision_variant(
                     statistics=SolutionStatistics(
                         time=time_end - time_start,
                         n_solutions=1,
+                        cost=cost,
                     ),
                 )
 
@@ -448,5 +452,6 @@ def _branch_and_bound_decision_variant(
         statistics=SolutionStatistics(
             time=time_end - time_start,
             n_solutions=0,
+            cost=cost,
         ),
     )

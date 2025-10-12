@@ -196,6 +196,8 @@ def _simulate_cell_solvability(
 
     """
     total_solved = 0
+    time = []
+    cost = []
     solver, solver_kwargs = solver
     for _ in range(samples):
         norm_c_draw = rng.uniform(norm_c_range[0], norm_c_range[1])
@@ -219,9 +221,11 @@ def _simulate_cell_solvability(
         )
 
         total_solved += int(result.value)
+        time.append(result.statistics.time)
+        cost.append(result.statistics.cost)
         progress.update(1)
 
-    return (total_solved / samples, result.statistics.time / samples)
+    return (total_solved / samples, np.mean(time), max(cost))
 
 
 def _save_phase_transition(
@@ -269,7 +273,7 @@ def _save_phase_transition(
 def phase_transition(
     num_items: int,
     samples: int = 100,
-    outcome: str = "both",
+    outcome: str | tuple = ("solvability", "time", "cost"),
     solver: str = "branch_and_bound",
     minizinc_solver: str = "coinbc",
     resolution: tuple[int, int] = (41, 41),
@@ -322,15 +326,15 @@ def phase_transition(
     samples : int, optional
         Number of instances to evaluate in each cell of the grid. Default is
         100.
-    outcome : str, optional
-        The outcome to measure in each cell. One or of "solvability" "time"
-        or "both". If "solvability" is specified, the phase transition matrix
+    outcome : str | tuple, optional
+        The outcome to measure in each cell. One or more of "solvability" "time"
+        or "cost". If "solvability" is specified, the phase transition matrix
         represents the proprotion of instances that are satisfiable in each
         cell. If "time" is specified, the phase transition matrix represents
-        the average time taken to solve instances in each cell. If "both" is
-        specified, the returned phase transition is a tuple with the
-        the solvability matrix as the first element, and the time matrix as the
-        second element. Default is "both".
+        the average time taken to solve instances in each cell. If "cost" is
+        specified, the phase transition matrix represents the maximum cost
+        (e.g. number of propagations) required to solve instances in each
+        cell. Default is ("solvability", "time", "cost").
 
     Returns
     -------
@@ -364,7 +368,7 @@ def phase_transition(
     weight_dist_kwargs : dict, optional
         Additional keyword arguments to pass to the weight distribution
         function. Defaults to None.
-    value_dist : str, optional
+    value_dist : str or tuple, optional
         Name of the distribution to sample item values from. Defaults to
         uniform distribution over the half-open interval [0.001, 1).
     value_dist_kwargs : dict, optional
@@ -456,10 +460,18 @@ def phase_transition(
     .. [#] Yadav, Nitin, et al. "Phase transition in the knapsack problem."
         arXiv preprint arXiv:1806.10244 (2018).
     """
-    if outcome not in ["solvability", "time", "both"]:
-        raise ValueError(
-            "`outcome` must one of 'solvability', 'time', or 'both'."
-        )
+    if isinstance(outcome, str):
+        if outcome not in ["solvability", "time", "both"]:
+            raise ValueError(
+                "`outcome` must one of 'solvability', 'time', or 'both'."
+            )
+    elif isinstance(outcome, tuple):
+        valid_outcomes = {"solvability", "time", "cost"}
+        if not set(outcome).issubset(valid_outcomes):
+            raise ValueError(
+                "`outcome` tuple can only contain "
+                "'solvability', 'time', or 'cost'."
+            )
 
     match solver:
         case "branch_and_bound":
@@ -499,9 +511,10 @@ def phase_transition(
 
     phase_transition_solvability = []
     phase_transition_time = []
+    phase_transition_cost = []
     with tqdm(total=samples * len(points)) as progress:
         for norm_c_range, norm_p_range in points:
-            solvability, time = _simulate_cell_solvability(
+            solvability, time, cost = _simulate_cell_solvability(
                 norm_c_range=norm_c_range,
                 norm_p_range=norm_p_range,
                 num_items=num_items,
@@ -516,11 +529,13 @@ def phase_transition(
             )
             phase_transition_solvability.append(solvability)
             phase_transition_time.append(time)
+            phase_transition_cost.append(cost)
 
     phase_transition_solvability = np.array(
         phase_transition_solvability
     ).reshape(resolution)
     phase_transition_time = np.array(phase_transition_time).reshape(resolution)
+    phase_transition_cost = np.array(phase_transition_cost).reshape(resolution)
 
     if path:
         _save_phase_transition(
@@ -531,11 +546,34 @@ def phase_transition(
             path=path,
         )
 
-    if outcome == "solvability":
-        result = phase_transition_solvability
-    elif outcome == "time":
-        result = phase_transition_time
-    else:
-        result = (phase_transition_solvability, phase_transition_time)
+    if isinstance(outcome, str):
+        match outcome:
+            case "solvability":
+                result = phase_transition_solvability
+            case "time":
+                result = phase_transition_time
+            case "cost":
+                result = phase_transition_cost
+            case _:
+                raise ValueError(
+                    "`outcome` must one of 'solvability', 'time', or 'cost'."
+                )
+    elif isinstance(outcome, tuple):
+        valid_outcomes = {"solvability", "time", "cost"}
+        if not set(outcome).issubset(valid_outcomes):
+            raise ValueError(
+                "`outcome` tuple can only contain "
+                "'solvability', 'time', or 'cost'."
+            )
+        result = []
+        for out in outcome:
+            match out:
+                case "solvability":
+                    result.append(phase_transition_solvability)
+                case "time":
+                    result.append(phase_transition_time)
+                case "cost":
+                    result.append(phase_transition_cost)
+        result = tuple(result)
 
     return grid, result

@@ -54,6 +54,7 @@ def greedy(items: list[Item], capacity: int) -> Solution:
     state = np.zeros(len(items))
     weight = 0
     balance = capacity
+    cost = 0
     while balance > 0:
         remaining_items = [
             items[i]
@@ -68,9 +69,12 @@ def greedy(items: list[Item], capacity: int) -> Solution:
         state[items.tolist().index(best_item)] = 1
         balance -= best_item.weight
         weight += best_item.weight
+        cost += 1
 
     time_end = time.perf_counter()
-    statistics = SolutionStatistics(time=time_end - time_start, n_solutions=1)
+    statistics = SolutionStatistics(
+        time=time_end - time_start, n_solutions=1, cost=cost
+    )
     return Solution(
         value=Arrangement(items=items, state=state),
         type=SolutionType.APPROXIMATE,

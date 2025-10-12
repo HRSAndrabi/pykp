@@ -108,7 +108,7 @@ def minizinc(
     statistics = SolutionStatistics(
         time=result.statistics["solveTime"],
         n_solutions=1,
-        propagations=propagations,
+        cost=propagations,
     )
 
     return Solution(
@@ -173,7 +173,7 @@ def _minizinc_decision_variant(
     statistics = SolutionStatistics(
         time=result.statistics["solveTime"],
         n_solutions=1,
-        propagations=propagations,
+        cost=propagations,
     )
 
     return Solution(
