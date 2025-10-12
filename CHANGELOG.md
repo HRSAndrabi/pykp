@@ -1,6 +1,45 @@
 # CHANGELOG
 
 
+## v4.4.0 (2025-10-12)
+
+### Bug Fixes
+
+* fix(fbp): boundary crossings not calculated properly.
+
+A boundary crossing occurs when two nodes have conflicting
+feasibility. The old implementation was incrementing boundary
+crossings if either node in the edge tuple was infeasible. ([`fd4d2f1`](https://github.com/HRSAndrabi/pykp/commit/fd4d2f162ae310de34ce7ec3f48edd860fc9a933))
+
+### Documentation
+
+* docs(fbp): add docs. ([`f27c96a`](https://github.com/HRSAndrabi/pykp/commit/f27c96a47fe9733469d2f7150056f698267b09e4))
+
+* docs(fsr): add example. ([`0a6a2ed`](https://github.com/HRSAndrabi/pykp/commit/0a6a2ed73760405ae25ddfb533d07eaa216a7e4b))
+
+* docs(fsr): add docs. ([`a32898b`](https://github.com/HRSAndrabi/pykp/commit/a32898b4ace2b1710b30d7d82a82ade01b3e4f87))
+
+### Features
+
+* feat(solvers): add cost metric.
+
+add cost metric to solution statistics and update solvers to
+track computational effort. ([`3184aaf`](https://github.com/HRSAndrabi/pykp/commit/3184aaf00197de2c6c300776a7be3910fbb3e90d))
+
+* feat(metrics): add fbp metric.
+
+Added feasibility boundary proportion metric, defined as the
+proportion of edges that connect feasible and infeasible nodes. ([`14e4629`](https://github.com/HRSAndrabi/pykp/commit/14e46293f2f442fe4694461d14b307c7c173d94b))
+
+* feat(metrics): add feasibility ratio. ([`29b0d03`](https://github.com/HRSAndrabi/pykp/commit/29b0d03c97f697f8e3a1ea33c81f4a352c7e7f88))
+
+### Refactoring
+
+* refactor(knapsack.graph): use underirected graph. ([`6836c02`](https://github.com/HRSAndrabi/pykp/commit/6836c02af0ffce657639571ae4a775d79135eab2))
+
+* refactor(knapsack): remove sahni-k from summary. ([`f44deb4`](https://github.com/HRSAndrabi/pykp/commit/f44deb4dd084d9cfc6f0e91de14b71bcb52ef4f4))
+
+
 ## v4.3.1 (2025-02-12)
 
 ### Bug Fixes
