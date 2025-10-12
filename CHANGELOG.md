@@ -1,6 +1,18 @@
 # CHANGELOG
 
 
+## v4.4.1 (2025-10-12)
+
+### Bug Fixes
+
+* fix(metrics): update valid outcomes
+
+metrics.phase_transition was accepting time, solvability, or
+both, as potential inputs. Fixed to also accept cost input.
+
+Updated tests. ([`f780ce6`](https://github.com/HRSAndrabi/pykp/commit/f780ce6dc21b36d01e25633bbd9472fa45ba9fb4))
+
+
 ## v4.4.0 (2025-10-12)
 
 ### Bug Fixes
