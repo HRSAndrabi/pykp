@@ -13,7 +13,7 @@ from pykp.knapsack import Item, Knapsack
 SOLVERS = ["branch_and_bound"]
 
 
-@pytest.mark.parametrize("outcome", ["solvability", "time", "both"])
+@pytest.mark.parametrize("outcome", ["solvability", "time", "cost"])
 @pytest.mark.parametrize("resolution", [(5, 5), (2, 3), (10, 10)])
 def test_phase_transition_returns_correct_shape(resolution, outcome):
     """Test dimensions of grid and phase transition match resolution."""
@@ -27,12 +27,7 @@ def test_phase_transition_returns_correct_shape(resolution, outcome):
     )
     assert grid[0].shape == resolution
     assert grid[1].shape == resolution
-
-    if outcome == "both":
-        assert phase_transition[0].shape == resolution
-        assert phase_transition[1].shape == resolution
-    else:
-        assert phase_transition.shape == resolution
+    assert phase_transition.shape == resolution
 
 
 @pytest.mark.parametrize("solver", SOLVERS)
@@ -58,7 +53,7 @@ def test_phase_transition_with_invalid_solver_raises():
         )
 
 
-@pytest.mark.parametrize("outcome", ["time", "solvability", "both"])
+@pytest.mark.parametrize("outcome", ["time", "solvability", "cost"])
 def test_phase_transition_saves_csv(tmp_path, outcome):
     """Test saving .csv file."""
     output_path = tmp_path / "phase_transition_output.csv"
@@ -86,8 +81,8 @@ def test_phase_transition_saves_csv(tmp_path, outcome):
         expected_columns.append("time")
     elif outcome == "solvability":
         expected_columns.append("solvability")
-    elif outcome == "both":
-        expected_columns.extend(["time", "solvability"])
+    elif outcome == "cost":
+        expected_columns.append("time")
     assert all(col in df.columns for col in expected_columns), (
         "Missing expected columns in CSV."
     )

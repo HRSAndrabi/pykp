@@ -461,9 +461,9 @@ def phase_transition(
         arXiv preprint arXiv:1806.10244 (2018).
     """
     if isinstance(outcome, str):
-        if outcome not in ["solvability", "time", "both"]:
+        if outcome not in ["solvability", "time", "cost"]:
             raise ValueError(
-                "`outcome` must one of 'solvability', 'time', or 'both'."
+                "`outcome` must be one of 'solvability', 'time', or 'cost'."
             )
     elif isinstance(outcome, tuple):
         valid_outcomes = {"solvability", "time", "cost"}
