@@ -1,6 +1,20 @@
 # CHANGELOG
 
 
+## v4.4.2 (2026-07-28)
+
+### Bug Fixes
+
+* fix: sahni-k incorrect calculation
+
+Sahni-k was incorrectly selecting max density item from the subset of all items, without
+considering whether the selected item would put the resulting knapsack over the
+capacity constraint.
+
+This fix filters the items to ensure that the highest density item is selected only from the
+subset of items that would fit. ([`36f4385`](https://github.com/HRSAndrabi/pykp/commit/36f4385a2381197adfd79c1498a5e965a7ab4228))
+
+
 ## v4.4.1 (2025-10-12)
 
 ### Bug Fixes
