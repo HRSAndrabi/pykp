@@ -75,13 +75,15 @@ def sahni_k(
                     break
 
                 # Check instance at capacity
+                # Filter out items that are already in the subset or exceed the
+                # capacity constraint
                 out_items = [
-                    item for item in arrangement.items if item not in subset
+                    item
+                    for item in arrangement.items
+                    if item not in subset and weight + item.weight <= capacity
                 ]
-                if (
-                    min([weight + item.weight for item in out_items])
-                    > capacity
-                ):
+
+                if not out_items:
                     break
 
                 densities = [item.value / item.weight for item in out_items]
