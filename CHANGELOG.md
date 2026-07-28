@@ -1,6 +1,13 @@
 # CHANGELOG
 
 
+## v4.4.3 (2026-07-28)
+
+### Bug Fixes
+
+* fix: pin setuptools for release metadata compatibility ([`34f51a8`](https://github.com/HRSAndrabi/pykp/commit/34f51a8a076e4eb7ae3222bd0e1d4ceaa084e5d9))
+
+
 ## v4.4.2 (2026-07-28)
 
 ### Bug Fixes
