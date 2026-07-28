@@ -177,3 +177,55 @@ def test_fbp_returns_correct_value(capacity):
     ]
     expected_fbp = len(feasibility_boundary_crossings) / edges
     assert fbp == expected_fbp, "Feasibility boundary proportion is incorrect."
+
+
+@pytest.mark.parametrize(
+    "instance, expected_sahni_k",
+    [
+        (
+            Knapsack(
+                items=np.array(
+                    [
+                        Item(500, 750),
+                        Item(350, 406),
+                        Item(505, 564),
+                        Item(505, 595),
+                        Item(640, 803),
+                        Item(435, 489),
+                        Item(465, 641),
+                        Item(50, 177),
+                        Item(220, 330),
+                        Item(170, 252),
+                    ]
+                ),
+                capacity=1900,
+            ),
+            1,
+        ),
+        (
+            Knapsack(
+                items=np.array(
+                    [
+                        Item(300, 205),
+                        Item(350, 252),
+                        Item(400, 352),
+                        Item(450, 447),
+                        Item(47, 114),
+                        Item(20, 50),
+                        Item(8, 28),
+                        Item(70, 251),
+                        Item(5, 19),
+                        Item(5, 20),
+                    ]
+                ),
+                capacity=1044,
+            ),
+            3,
+        ),
+    ],
+)
+def test_sahni_k(instance, expected_sahni_k):
+    """Test that the Sahni-k metric is calculated correctly."""
+    instance.solve()
+    result = metrics.sahni_k(instance.optimal_nodes[0], instance.capacity)
+    assert result == expected_sahni_k, "Sahni-k value is incorrect."
