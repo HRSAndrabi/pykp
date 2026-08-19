@@ -1,11 +1,28 @@
 # CHANGELOG
 
 
+## v4.5.0 (2026-08-19)
+
+### Features
+
+* feat: add sahni-k inverse metric
+
+Added a metric to track inverse Sahni-k.
+
+Inverse Sahni-k is the minimum number of items outside a target
+arrangement that must be forbidden for deterministic density-greedy
+ filling, starting from an empty knapsack, to reproduce the target. ([`1ebec9a`](https://github.com/HRSAndrabi/pykp/commit/1ebec9a1ce58325aed492376b5434c55cdbcebd7))
+
+### Testing
+
+* test: add sahni-k test cases ([`eec2133`](https://github.com/HRSAndrabi/pykp/commit/eec21333e365fb5a83539168f0e04fbccc64bef5))
+
+
 ## v4.4.3 (2026-07-28)
 
 ### Bug Fixes
 
-* fix: pin setuptools for release metadata compatibility ([`34f51a8`](https://github.com/HRSAndrabi/pykp/commit/34f51a8a076e4eb7ae3222bd0e1d4ceaa084e5d9))
+* fix: pin setuptools for release metadata compatibility ([`778d32b`](https://github.com/HRSAndrabi/pykp/commit/778d32bf56fedd4258c620037b309526047f1be7))
 
 
 ## v4.4.2 (2026-07-28)
