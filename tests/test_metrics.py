@@ -8,7 +8,7 @@ import pandas as pd
 import pytest
 
 import pykp.metrics as metrics
-from pykp.knapsack import Item, Knapsack
+from pykp.knapsack import Arrangement, Item, Knapsack
 
 SOLVERS = ["branch_and_bound"]
 
@@ -229,3 +229,74 @@ def test_sahni_k(instance, expected_sahni_k):
     instance.solve()
     result = metrics.sahni_k(instance.optimal_nodes[0], instance.capacity)
     assert result == expected_sahni_k, "Sahni-k value is incorrect."
+
+
+@pytest.mark.parametrize(
+    "arrangement, capacity, expected_sahni_k_inverse",
+    [
+        (
+            Arrangement(
+                items=[Item(60, 6), Item(49, 5)],
+                state=[1, 0],
+            ),
+            6,
+            0,
+        ),
+        (
+            Arrangement(
+                items=[Item(60, 6), Item(49, 5), Item(49, 5)],
+                state=[0, 1, 1],
+            ),
+            10,
+            1,
+        ),
+        (
+            Arrangement(
+                items=[
+                    Item(60, 6),
+                    Item(60, 6),
+                    Item(49, 5),
+                    Item(49, 5),
+                ],
+                state=[0, 0, 1, 1],
+            ),
+            10,
+            2,
+        ),
+    ],
+)
+def test_sahni_k_inverse_returns_minimum_forbidden_item_count(
+    arrangement,
+    capacity,
+    expected_sahni_k_inverse,
+):
+    """Test the minimum number of non-target items that must be forbidden."""
+    result = metrics.sahni_k_inverse(arrangement, capacity)
+
+    assert result == expected_sahni_k_inverse
+
+
+def test_sahni_k_inverse_rejects_non_arrangement():
+    """Test that the target must be an Arrangement."""
+    with pytest.raises(ValueError):
+        metrics.sahni_k_inverse([], capacity=10)
+
+
+def test_sahni_k_inverse_rejects_target_over_capacity():
+    """Test that an infeasible target arrangement is rejected."""
+    arrangement = Arrangement(items=[Item(10, 11)], state=[1])
+
+    with pytest.raises(ValueError):
+        metrics.sahni_k_inverse(arrangement, capacity=10)
+
+
+def test_sahni_k_inverse_breaks_density_ties_by_item_order():
+    """Test that density ties preserve the arrangement's item order."""
+    arrangement = Arrangement(
+        items=[Item(60, 6), Item(50, 5), Item(50, 5)],
+        state=[0, 1, 1],
+    )
+
+    result = metrics.sahni_k_inverse(arrangement, capacity=10)
+
+    assert result == 1
