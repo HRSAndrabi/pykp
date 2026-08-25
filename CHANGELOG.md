@@ -1,6 +1,15 @@
 # CHANGELOG
 
 
+## v4.6.0 (2026-08-25)
+
+### Features
+
+* feat(minizinc): update model string
+
+Use the minizinc knapsack library. ([`6f313e0`](https://github.com/HRSAndrabi/pykp/commit/6f313e0e842ba5edf4c12187e8713c0837db3005))
+
+
 ## v4.5.0 (2026-08-19)
 
 ### Features
