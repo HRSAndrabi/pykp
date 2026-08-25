@@ -1,3 +1,5 @@
+from numbers import Integral
+
 import nest_asyncio
 import numpy as np
 from minizinc import Instance, Model, Solver
@@ -8,8 +10,17 @@ from pykp.knapsack._item import Item
 from ._solution import *
 
 
+def _as_non_negative_int(value, name: str) -> int:
+    """Validate and normalise an integer MiniZinc input."""
+    if isinstance(value, bool) or not isinstance(value, Integral):
+        raise TypeError(f"`{name}` must be an integer")
+    if value < 0:
+        raise ValueError(f"`{name}` must be non-negative")
+    return int(value)
+
+
 def minizinc(
-    items: list[Item], capacity: float, solver: str = "coinbc"
+    items: list[Item], capacity: int, solver: str = "coinbc"
 ) -> Solution:
     """Solves the knapsack problem using the MiniZinc.
 
@@ -17,7 +28,7 @@ def minizinc(
     ----------
     items : list[Item]
         Array of items to consider for the knapsack.
-    capacity : float
+    capacity : int
         Maximum weight capacity of the knapsack.
     solver: str, optional
         MiniZinc solver to use. Default is "coinbc".
@@ -73,33 +84,74 @@ def minizinc(
         will report only the first optimal solution found. If knowing all
         optimal solutions is important, consider using the branch-and-bound
         solver.
+
+    Raises
+    ------
+    TypeError
+        If the capacity, an item value, or an item weight is not an integer.
+    ValueError
+        If the capacity, an item value, or an item weight is negative.
     """
+    capacity = _as_non_negative_int(capacity, "capacity")
+    profits = [
+        _as_non_negative_int(item.value, f"items[{i}].value")
+        for i, item in enumerate(items)
+    ]
+    sizes = [
+        _as_non_negative_int(item.weight, f"items[{i}].weight")
+        for i, item in enumerate(items)
+    ]
+
+    if len(items) == 0:
+        return Solution(
+            value=Arrangement(items=items, state=np.array([], dtype=int)),
+            type=SolutionType.MAXIMISE,
+            statistics=SolutionStatistics(
+                time=0.0,
+                n_solutions=1,
+                cost=None,
+            ),
+        )
+
     nest_asyncio.apply()
     model = Model()
     model.add_string(
         """
-		int: n; % number of objects
-		set of int: OBJ = 1..n;
-		float: capacity;
-		array[OBJ] of float: profit;
-		array[OBJ] of float: size;
+        include "knapsack.mzn";
 
-		%var set of OBJ: x;
-		array[OBJ] of var 0..1: x;
-		var float: P=sum(i in OBJ)(profit[i]*x[i]);
+        int: n; % number of objects
+        int: capacity; % capacity of knapsack
 
-		constraint sum(i in OBJ)(size[i]*x[i]) <= capacity;
+        int: totalProfit;
+        int: totalCapacity;
 
-		solve :: int_search(x, first_fail, indomain_max, complete) maximize P;
-		"""
+        set of int: OBJ = 1..n;
+        array[OBJ] of int: profit; % profits of the items
+        array[OBJ] of int: size; % weights of the items
+
+        % decisions to make (which item should be included)
+        array[OBJ] of var 0..1: x;
+
+        var 0..totalCapacity: W;
+        var 0..totalProfit: P;
+
+        constraint knapsack(size, profit, x, W, P);
+        constraint W <= capacity;
+
+        solve maximize P;
+
+        output ["x = ", show(x), "\\n", "Solution=",show(P)];
+        """
     )
     solver_instance = Solver.lookup(solver)
 
     instance = Instance(solver_instance, model)
     instance["n"] = len(items)
     instance["capacity"] = capacity
-    instance["profit"] = [item.value for item in items]
-    instance["size"] = [item.weight for item in items]
+    instance["totalProfit"] = sum(profits)
+    instance["totalCapacity"] = sum(sizes)
+    instance["profit"] = profits
+    instance["size"] = sizes
 
     result = instance.solve()
     propagations = (

@@ -1,6 +1,7 @@
 """Tests for pykp.solvers module."""
 
 import json
+import re
 
 import numpy as np
 import pytest
@@ -12,7 +13,7 @@ from pykp.sampling import Sampler
 HEURISTIC_SOLVERS = ["greedy"]
 OPTIMAL_SOLVERS = [
     "branch_and_bound",
-    # "mzn_geocode",
+    "minizinc",
 ]
 ALL_SOLVERS = HEURISTIC_SOLVERS + OPTIMAL_SOLVERS
 
@@ -27,8 +28,8 @@ def solver(request):
         solver = solvers.greedy
     elif request.param == "branch_and_bound":
         solver = solvers.branch_and_bound
-    elif request.param == "mzn_geocode":
-        solver = solvers.mzn_gecode
+    elif request.param == "minizinc":
+        solver = solvers.minizinc
 
     return solver
 
@@ -121,7 +122,7 @@ def test_all_items_do_not_fit(solver):
         assert np.array_equal(solution.value.state, np.zeros(len(items)))
 
 
-@pytest.mark.parametrize("solver", OPTIMAL_SOLVERS, indirect=True)
+@pytest.mark.parametrize("solver", ["branch_and_bound"], indirect=True)
 @pytest.mark.parametrize("case", TEST_CASES)
 def test_correct_optimal_found(solver, case):
     """Test that the correct optimal solution is found."""
@@ -135,7 +136,89 @@ def test_correct_optimal_found(solver, case):
     if isinstance(solution.value, list):
         assert np.isclose(solution.value[0].value, case["optimal_value"])
     else:
-        assert np.isclose(solution.value[0].value, case["optimal_value"])
+        assert np.isclose(solution.value.value, case["optimal_value"])
+
+
+def test_minizinc_accepts_numpy_integers():
+    """Test NumPy integer scalars are valid MiniZinc inputs."""
+    items = np.array(
+        [
+            Item(value=np.int64(10), weight=np.int32(5)),
+            Item(value=np.int32(15), weight=np.int64(10)),
+        ]
+    )
+
+    solution = solvers.minizinc(items, np.int64(10))
+
+    assert solution.value.value == 15
+    assert solution.value.weight == 10
+
+
+@pytest.mark.parametrize(
+    ("items", "capacity", "message"),
+    [
+        (
+            np.array([Item(value=1, weight=1)]),
+            1.5,
+            "`capacity` must be an integer",
+        ),
+        (
+            np.array([Item(value=1.5, weight=1)]),
+            1,
+            "`items[0].value` must be an integer",
+        ),
+        (
+            np.array([Item(value=1, weight=1.5)]),
+            1,
+            "`items[0].weight` must be an integer",
+        ),
+        (
+            np.array([Item(value=True, weight=1)]),
+            1,
+            "`items[0].value` must be an integer",
+        ),
+        (
+            np.array([Item(value=1, weight=True)]),
+            1,
+            "`items[0].weight` must be an integer",
+        ),
+        (
+            np.array([Item(value=1, weight=1)]),
+            True,
+            "`capacity` must be an integer",
+        ),
+    ],
+)
+def test_minizinc_rejects_non_integer_inputs(items, capacity, message):
+    """Test the integer MiniZinc model rejects incompatible input types."""
+    with pytest.raises(TypeError, match=re.escape(message)):
+        solvers.minizinc(items, capacity)
+
+
+@pytest.mark.parametrize(
+    ("items", "capacity", "message"),
+    [
+        (
+            np.array([Item(value=1, weight=1)]),
+            -1,
+            "`capacity` must be non-negative",
+        ),
+        (
+            np.array([Item(value=-1, weight=1)]),
+            1,
+            "`items[0].value` must be non-negative",
+        ),
+        (
+            np.array([Item(value=1, weight=-1)]),
+            1,
+            "`items[0].weight` must be non-negative",
+        ),
+    ],
+)
+def test_minizinc_rejects_negative_inputs(items, capacity, message):
+    """Test the MiniZinc knapsack predicate receives non-negative inputs."""
+    with pytest.raises(ValueError, match=re.escape(message)):
+        solvers.minizinc(items, capacity)
 
 
 @pytest.mark.parametrize("num_items", [5, 10, 15, 20])
